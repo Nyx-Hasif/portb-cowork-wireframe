@@ -7,10 +7,10 @@ import CategoryYears from "./components/CategoryYears";
 const CommunityPage = () => {
   return (
     <div>
-      <Hero title="Gallery" imagePath={"/images/hero.jpg"} />
+      <Hero title="Gallery" imagePath={"/images/hero.png"} />
       <EpicCarousel />
       <CategoryYears />
-      <CTA title="Get in touch with us" imagePath="/images/hero.jpg" />
+      <CTA title="Get in touch with us" imagePath={"/images/hero.png"} />
     </div>
   );
 };

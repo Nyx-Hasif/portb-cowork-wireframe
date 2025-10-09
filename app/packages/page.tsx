@@ -13,7 +13,7 @@ import CTA from "../../components/CTA";
 const PackagesPage = () => {
   return (
     <div>
-      <Hero title="Packages Option" imagePath={"/images/hero.jpg"} />
+      <Hero title="Packages Option" imagePath={"/images/hero.png"} />
       <PricingTable />
       <PrevEvent />
       <Featured />
@@ -24,7 +24,7 @@ const PackagesPage = () => {
       <Amenities />
       <CTA
         title="Discover the albums of coworking at PortB"
-        imagePath="/images/hero.jpg"
+        imagePath={"/images/hero.png"}
       />
     </div>
   );

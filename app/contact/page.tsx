@@ -7,13 +7,13 @@ import Faqs from "./components/Faqs";
 const ContactPage = () => {
   return (
     <div>
-      <Hero title="Get in touch with us" imagePath={"/images/hero.jpg"} />
+      <Hero title="Get in touch with us" imagePath={"/images/hero.png"} />
       <Booking />
       <Faqs />
 
       <CTA
         title="Discover the opportunity of coworking at PortB"
-        imagePath="/images/hero.jpg"
+        imagePath={"/images/hero.png"}
       />
     </div>
   );

@@ -24,7 +24,7 @@ export default function Home() {
       <Reviews />
       <CTA
         title="Discover the workspace of coworking at PortB"
-        imagePath="/images/hero.png"
+        imagePath={"/images/hero.png"}
       />
     </div>
   );
