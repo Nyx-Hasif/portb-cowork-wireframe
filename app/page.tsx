@@ -13,7 +13,7 @@ export default function Home() {
     <div>
       <Hero
         title="Experience exceptional coworking at PortB  where productivity meets community in the hearts of innovation"
-        imagePath={"/images/hero.jpg"}
+        imagePath={"/images/hero.png"}
       />
       <Facilities />
       <WhyUs />
@@ -24,7 +24,7 @@ export default function Home() {
       <Reviews />
       <CTA
         title="Discover the workspace of coworking at PortB"
-        imagePath="/images/hero.jpg"
+        imagePath="/images/hero.png"
       />
     </div>
   );
