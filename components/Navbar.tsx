@@ -38,7 +38,7 @@ const Navbar = () => {
           </div>
 
           <div className="md:hidden" onClick={toggleMenu}>
-            click menu
+            click menu here
           </div>
         </div>
       </div>
