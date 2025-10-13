@@ -6,7 +6,7 @@ const Booking = () => {
     const [selectedValue, setSelectedValue] = useState('');
 
   return (
-    <div className="bg-white">
+    <div className="">
       <div className="p-4 border border-black">
         {/* GRID CARDS */}
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] w-full max-w-7xl mx-auto gap-4">

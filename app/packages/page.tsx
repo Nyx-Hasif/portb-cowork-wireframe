@@ -15,7 +15,7 @@ const PackagesPage = () => {
     <div>
       <Hero title="Packages Option" imagePath={"/images/hero.png"} />
       <PricingTable />
-      <PrevEvent />
+      <PrevEvent /> 
       <Featured />
       <AllEvents />
       <VirtualAdress />

@@ -2,11 +2,11 @@ import React from 'react'
 
 const Footer = () => {
   return (
-    <div className="bg-gray-200 ">
+    <div className="">
       {/* Gradient line */}
       <div className=" h-5 bg-gradient-to-r from-green-400 to-green-600"></div>
 
-      <div className="p-4 md:py-8 ">
+      <div className="p-4 md:p-12 ">
         {/* Footer */}
         <div className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-4 gap-4 border border-black ">
           <div className="border border-black md:p-8 p-2 space-y-6">

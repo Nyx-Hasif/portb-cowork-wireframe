@@ -1,243 +1,141 @@
-import React from 'react'
+"use client";
+import React, { useState } from "react";
 
 const AllEvents = () => {
+  const [category, setCategory] = useState("All");
+
+  const cards = [
+    {
+      id: 1,
+      image: "img_1",
+      category: "Networking",
+      title: " Startup Pitch Night",
+      description:
+        "Present your startup idea to a panel of investors and get valuable feedback from the community.",
+    },
+    {
+      id: 2,
+      image: "img_2",
+      category: "Panel",
+      title: " Startup Pitch Night",
+      description:
+        "Present your startup idea to a panel of investors and get valuable feedback from the community.",
+    },
+    {
+      id: 3,
+      image: "img_3",
+      category: "Workshop",
+      title: " Startup Pitch Night",
+      description:
+        "Present your startup idea to a panel of investors and get valuable feedback from the community.",
+    },
+    {
+      id: 4,
+      image: "img_4",
+      category: "Social",
+      title: " Startup Pitch Night",
+      description:
+        "Present your startup idea to a panel of investors and get valuable feedback from the community.",
+    },
+    {
+      id: 5,
+      image: "img_3",
+      category: "Workshop",
+      title: " Startup Pitch Night",
+      description:
+        "Present your startup idea to a panel of investors and get valuable feedback from the community.",
+    },
+    {
+      id: 6,
+      image: "img_4",
+      category: "Social",
+      title: " Startup Pitch Night",
+      description:
+        "Present your startup idea to a panel of investors and get valuable feedback from the community.",
+    },
+  ];
+
+  const filteredCards =
+    category === "All"
+      ? cards
+      : cards.filter((card) => card.category === category);
+
   return (
-    <div className="bg-white">
-        {/* all events content */}
-        <div className=" border border-black p-4 ">
-
-          {/* title and category button */}
-          <div className="border border-black w-full max-w-7xl mx-auto flex md:flex-row flex-col justify-between md:items-center md:px-8 py-4 gap-4 ">
-            <h1 className="md:text-6xl text-4xl font-medium">All Events</h1>
-            <div className="flex flex-row gap-2">
-              <button className="border border-black py-2 px-4 rounded-xl">
-                All
-              </button>
-              <button className="border border-black py-2 px-4 rounded-xl">
-                Networking
-              </button>
-              <button className="border border-black py-2 px-4 rounded-xl">
-                Workshop
-              </button>
-              <button className="border border-black py-2 px-4 rounded-xl">
-                Social
-              </button>
-              <button className="border border-black py-2 px-4 rounded-xl">
-                Panel
-              </button>
-            </div>
-          </div>
-
-          {/* Grid for cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 w-full max-w-7xl mx-auto gap-8 py-4">
-            {/* parent card_container_1 */}
-            <div className=" border border-black">
-              {/* event imag cards_1 */}
-              <div className="relative">
-                <div className="h-100 flex justify-center items-center border border-black w-full ">
-                  <p>img_1</p>
-                </div>
-                <div className="flex flex-row justify-between items-center border border-black absolute top-5 inset-x-0 px-4">
-                  <div className="border border-black py-2 px-4 rounded-xl">
-                    <p>Networking</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* content_mix */}
-              <div className="md:p-8 p-4 space-y-8">
-                {/* title n description content */}
-                <div className="space-y-4">
-                  <h2 className="text-2xl">Startup Pitch Night</h2>
-                  <p className="text-xl">
-                    Present your startup idea to a panel of investors and get
-                    valuable feedback from the community.
-                  </p>
-                </div>
-
-                {/* Price and button */}
-                <div className="flex flex-row justify-end items-center border border-black ">
-                  <button className="bg-green-600 text-white py-2 px-4 rounded-2xl cursor-pointer text-xl font-medium">
-                     Learn More
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* parent card_container_2 */}
-            <div className=" border border-black">
-              {/* event imag cards_1 */}
-              <div className="relative">
-                <div className="h-100 flex justify-center items-center border border-black w-full ">
-                  <p>img_1</p>
-                </div>
-                <div className="flex flex-row justify-between items-center border border-black absolute top-5 inset-x-0 px-4">
-                  <div className="border border-black py-2 px-4 rounded-xl">
-                    <p>Social</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* content_mix */}
-              <div className="md:p-8 p-4 space-y-8">
-                {/* title n description content */}
-                <div className="space-y-4">
-                  <h2 className="text-2xl">Startup Pitch Night</h2>
-                  <p className="text-xl">
-                    Present your startup idea to a panel of investors and get
-                    valuable feedback from the community.
-                  </p>
-                </div>
-
-                {/* Price and button */}
-                <div className="flex flex-row justify-end items-center border border-black ">
-                  <button className="bg-green-600 text-white py-2 px-4 rounded-2xl cursor-pointer text-xl font-medium">
-                     Learn More
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* parent card_container_3 */}
-            <div className=" border border-black">
-              {/* event imag cards_1 */}
-              <div className="relative">
-                <div className="h-100 flex justify-center items-center border border-black w-full ">
-                  <p>img_1</p>
-                </div>
-                <div className="flex flex-row justify-between items-center border border-black absolute top-5 inset-x-0 px-4">
-                  <div className="border border-black py-2 px-4 rounded-xl">
-                    <p>Workshop</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* content_mix */}
-              <div className="md:p-8 p-4 space-y-8">
-                {/* title n description content */}
-                <div className="space-y-4">
-                  <h2 className="text-2xl">Startup Pitch Night</h2>
-                  <p className="text-xl">
-                    Present your startup idea to a panel of investors and get
-                    valuable feedback from the community.
-                  </p>
-                </div>
-
-                {/* Price and button */}
-                <div className="flex flex-row justify-end items-center border border-black ">
-                  <button className="bg-green-600 text-white py-2 px-4 rounded-2xl cursor-pointer text-xl font-medium">
-                     Learn More
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* parent card_container_4 */}
-            <div className=" border border-black">
-              {/* event imag cards_1 */}
-              <div className="relative">
-                <div className="h-100 flex justify-center items-center border border-black w-full ">
-                  <p>img_1</p>
-                </div>
-                <div className="flex flex-row justify-between items-center border border-black absolute top-5 inset-x-0 px-4">
-                  <div className="border border-black py-2 px-4 rounded-xl">
-                    <p>Panel</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* content_mix */}
-              <div className="md:p-8 p-4 space-y-8">
-                {/* title n description content */}
-                <div className="space-y-4">
-                  <h2 className="text-2xl">Startup Pitch Night</h2>
-                  <p className="text-xl">
-                    Present your startup idea to a panel of investors and get
-                    valuable feedback from the community.
-                  </p>
-                </div>
-
-                {/* Price and button */}
-                <div className="flex flex-row justify-end items-center border border-black ">
-                  <button className="bg-green-600 text-white py-2 px-4 rounded-2xl cursor-pointer text-xl font-medium">
-                     Learn More
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* parent card_container_5 */}
-            <div className=" border border-black">
-              {/* event imag cards_1 */}
-              <div className="relative">
-                <div className="h-100 flex justify-center items-center border border-black w-full ">
-                  <p>img_1</p>
-                </div>
-                <div className="flex flex-row justify-between items-center border border-black absolute top-5 inset-x-0 px-4">
-                  <div className="border border-black py-2 px-4 rounded-xl">
-                    <p>Panel</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* content_mix */}
-              <div className="md:p-8 p-4 space-y-8">
-                {/* title n description content */}
-                <div className="space-y-4">
-                  <h2 className="text-2xl">Startup Pitch Night</h2>
-                  <p className="text-xl">
-                    Present your startup idea to a panel of investors and get
-                    valuable feedback from the community.
-                  </p>
-                </div>
-
-                {/* Price and button */}
-                <div className="flex flex-row justify-end items-center border border-black ">
-                  <button className="bg-green-600 text-white py-2 px-4 rounded-2xl cursor-pointer text-xl font-medium">
-                     Learn More
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* parent card_container_6 */}
-            <div className=" border border-black">
-              {/* event imag cards_1 */}
-              <div className="relative">
-                <div className="h-100 flex justify-center items-center border border-black w-full ">
-                  <p>img_1</p>
-                </div>
-                <div className="flex flex-row justify-between items-center border border-black absolute top-5 inset-x-0 px-4">
-                  <div className="border border-black py-2 px-4 rounded-xl">
-                    <p>Panel</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* content_mix */}
-              <div className="md:p-8 p-4 space-y-8">
-                {/* title n description content */}
-                <div className="space-y-4">
-                  <h2 className="text-2xl">Startup Pitch Night</h2>
-                  <p className="text-xl">
-                    Present your startup idea to a panel of investors and get
-                    valuable feedback from the community.
-                  </p>
-                </div>
-
-                {/* Price and button */}
-                <div className="flex flex-row justify-end items-center border border-black ">
-                  <button className="bg-green-600 text-white py-2 px-4 rounded-2xl cursor-pointer text-xl font-medium">
-                     Learn More
-                  </button>
-                </div>
-              </div>
-            </div>
+    <div className="">
+      {/* all events content */}
+      <div className=" border border-black p-4 ">
+        {/* title and category button */}
+        <div className="border border-black w-full max-w-[100rem] mx-auto flex md:flex-row flex-col justify-between md:items-center md:px-8 py-4 gap-4 ">
+          <h1 className="md:text-6xl text-4xl font-medium">All Events</h1>
+          <div className="grid grid-cols-4 md:grid-cols-5 gap-2">
+            <button
+              onClick={() => setCategory("All")}
+              className={`border py-2 px-4 rounded-xl md:text-2xl text-xl transition-colors
+              ${category === "All" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100 border-black"}`}>
+              All
+            </button>
+            <button
+              onClick={() => setCategory("Networking")}
+              className={`border py-2 px-4 rounded-xl md:text-2xl text-xl transition-colors
+            ${category === "Networking" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100 border-black"}`}>
+              Networking
+            </button>
+            <button
+              onClick={() => setCategory("Workshop")}
+              className={`border py-2 px-4 rounded-xl md:text-2xl text-xl transition-colors
+            ${category === "Workshop" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100 border-black"}`}>
+              Workshop
+            </button>
+            <button
+              onClick={() => setCategory("Social")}
+              className={`border py-2 px-4 rounded-xl md:text-2xl text-xl transition-colors
+            ${category === "Social" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100 border-black"}`}>
+              Social
+            </button>
+            <button
+              onClick={() => setCategory("Panel")}
+              className={`border py-2 px-4 rounded-xl md:text-2xl text-xl transition-colors
+            ${category === "Panel" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100 border-black"}`}>
+              Panel
+            </button>
           </div>
         </div>
-      
+
+        {/* Grid for cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 w-full max-w-[100rem] mx-auto gap-8 py-4">
+          {filteredCards.map((card) => (
+            <div key={card.id} className=" border border-black">
+              <div className="relative">
+                <div className="h-100 flex justify-center items-center border border-black w-full ">
+                  <p>{card.image}</p>
+                </div>
+                <div className="flex flex-row justify-between items-center border border-black absolute top-5 inset-x-0 px-4">
+                  <div className="border border-black py-2 px-4 rounded-xl text-xl">
+                    <p>{card.category}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="md:p-8 p-4 space-y-8">
+                <div className="space-y-4">
+                  <h2 className="md:text-4xl text-2xl">{card.title}</h2>
+                  <p className="md:text-2xl text-xl">{card.description}</p>
+                </div>
+
+                <div className="flex flex-row justify-end items-center border border-black ">
+                  <button className="bg-green-600 text-white py-2 px-4 rounded-2xl cursor-pointer text-2xl font-medium">
+                    Learn More
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* end */}
+        </div>
+      </div>
     </div>
   );
-}
+};
 
-export default AllEvents
+export default AllEvents;

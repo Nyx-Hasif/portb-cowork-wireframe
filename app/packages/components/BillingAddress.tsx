@@ -2,7 +2,7 @@ import React from 'react'
 
 const BillingAddress = () => {
   return (
-    <div className="bg-white md:p-4 border border-black">
+    <div className="md:p-4 border border-black">
       <div className="border border-black p-4 w-full max-w-7xl mx-auto md:space-y-6 space-y-3">
         {/* title card */}
         <div className="border border-black space-y-2 text-center">
