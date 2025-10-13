@@ -231,7 +231,7 @@ const Membership = () => {
         </div>
 
         {/* buttons */}
-        <div className="flex flex-row gap-4 justify-center ">
+        <div className="flex md:flex-row flex-col gap-4 justify-center ">
             <div className="flex flex-row gap-2 border border-black py-2 px-4">
                 <i>✅</i>
                 <button>helloportb@gmail.com</button>

@@ -51,12 +51,12 @@ const PricingTable = () => {
       {/* Parent_container */}
       <div className="grid grid-cols-1 gap-8 w-full md:max-w-[100rem] mx-auto border-black md:py-8 p-4">
         {/* container all button */}
-        <div className="flex flex-row gap-4 border border-black  ">
+        <div className="flex md:flex-row flex-col gap-4 border border-black  ">
           {/* container button daily + dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={toggleButton}
-              className={`px-4 py-2 border border-black rounded-lg font-medium w-[8rem] transition-all duration-200 ease-in-out
+              className={`px-4 py-2 border border-black rounded-lg font-medium w-full  transition-all duration-200 ease-in-out
     ${
       activePlan === "daily"
         ? "bg-black text-white"
@@ -67,7 +67,7 @@ const PricingTable = () => {
             </button>
             {/* dropdown for daily button */}
             {isOpen && (
-              <div className="grid grid-cols-[1fr] border border-black absolute top-full z-10 w-full bg-white text-black  ">
+              <div className="grid grid-cols-[1fr] border border-black absolute top-full  z-10 w-full bg-white text-black  ">
                 <button
                   onClick={() => handleOptionClick("1 Hour")}
                   className="hover:bg-black hover:text-white duration 500 transition-all ease-in-out cursor-pointer"
@@ -92,7 +92,7 @@ const PricingTable = () => {
           {/* button weekly */}
           <button
             onClick={() => handleClickButton("Weekly", "weekly")}
-            className={`px-4 py-2 border border-black rounded-lg font-medium w-[8rem] transition-all duration-200 ease-in-out
+            className={`px-4 py-2 border border-black rounded-lg font-medium  transition-all duration-200 ease-in-out
     ${
       activePlan === "weekly"
         ? "bg-black text-white"
@@ -104,7 +104,7 @@ const PricingTable = () => {
           {/* button monthly */}
           <button
             onClick={() => handleClickButton("Monthly", "monthly")}
-            className={`px-4 py-2 border border-black rounded-lg font-medium w-[8rem] transition-all duration-200 ease-in-out
+            className={`px-4 py-2 border border-black rounded-lg font-medium  transition-all duration-200 ease-in-out
     ${
       activePlan === "monthly"
         ? "bg-black text-white"
@@ -116,7 +116,7 @@ const PricingTable = () => {
           {/* button yearly */}
           <button
             onClick={() => handleClickButton("Yearly", "yearly")}
-            className={`px-4 py-2 border border-black rounded-lg font-medium w-[8rem] transition-all duration-200 ease-in-out
+            className={`px-4 py-2 border border-black rounded-lg font-medium  transition-all duration-200 ease-in-out
     ${
       activePlan === "yearly"
         ? "bg-black text-white"

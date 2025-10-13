@@ -65,39 +65,30 @@ const AllEvents = () => {
       {/* all events content */}
       <div className=" border border-black p-4 ">
         {/* title and category button */}
-        <div className="border border-black w-full max-w-[100rem] mx-auto flex md:flex-row flex-col justify-between md:items-center md:px-8 py-4 gap-4 ">
+        <div className="border border-black w-full max-w-[100rem] mx-auto flex lg:flex-row flex-col justify-between md:items-center md:px-8 py-4 gap-4 ">
           <h1 className="md:text-6xl text-4xl font-medium">All Events</h1>
-          <div className="grid grid-cols-4 md:grid-cols-5 gap-2">
-            <button
-              onClick={() => setCategory("All")}
-              className={`border py-2 px-4 rounded-xl md:text-2xl text-xl transition-colors
-              ${category === "All" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100 border-black"}`}>
-              All
-            </button>
-            <button
-              onClick={() => setCategory("Networking")}
-              className={`border py-2 px-4 rounded-xl md:text-2xl text-xl transition-colors
-            ${category === "Networking" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100 border-black"}`}>
-              Networking
-            </button>
-            <button
-              onClick={() => setCategory("Workshop")}
-              className={`border py-2 px-4 rounded-xl md:text-2xl text-xl transition-colors
-            ${category === "Workshop" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100 border-black"}`}>
-              Workshop
-            </button>
-            <button
-              onClick={() => setCategory("Social")}
-              className={`border py-2 px-4 rounded-xl md:text-2xl text-xl transition-colors
-            ${category === "Social" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100 border-black"}`}>
-              Social
-            </button>
-            <button
-              onClick={() => setCategory("Panel")}
-              className={`border py-2 px-4 rounded-xl md:text-2xl text-xl transition-colors
-            ${category === "Panel" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100 border-black"}`}>
-              Panel
-            </button>
+          {/* category button */}
+          <div className="grid grid-cols-3 sm:grid-cols-5 xl:grid-cols-5 gap-2">
+            {[
+              { label: "All", value: "All" },
+              { label: "Networking", value: "Networking" },
+              { label: "Workshop", value: "Workshop" },
+              { label: "Social", value: "Social" },
+              { label: "Panel", value: "Panel" },
+            ].map((item) => (
+              <button
+                key={item.value}
+                onClick={() => setCategory(item.value)}
+                className={`p-4 rounded-xl text-xl md:text-2xl font-medium transition-colors
+          ${
+            category === item.value
+              ? "bg-black text-white"
+              : "bg-white text-black border border-black hover:bg-gray-100"
+          }`}
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
         </div>
 
