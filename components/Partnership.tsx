@@ -1,67 +1,118 @@
-import React from 'react'
+"use client";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { assets } from "@/assets/asset";
 
 const Partnership = () => {
+  const pillars = [
+    { icon: "🎓", title: "Education" },
+    { icon: "💊", title: "Community Development" },
+    { icon: "🎭", title: "Environment" },
+    { icon: "🎨", title: "Arts & Public Spaces" },
+    { icon: "🔬", title: "Knowledge" },
+    { icon: "💻", title: "Creative Support" },
+  ];
 
-  const cards_icon = ["icon_1", "icon_2", "icon_3", "icon_4", "icon_5", "icon_6"];
-  const cards_title = ["Education", "Health", "Culture", "Art", "Science", "Technology"];
-  const marquee_logo = ['logo_1', 'logo_2', 'logo_3', 'logo_4', 'logo_5', 'logo_6'];
-
+  /** ✅ put all your real logos here */
+  const partners = [
+    { image: assets.b_logo, name: "B Logo" },
+    { image: assets.canon_logo, name: "Canon" },
+    { image: assets.petron_logo, name: "Petron" },
+    { image: assets.vci_logo, name: "VCI" },
+    { image: assets.bni_logo, name: "BNI" },
+    { image: assets.boehringer_ingelheim_logo, name: "Boehringer Ingelheim" },
+    { image: assets.khr_logo, name: "KHR" },
+    { image: assets.medisavers_logo, name: "Medisavers" },
+    { image: assets.petronas_logo, name: "Petronas" },
+    { image: assets.prudential_logo, name: "Prudential" },
+    { image: assets.redwheels_logo, name: "Redwheels" },
+    { image: assets.samurai_logo, name: "Samurai" },
+    { image: assets.shell_logo, name: "Shell" },
+    { image: assets.sme_logo, name: "SME" },
+  ];
 
   return (
-    <div className=" p-4   border border-black ">
-      <div className="w-full max-w-7xl mx-auto space-y-5">
-        <div className="border border-black space-y-2">
-          <h1 className="md:text-6xl text-4xl">
-            Building Capacity and Vibrant Communities
-          </h1>
-          <p className="md:text-4xl text-2xl">
-            We deliver social value across 6 main pillars
+    <section className="relative w-full bg-[#e9eef3] text-black overflow-hidden">
+      {/* centered content */}
+      <div className="max-w-7xl mx-auto px-6 md:px-10 py-20 space-y-16">
+        {/* intro */}
+        <div className="text-center space-y-4">
+          <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+            Building Capacity & Vibrant Communities
+          </h2>
+          <p className="text-lg md:text-2xl">
+            Delivering social value across six main pillars
           </p>
         </div>
 
-        {/* Card body */}
-        <div className="">
-          {/* start */}
-          <div className="border border-black grid grid-cols-1 lg:grid-cols-[1fr_1fr_1fr] gap-4">
-            {cards_icon.map((item, index) => (
-              <div
-                key={index}
-                className="border border-black flex flex-row gap-4"
-              >
-                <div className="p-12 border border-black">
-                  <i>{item}</i>
-                </div>
-                <div className="flex justify-left items-center border border-black px-4 w-full">
-                  <p className="md:text-xl text-lg">{cards_title[index]}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          {/* end */}
+        {/* cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {pillars.map((p, i) => (
+            <motion.div
+              key={i}
+              whileHover={{ y: -4 }}
+              transition={{ duration: 0.3 }}
+              className="bg-gray-700 rounded-xl border border-white/10 p-8 flex flex-col items-center text-center shadow-sm hover:shadow-gray-900/30 transition-all"
+            >
+              <div className="text-6xl mb-4">{p.icon}</div>
+              <h3 className="text-xl md:text-2xl font-semibold text-white">
+                {p.title}
+              </h3>
+            </motion.div>
+          ))}
         </div>
 
-        {/* text content */}
+        {/* description */}
+        <p className="max-w-3xl mx-auto text-center text-base md:text-xl text-black leading-relaxed">
+          For over a decade, we’ve advanced social value for Malaysians —
+          ensuring inclusivity and equality across all our pillars and partner
+          entities.
+        </p>
+      </div>
 
-        <div>
-          <p className='text-2xl'>
-            We continue building on our efforts over the last decade to better
-            deliver societal value for Malaysians, ensuring greater inclusivity
-            and equality via our internal activities and related entities below:
-          </p>
+      {/* ===== full‑width marquee (pure CSS) ===== */}
+      <div className="relative w-full py-10 overflow-hidden">
+        <div className="marquee flex gap-12">
+          {[...partners, ...partners].map((p, i) => (
+            <div
+              key={i}
+              className="flex items-center bg-white rounded-2xl md:py-4 py-2 justify-center min-w-[160px] sm:min-w-[200px] md:min-w-[240px]"
+            >
+              <Image
+                src={p.image}
+                alt={p.name}
+                width={180}
+                height={80}
+                quality={100}
+                className="object-contain w-32 sm:w-40 md:w-48 lg:w-56 h-32 opacity-90 hover:opacity-100 transition"
+              />
+            </div>
+          ))}
         </div>
-      </div>
 
-      {/* marquee content logo partnership */}
-
-      <div className="border border-black p-4 md:mt-5 mt-4 flex flex-row justify-between gap-4  overflow-hidden">
-        {marquee_logo.map((item, index) => (
-          <div key={index} className="border border-black p-16 flex flex-row gap-4">
-            <p>{item}</p>
-          </div>
-        ))}
+        {/* keyframes */}
+        <style jsx global>{`
+          .marquee {
+            width: max-content;
+            animation: scroll-left 35s linear infinite;
+          }
+          @keyframes scroll-left {
+            0% {
+              transform: translateX(0);
+            }
+            100% {
+              transform: translateX(-50%);
+            }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .marquee {
+              animation: none;
+            }
+          }
+        `}</style>
       </div>
-    </div>
+    </section>
   );
-}
+};
 
-export default Partnership
+export default Partnership;

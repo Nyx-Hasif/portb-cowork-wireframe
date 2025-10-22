@@ -3,7 +3,6 @@ import Hero from "../../components/Hero";
 import PricingTable from "./components/PricingTable";
 import PrevEvent from "./components/PrevEvent";
 import Featured from "./components/Featured";
-import AllEvents from "./components/AllEvents";
 import VirtualAdress from "./components/VirtualAdress";
 import BillingAddress from "./components/BillingAddress";
 import Membership from "./components/Membership";
@@ -15,9 +14,8 @@ const PackagesPage = () => {
     <div>
       <Hero title="Packages Option" imagePath={"/images/hero.png"} />
       <PricingTable />
-      <PrevEvent /> 
+      <PrevEvent />
       <Featured />
-      <AllEvents />
       <VirtualAdress />
       <BillingAddress />
       <Membership />

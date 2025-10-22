@@ -1,122 +1,102 @@
+"use client";
 import React from "react";
+import { motion } from "framer-motion";
+import { InfiniteMovingCards } from "./ui/infinite-moving-cards";
+import TestimonialCarouselDemo from "./testimonialsCarousel";
+import LustreText from "@/components/ui/lustretext";
 
 const Reviews = () => {
-  const reviews = [
+  const testimonials = [
     {
-      id: 1,
-      name: "Muhammad Hasif",
-      rating: "⭐⭐⭐⭐⭐",
-      image: "pic_1",
-      review:
-        "“The best working space so far in kelantan. You can finish your tas peacefully. Go have your lunch at common area with free flow cofee.. 100 extra points...”",
+      quote:
+        "It was the best of times, it was the worst of times, it was the age of wisdom...",
+      name: "Charles Dickens",
+      title: "A Tale of Two Cities",
     },
     {
-      id: 2,
-      name: "Muhammad Hasif",
-      rating: "⭐⭐⭐⭐⭐",
-      image: "pic_2",
-      review:
-        "“The best working space so far in kelantan. You can finish your tas peacefully. Go have your lunch at common area with free flow cofee.. 100 extra points...”",
+      quote:
+        "To be, or not to be, that is the question: Whether 'tis nobler in the mind...",
+      name: "William Shakespeare",
+      title: "Hamlet",
     },
     {
-      id: 3,
-      name: "Muhammad Hasif",
-      rating: "⭐⭐⭐⭐⭐",
-      image: "pic_3",
-      review:
-        "“The best working space so far in kelantan. You can finish your tas peacefully. Go have your lunch at common area with free flow cofee.. 100 extra points...”",
+      quote: "All that we see or seem is but a dream within a dream.",
+      name: "Edgar Allan Poe",
+      title: "A Dream Within a Dream",
+    },
+    {
+      quote:
+        "It is a truth universally acknowledged, that a single man in possession of a good fortune...",
+      name: "Jane Austen",
+      title: "Pride and Prejudice",
+    },
+    {
+      quote:
+        "Call me Ishmael. Some years ago — never mind how long precisely — I thought I would sail about...",
+      name: "Herman Melville",
+      title: "Moby‑Dick",
     },
   ];
 
   return (
-    <div className="min-h-screen md:py-8 py-4">
-      <div className=" w-full max-w-[100rem] mx-auto border border-black">
-        {/* intro content */}
-        <div className="border border-black text-center space-y-6">
-          <h1 className="md:text-6xl text-4xl">Loved by creators & teams</h1>
-          <p className="md:text-4xl text-2xl">Here is what members say</p>
-        </div>
+    <section className="relative w-full md:py-8 py-6  md:space-y-6 bg-[#e9eef3]">
+      {/* heading / intro stays centered and narrow */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+        className="max-w-6xl mx-auto text-center space-y-4 md:space-y-6 px-4"
+      >
+        <LustreText
+          className="text-3xl w-full sm:text-4xl md:text-6xl font-extrabold leading-tight tracking-tight"
+          text="Loved by Creators & Teams"
+        />
+        <p className="text-gray-600 dark:text-gray-400 text-lg sm:text-xl md:text-2xl tracking-tight">
+          Here’s what our members say
+        </p>
+      </motion.div>
 
+      {/* full‑width marquees */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7, delay: 0.1 }}
+        className="w-full hidden lg:flex flex-col overflow-hidden"
+      >
+        <InfiniteMovingCards
+          items={testimonials}
+          direction="right"
+          speed="normal"
+        />
+      </motion.div>
 
-        {/*===================================================== carousel content slider=========================================================/}
-        {/* start */}
-        <div className="border border-black  grid grid-cols-1 md:grid-cols-3 mt-10 gap-4 md:gap-8 ">
-          <div className="md:h-100 h-50   border border-black">
-            <div>pic_1</div>
-          </div>
-          <div className="hidden md:flex md:h-100   h-50 border border-black">
-            <div>pic_2</div>
-          </div>
-          <div className=" hidden md:flex md:h-100 h-50 border border-black">
-            <div>pic_3</div>
-          </div>
-        </div>
-        {/* end ===================================================================================================================*/}
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7, delay: 0.2 }}
+        className="w-full hidden lg:flex flex-col overflow-hidden"
+      >
+        <InfiniteMovingCards
+          items={testimonials}
+          direction="left"
+          speed="normal"
+        />
+      </motion.div>
 
-      {/* ================================marquee reviews 1 */}
-
-      <div className="border border-black  grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 mt-10 gap-4 md:gap-8 md:text-2xl">
-        {/* card content */}
-
-        {reviews.map((item, index) => (
-          <div
-            key={index}
-            className=" border border-black flex flex-col justify-between p-4 gap-4"
-          >
-            {/* review_content */}
-            <p>{item.review}</p>
-
-            {/* rating */}
-            <div className="">
-              <i className="text-2xl ">{item.rating}</i>
-            </div>
-
-            {/* profile contents */}
-            <div className="flex flex-row border border-black gap-2 ">
-              <div className="border border-black p-4 rounded-4xl flex justify-center items-center">
-                <div>{item.image}</div>
-              </div>
-              <div className="border border-black flex items-center  w-full">
-                <p>{item.name}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-      {/* marquee reviews============================================ 2 */}
-
-      <div className="border border-black  grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 mt-10 gap-4 md:gap-8 md:text-2xl ">
-        {/* card content */}
-
-        {reviews.map((item, index) => (
-          <div
-            key={index}
-            className=" border border-black flex flex-col justify-between p-4 gap-4"
-          >
-            {/* review_content */}
-            <p>{item.review}</p>
-
-            {/* rating */}
-            <div className="">
-              <i className="text-2xl ">{item.rating}</i>
-            </div>
-
-            {/* profile contents */}
-            <div className="flex flex-row border border-black gap-2 ">
-              <div className="border border-black p-4 rounded-4xl flex justify-center items-center">
-                <div>{item.image}</div>
-              </div>
-              <div className="border border-black flex items-center  w-full">
-                <p>{item.name}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* end */}
-    </div>
+      {/* mobile carousel */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7 }}
+        className="w-full lg:hidden flex justify-center px-2"
+      >
+        <TestimonialCarouselDemo/>
+      </motion.div>
+    </section>
   );
 };
 

@@ -1,75 +1,110 @@
-import React from 'react'
+"use client";
+import Image from "next/image";
+import { assets } from "@/assets/asset";
+import React from "react";
 
 const Footer = () => {
   return (
-    <div className="">
-      {/* Gradient line */}
-      <div className=" h-5 bg-gradient-to-r from-green-400 to-green-600"></div>
+    <footer className="w-full bg-[#343434]">
+      {/* Gradient hijau */}
+      <div className="gradient-wave md:h-3 h-2 w-full" />
 
-      <div className="p-4 md:p-12 ">
-        {/* Footer */}
-        <div className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-4 gap-4 border border-black ">
-          <div className="border border-black md:p-8 p-2 space-y-6">
-            <h1 className='text-4xl'>PortB logo</h1>
-            <p className='text-xl'>
-              A modern coworking space where creativity meets productivity. Join
-              our community of innovators and entrepreneurs.
-            </p>
+      <div className="px-6 lg:px-12 py-14 border-t border-gray-200 dark:border-gray-700">
+        {/* grid */}
+        <div className="grid grid-cols-1  lg:grid-cols-4 gap-10 pb-12 border-b border-gray-200 dark:border-gray-700">
+          {/* logo */}
+          <div className="flex flex-col space-y-5">
+            <Image
+              src={assets.portb_logo}
+              alt="PortB logo"
+              width={800}
+              height={800}
+              quality={100}
+              className="object-contain w-32 sm:w-40 md:w-48 lg:w-64 xl:w-72 h-auto transition-all"
+              priority
+              draggable={false}
+            />
           </div>
 
           {/* quick links */}
-          <div className="border border-black md:p-8 p-2 space-y-6">
-            <h1 className='text-3xl'>Quick Links</h1>
-            <div className="flex flex-col space-y-2 ">
-              <a href="#" className='text-xl'>Packages</a>
-              <a href="#" className='text-xl'>Community</a>
-              <a href="#" className='text-xl'>Contact us</a>
-            </div>
+          <div>
+            <h3 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
+              Quick Links
+            </h3>
+            <ul className="space-y-2 text-lg text-gray-700 dark:text-gray-300">
+              {["Packages", "Community", "Contact Us"].map((item) => (
+                <li key={item}>
+                  <a
+                    href="#"
+                    className="hover:text-green-600 dark:hover:text-emerald-400 transition-colors"
+                  >
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* contact */}
-          <div className="border border-black md:p-8 p-2 space-y-6">
-            <h1 className='text-3xl'>Contact</h1>
-            <div className='space-y-2'>
-              <p className='text-xl'>Siti Square,Kota Bharu</p>
-              <p className='text-xl'>+6014 3298 981</p>
-              <p className='text-xl'>helloportB@gmail.com</p>
-            </div>
+          {/* contact info */}
+          <div>
+            <h3 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
+              Contact
+            </h3>
+            <p className="text-lg text-gray-700 dark:text-gray-300">
+              +60 14 3298 981
+            </p>
+            <p className="text-lg text-gray-700 dark:text-gray-300">
+              helloportB@gmail.com
+            </p>
           </div>
 
           {/* newsletter */}
-          <div className="border border-black md:p-8 p-2 space-y-6">
-            <h1 className='text-3xl'>Stay Updated with us</h1>
-            <p className='text-xl'>Subscribe to our newsletter for events and updates.</p>
-            <div className="flex gap-2">
+          <div>
+            <h3 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
+              Stay Updated with Us
+            </h3>
+            <p className="text-lg text-gray-700 dark:text-gray-300 mb-4">
+              Subscribe to our newsletter for events and updates.
+            </p>
+
+            {/* ✅ simple stacked layout */}
+            <form
+              onSubmit={(e) => e.preventDefault()}
+              className="flex flex-col w-full space-y-3"
+            >
               <input
                 type="email"
-                placeholder="Email"
-                className="border border-black w-full  bg-white"
+                placeholder="Enter your email"
+                className="w-full rounded-lg border border-gray-400 dark:border-gray-600 bg-transparent px-4 py-3 text-base md:text-lg text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
               />
-              <button className="bg-black text-white rounded-md px-2 font-medium ">
+              <button
+                type="submit"
+                className="w-full rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold py-3 text-base md:text-lg transition-colors"
+              >
                 Subscribe
               </button>
-            </div>
+            </form>
           </div>
         </div>
 
-        {/* horizontal line */}
-        <div className="border border-black my-4"></div>
-
-        {/* copyright content + social media */}
-        <div className="border border-black flex flex-col md:flex-row md:justify-between items-center ">
-          <p className='text-xl'>© 2025 PortB. All rights reserved.</p>
-          <div className="flex space-x-1">
-            <i>facebook</i>
-            <i>tiktok</i>
-            <i>instagram</i>
-            <i>threads</i>
+        {/* footer bottom */}
+        <div className="flex flex-col md:flex-row justify-between items-center mt-10 space-y-4 md:space-y-0 text-base md:text-lg text-gray-600 dark:text-gray-400">
+          <p>© 2025 PortB. All rights reserved.</p>
+          <div className="flex gap-4">
+            {["Facebook", "TikTok", "Instagram", "Threads"].map((item) => (
+              <a
+                key={item}
+                href="#"
+                className="capitalize hover:text-green-600 dark:hover:text-emerald-400 transition-colors"
+              >
+                {item}
+              </a>
+            ))}
           </div>
         </div>
       </div>
-    </div>
+    </footer>
   );
-}
+};
 
-export default Footer
+export default Footer;
