@@ -1,8 +1,8 @@
 import React from "react";
 import Hero from "../../components/Hero";
 import CTA from "../../components/CTA";
-import EpicCarousel from "./components/EpicCarousel";
-import CategoryYears from "./components/CategoryYears";
+import EpicCarousel from "../gallery/components/EpicCarousel";
+import CategoryYears from "../gallery/components/CategoryYears";
 
 const CommunityPage = () => {
   return (

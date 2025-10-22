@@ -105,9 +105,9 @@ const Navbar = () => {
       { label: "Amenities", href: "/amenities" },
     ],
     community: [
-      { label: "Previous Events", href: "/community/previous-events" },
-      { label: "Upcoming Events", href: "/community/upcoming-events" },
-      { label: "Gallery", href: "/community/gallery" },
+      { label: "Previous Events", href: "/previous-events" },
+      { label: "Upcoming Events", href: "/upcoming-events" },
+      { label: "Gallery", href: "/gallery" },
     ],
   };
 
