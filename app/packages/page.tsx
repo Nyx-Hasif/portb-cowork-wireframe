@@ -6,7 +6,7 @@ import Featured from "./components/Featured";
 import VirtualAdress from "./components/VirtualAdress";
 import BillingAddress from "./components/BillingAddress";
 import Membership from "./components/Membership";
-import Amenities from "./components/Amenities";
+import Amenities from "../amenities/components/Amenities";
 import CTA from "../../components/CTA";
 
 const PackagesPage = () => {

@@ -13,14 +13,18 @@ const Navbar = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
 
   const mobileMenuRef = useRef<HTMLDivElement>(null);
-  const toggleButtonRef = useRef<HTMLButtonElement>(null); // ✅ New ref
+  const toggleButtonRef = useRef<HTMLButtonElement>(null);
 
-  // ✅ Improved toggle with event parameter
-  const toggleMenu = (e?: React.MouseEvent | React.TouchEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+  // ✅ Simple toggle for links (no preventDefault)
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+    setMobileDropdown(null);
+  };
+
+  // ✅ Toggle for button only (with preventDefault)
+  const toggleMenuButton = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setIsMenuOpen((prev) => !prev);
     setMobileDropdown(null);
   };
@@ -51,14 +55,13 @@ const Navbar = () => {
     };
   }, [lastScrollY]);
 
-  // ✅ Fixed click outside handler
+  // Click outside handler
   useEffect(() => {
     if (!isMenuOpen) return;
 
     const handleClickOutside = (event: Event) => {
       const target = event.target as Node;
 
-      // ✅ Check if click is on toggle button - ignore it
       if (toggleButtonRef.current?.contains(target)) {
         return;
       }
@@ -69,7 +72,6 @@ const Navbar = () => {
       }
     };
 
-    // ✅ Delay to prevent immediate trigger
     const timeoutId = setTimeout(() => {
       document.addEventListener("mousedown", handleClickOutside);
       document.addEventListener("touchstart", handleClickOutside, {
@@ -98,9 +100,9 @@ const Navbar = () => {
 
   const menuItems = {
     packages: [
-      { label: "Coworking Space", href: "/packages/coworking" },
-      { label: "Business Address", href: "/packages/business-address" },
-      { label: "Amenities", href: "/packages/amenities" },
+      { label: "Coworking Space", href: "/coworking-space" },
+      { label: "Business Address", href: "/business-address" },
+      { label: "Amenities", href: "/amenities" },
     ],
     community: [
       { label: "Previous Events", href: "/community/previous-events" },
@@ -118,7 +120,6 @@ const Navbar = () => {
       >
         <div className="px-6">
           <nav className="flex justify-between h-auto items-center py-4">
-            {/* Logo */}
             <div>
               <Image
                 src={assets.portb_logo}
@@ -240,15 +241,12 @@ const Navbar = () => {
               </Link>
             </div>
 
-            {/* ✅ Mobile menu button with ref and improved handler */}
+            {/* ✅ Mobile button - guna toggleMenuButton */}
             <button
               ref={toggleButtonRef}
               className="md:hidden p-2 z-[110] touch-manipulation"
-              onClick={toggleMenu}
-              onTouchEnd={(e) => {
-                e.preventDefault();
-                toggleMenu(e);
-              }}
+              onClick={toggleMenuButton}
+              onTouchEnd={toggleMenuButton}
               aria-label="Toggle menu"
             >
               {isMenuOpen ? (
@@ -269,10 +267,7 @@ const Navbar = () => {
       {isMenuOpen && (
         <div
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[80] md:hidden"
-          onClick={() => {
-            setIsMenuOpen(false);
-            setMobileDropdown(null);
-          }}
+          onClick={closeMenu}
         />
       )}
 
@@ -286,10 +281,11 @@ const Navbar = () => {
         }`}
       >
         <div className="py-4 px-4 space-y-2 max-h-[calc(100vh-100px)] overflow-y-auto">
+          {/* ✅ Links use closeMenu (no preventDefault) */}
           <Link
             href="/"
             className="block py-2 text-gray-800 hover:text-green-600"
-            onClick={toggleMenu}
+            onClick={closeMenu}
           >
             Home
           </Link>
@@ -317,7 +313,7 @@ const Navbar = () => {
                     key={item.href}
                     href={item.href}
                     className="block py-2 text-gray-600 hover:text-green-600"
-                    onClick={toggleMenu}
+                    onClick={closeMenu}
                   >
                     {item.label}
                   </Link>
@@ -349,7 +345,7 @@ const Navbar = () => {
                     key={item.href}
                     href={item.href}
                     className="block py-2 text-gray-600 hover:text-green-600"
-                    onClick={toggleMenu}
+                    onClick={closeMenu}
                   >
                     {item.label}
                   </Link>
@@ -361,7 +357,7 @@ const Navbar = () => {
           <Link
             href="/contact"
             className="block py-2 text-gray-800 hover:text-green-600"
-            onClick={toggleMenu}
+            onClick={closeMenu}
           >
             Contact us
           </Link>
@@ -370,7 +366,7 @@ const Navbar = () => {
             <Link
               href="/login"
               className="block w-full text-center bg-gray-900 text-white rounded-lg px-6 py-2 hover:bg-gray-800 transition-colors"
-              onClick={toggleMenu}
+              onClick={closeMenu}
             >
               Admin
             </Link>
