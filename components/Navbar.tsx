@@ -9,15 +9,19 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileDropdown, setMobileDropdown] = useState<string | null>(null);
-
-  // ✅ Scroll state
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const toggleButtonRef = useRef<HTMLButtonElement>(null); // ✅ New ref
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+  // ✅ Improved toggle with event parameter
+  const toggleMenu = (e?: React.MouseEvent | React.TouchEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setIsMenuOpen((prev) => !prev);
     setMobileDropdown(null);
   };
 
@@ -25,19 +29,16 @@ const Navbar = () => {
     setMobileDropdown(mobileDropdown === menu ? null : menu);
   };
 
-  // ✅ Handle scroll to hide/show navbar
+  // Handle scroll
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
-      // Show navbar when scrolling up or at top
       if (currentScrollY < lastScrollY || currentScrollY < 10) {
         setIsVisible(true);
-      }
-      // Hide navbar when scrolling down (after 10px)
-      else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setIsVisible(false);
-        setActiveDropdown(null); // Close desktop dropdowns
+        setActiveDropdown(null);
       }
 
       setLastScrollY(currentScrollY);
@@ -50,33 +51,40 @@ const Navbar = () => {
     };
   }, [lastScrollY]);
 
-  // Click outside to close
+  // ✅ Fixed click outside handler
   useEffect(() => {
     if (!isMenuOpen) return;
 
     const handleClickOutside = (event: Event) => {
-      if (
-        mobileMenuRef.current &&
-        !mobileMenuRef.current.contains(event.target as Node)
-      ) {
+      const target = event.target as Node;
+
+      // ✅ Check if click is on toggle button - ignore it
+      if (toggleButtonRef.current?.contains(target)) {
+        return;
+      }
+
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(target)) {
         setIsMenuOpen(false);
         setMobileDropdown(null);
       }
     };
 
-    // Small delay to prevent immediate closing
-    setTimeout(() => {
+    // ✅ Delay to prevent immediate trigger
+    const timeoutId = setTimeout(() => {
       document.addEventListener("mousedown", handleClickOutside);
-      document.addEventListener("touchstart", handleClickOutside);
-    }, 0);
+      document.addEventListener("touchstart", handleClickOutside, {
+        passive: true,
+      });
+    }, 100);
 
     return () => {
+      clearTimeout(timeoutId);
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("touchstart", handleClickOutside);
     };
   }, [isMenuOpen]);
 
-  // Prevent body scroll when menu open
+  // Prevent body scroll
   useEffect(() => {
     if (isMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -103,13 +111,11 @@ const Navbar = () => {
 
   return (
     <>
-      {/* ✅ Fixed navbar with slide animation */}
       <nav
         className={`fixed top-0 left-0 right-0 z-[100] bg-white shadow-sm transition-transform duration-300 ${
           isVisible ? "translate-y-0" : "-translate-y-full"
         }`}
       >
-        {/* Navbar */}
         <div className="px-6">
           <nav className="flex justify-between h-auto items-center py-4">
             {/* Logo */}
@@ -234,8 +240,17 @@ const Navbar = () => {
               </Link>
             </div>
 
-            {/* Mobile menu button */}
-            <button className="md:hidden p-2 z-[110]" onClick={toggleMenu}>
+            {/* ✅ Mobile menu button with ref and improved handler */}
+            <button
+              ref={toggleButtonRef}
+              className="md:hidden p-2 z-[110] touch-manipulation"
+              onClick={toggleMenu}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                toggleMenu(e);
+              }}
+              aria-label="Toggle menu"
+            >
               {isMenuOpen ? (
                 <X className="h-6 w-6 text-gray-800" />
               ) : (
@@ -245,14 +260,12 @@ const Navbar = () => {
           </nav>
         </div>
 
-        {/* Gradient */}
         <div className="gradient-wave md:h-3 h-2 w-full" />
       </nav>
 
-      {/* ✅ Spacer to prevent content jump */}
       <div className="h-[100px] md:h-[110px]" />
 
-      {/* Backdrop overlay */}
+      {/* Backdrop */}
       {isMenuOpen && (
         <div
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[80] md:hidden"
@@ -281,7 +294,6 @@ const Navbar = () => {
             Home
           </Link>
 
-          {/* Mobile Packages Dropdown */}
           <div>
             <button
               className="flex items-center justify-between w-full py-2 text-gray-800 hover:text-green-600"
@@ -314,7 +326,6 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Mobile Community Dropdown */}
           <div>
             <button
               className="flex items-center justify-between w-full py-2 text-gray-800 hover:text-green-600"
