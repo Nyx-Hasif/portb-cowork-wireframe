@@ -1,13 +1,14 @@
+import { assets } from '@/assets/asset';
 import Image from 'next/image'
 import React from 'react'
 
 // declare props is a must!!! only for typescript
 interface HeroProps {
   title: string;
-  imagePath: string;
+  // imagePath: string;
 }
 
-const CTA = ({title,imagePath} : HeroProps) => {
+const CTA = ({title} : HeroProps) => {
   return (
     <div className="min-h-auto">
       {/* gambar background */}
@@ -15,7 +16,7 @@ const CTA = ({title,imagePath} : HeroProps) => {
       <div className="w-full lg:h-[600px] md:h-[400px] h-[300px]  relative">
         {/* Layer 1 (Bottom)  */}
         <Image
-          src={imagePath}
+          src={assets.bg_cta_home}
           alt="hero"
           fill
           quality={100}

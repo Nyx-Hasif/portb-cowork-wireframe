@@ -1,3 +1,4 @@
+import { assets } from "@/assets/asset";
 
 export type Plan = "1 Hour" | "4 Hour" | "8 Hour" | "Weekly" | "Monthly" | "Yearly"; // ✅ Definisi jenis plan
 
@@ -13,7 +14,7 @@ export type PricingCard = { //typescript type annotation wajib gunakan untuk dec
 export const cards = [
     {
         id: 1,
-        image: "img_1",
+        image: assets.meeting_room,
         category: "Meeting Room",
         description: "Ideal for 6-10 people",
         pricing: {
@@ -37,7 +38,7 @@ export const cards = [
     },
     {
         id: 2,
-        image: "img_2",
+        image: assets.fixed_desk,
         category: "Fixed Desk",
         description: "Ideal for 1 person",
         pricing: {
@@ -61,7 +62,7 @@ export const cards = [
     },
     {
         id: 3,
-        image: "img_3",
+        image: assets.common_area,
         category: "Common Area",
         description: "Ideal for 6-10 people",
         pricing: {
@@ -85,7 +86,7 @@ export const cards = [
     },
     {
         id: 4,
-        image: "img_4",
+        image: assets.green_area,
         category: "Green Area",
         description: "Ideal for 6-10 people",
         pricing: {
@@ -109,7 +110,7 @@ export const cards = [
     },
     {
         id: 5,
-        image: "img_5",
+        image: assets.event_space_area,
         category: "Space Event",
         description: "Ideal for 6-10 people",
         pricing: {

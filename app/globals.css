@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 /* global styles bg */
-@layer base {
+/* @layer base {
   body {
     @apply bg-gray-600 text-white;
   }
-}
+} */
 
 /* globals.css */
 @layer utilities {

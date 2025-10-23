@@ -17,6 +17,12 @@ import samurai_logo from "./samurai_logo.png";
 import shell_logo from "./shell_logo.png";
 import sme_logo from "./sme_logo.png";
 import vci_logo from "./vci_logo.png";
+import bg_cta_home from "./bg_cta_home.png";
+import meeting_room from "./meeting_room.png";
+import green_area from "./green_area.png";
+import fixed_desk from "./fixed_desk.png";
+import common_area from "./common_area.png";
+import event_space_area from "./event_space_area.png";
 
 
 
@@ -105,6 +111,12 @@ export const assets = {
   samurai_logo,
   shell_logo,
   sme_logo,
-  vci_logo
+  vci_logo,
+  bg_cta_home,
+  meeting_room,
+  green_area,
+  fixed_desk,
+  common_area,
+  event_space_area
 
 }

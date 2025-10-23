@@ -1,197 +1,165 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { cards } from "@/data/pricingData";
 import type { Plan } from "@/data/pricingData";
 
-const PricingTable = () => {
+export default function PricingTable() {
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState<Plan>("1 Hour"); // default
+  const [selected, setSelected] = useState<Plan>("1 Hour");
   const [activePlan, setActivePlan] = useState<
     "daily" | "weekly" | "monthly" | "yearly"
   >("daily");
-  const dropdownRef = useRef<HTMLDivElement>(null); // ref for the  dropdown
+  const [buttonDisplay, setButtonDisplay] = useState("Daily");
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const toggleButton = () => {
-    setIsOpen(!isOpen);
+  const toggleButton = () => setIsOpen((p) => !p);
+  const handleOptionClick = (v: Plan) => {
+    setSelected(v);
+    setButtonDisplay(v);
+    setActivePlan("daily");
+    setIsOpen(false);
   };
-
-  const handleOptionClick = (value: Plan) => {
-    setSelected(value); // value is parameter [1 hour is the value] save in selected (updated)
-    setActivePlan("daily"); // ✅ dropdown = daily
-    setIsOpen(false); // close the dropdown
-  };
-
   const handleClickButton = (
     period: Plan,
-    planType: "weekly" | "monthly" | "yearly"
+    type: "weekly" | "monthly" | "yearly",
+    txt: string
   ) => {
-    setSelected(period); //Weekly, Monthly, Yearly
-    setActivePlan(planType);
+    setSelected(period);
+    setActivePlan(type);
+    setButtonDisplay(txt);
   };
 
-  // close the dropdown when click outside of it or anywhere
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const clickOutside = (e: MouseEvent) => {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false); // tutup dropdown
-      }
+        !dropdownRef.current.contains(e.target as Node)
+      )
+        setIsOpen(false);
     };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    document.addEventListener("mousedown", clickOutside);
+    return () => document.removeEventListener("mousedown", clickOutside);
   }, []);
 
   return (
-    <div className="">
-      {/* Parent_container */}
-      <div className="grid grid-cols-1 gap-8 w-full md:max-w-[100rem] mx-auto border-black md:py-8 p-4">
-        {/* container all button */}
-        <div className="flex md:flex-row flex-col gap-4 border border-black  ">
-          {/* container button daily + dropdown */}
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={toggleButton}
-              className={`px-4 py-2 border border-black rounded-lg font-medium w-full  transition-all duration-200 ease-in-out
-    ${
-      activePlan === "daily"
-        ? "bg-black text-white"
-        : "bg-white text-black hover:bg-gray-100"
-    }`}
-            >
-              Daily
-            </button>
-            {/* dropdown for daily button */}
-            {isOpen && (
-              <div className="grid grid-cols-[1fr] border border-black absolute top-full  z-10 w-full bg-white text-black  ">
-                <button
-                  onClick={() => handleOptionClick("1 Hour")}
-                  className="hover:bg-black hover:text-white duration 500 transition-all ease-in-out cursor-pointer"
-                >
-                  1 Hour
-                </button>
-                <button
-                  onClick={() => handleOptionClick("4 Hour")}
-                  className="hover:bg-black hover:text-white duration 500 transition-all ease-in-out cursor-pointer"
-                >
-                  4 Hour
-                </button>
-                <button
-                  onClick={() => handleOptionClick("8 Hour")}
-                  className="hover:bg-black hover:text-white duration 500 transition-all ease-in-out cursor-pointer"
-                >
-                  8 Hour
-                </button>
-              </div>
-            )}
-          </div>
-          {/* button weekly */}
+    <section className="w-full max-w-[1100px] mx-auto px-4 md:py-10 py-8">
+      {/* PLAN BUTTONS */}
+      <div className="flex flex-wrap justify-center md:justify-start gap-3 mb-10">
+        {/* Daily dropdown */}
+        <div className="relative" ref={dropdownRef}>
           <button
-            onClick={() => handleClickButton("Weekly", "weekly")}
-            className={`px-4 py-2 border border-black rounded-lg font-medium  transition-all duration-200 ease-in-out
-    ${
-      activePlan === "weekly"
-        ? "bg-black text-white"
-        : "bg-white text-black hover:bg-gray-100"
-    }`}
+            onClick={toggleButton}
+            className={`px-6 py-2 rounded-md border font-medium transition
+              ${
+                activePlan === "daily"
+                  ? "bg-black text-white border-black"
+                  : "bg-white text-black border-gray-300 hover:bg-gray-100"
+              }`}
           >
-            Weekly
+            {activePlan === "daily" ? buttonDisplay : "Daily"}
           </button>
-          {/* button monthly */}
-          <button
-            onClick={() => handleClickButton("Monthly", "monthly")}
-            className={`px-4 py-2 border border-black rounded-lg font-medium  transition-all duration-200 ease-in-out
-    ${
-      activePlan === "monthly"
-        ? "bg-black text-white"
-        : "bg-white text-black hover:bg-gray-100"
-    }`}
-          >
-            Monthly
-          </button>
-          {/* button yearly */}
-          <button
-            onClick={() => handleClickButton("Yearly", "yearly")}
-            className={`px-4 py-2 border border-black rounded-lg font-medium  transition-all duration-200 ease-in-out
-    ${
-      activePlan === "yearly"
-        ? "bg-black text-white"
-        : "bg-white text-black hover:bg-gray-100"
-    }`}
-          >
-            Yearly
-          </button>
+          {isOpen && (
+            <div className="absolute top-full left-0 mt-2 w-full bg-white border border-gray-300 rounded-md shadow z-10">
+              {["1 Hour", "4 Hour", "8 Hour"].map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => handleOptionClick(opt as Plan)}
+                  className="block w-full text-left px-4 py-2 text-sm hover:bg-black hover:text-white"
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Card_container */}
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-8">
-          {cards.map((item, index) => {
-            let colClass = "md:col-span-2"; // default untuk card 1,2,3
-
-            if (index === 3) {
-              // Card ke-4 (index 3): start dari column 2, span 2
-              colClass = "md:col-start-2 md:col-span-2";
-            } else if (index === 4) {
-              // Card ke-5 (index 4): span 2 (auto center dalam 6-col)
-              colClass = "md:col-span-2";
+        {["Weekly", "Monthly", "Yearly"].map((p) => (
+          <button
+            key={p}
+            onClick={() =>
+              handleClickButton(
+                p as Plan,
+                p.toLowerCase() as "weekly" | "monthly" | "yearly",
+                p
+              )
             }
+            className={`px-6 py-2 rounded-md border font-medium transition
+              ${
+                activePlan === p.toLowerCase()
+                  ? "bg-black text-white border-black"
+                  : "bg-white text-black border-gray-300 hover:bg-gray-100"
+              }`}
+          >
+            {p}
+          </button>
+        ))}
+      </div>
 
-            return (
-              <div
-                key={item.id} // ✅ lebih baik guna item.id
-                className={`border border-black space-y-3 w-full p-4 md:p-8 ${colClass}`}
-              >
-                {/* gambar */}
-                <div className="border border-black">
-                  <div className="h-64 flex justify-center items-center">
-                    <p>{item.image}</p>
-                  </div>
-                </div>
+      {/* GRID LAYOUT */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
+        {cards.map((item, index) => {
+          // basic span for all cards
+          let colClass = "md:col-span-2 lg:col-span-2";
 
-                <div className="space-y-3">
-                  {/* text content */}
-                  <div>
-                    <h1 className="md:text-4xl text-2xl font-bold">
-                      {item.category}
-                    </h1>
-                    <p className="text-xl">{item.description}</p>
-                  </div>
+          // 🟢 Medium (tablet) layout (1-2 | 3-4 | 5 center)
+          if (index === 0) colClass += " md:col-start-1";
+          if (index === 1) colClass += " md:col-start-3";
+          if (index === 2) colClass += " md:col-start-1 md:row-start-2";
+          if (index === 3) colClass += " md:col-start-3 md:row-start-2";
+          if (index === 4) colClass += " md:col-start-2 md:row-start-3";
 
-                  {/* packages_list */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xl">
-                    {item.list.map((feature, idx) => (
-                      <div
-                        key={idx}
-                        className="flex flex-row gap-2 border border-black"
-                      >
-                        <p>{feature}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+          // 🖥️ Large layout (1-2-3 top | 4-5 centered below)
+          if (index === 0) colClass += " lg:col-start-1 lg:row-start-1";
+          if (index === 1) colClass += " lg:col-start-3 lg:row-start-1";
+          if (index === 2) colClass += " lg:col-start-5 lg:row-start-1";
+          if (index === 3) colClass += " lg:col-start-2 lg:row-start-2";
+          if (index === 4) colClass += " lg:col-start-4 lg:row-start-2";
 
-                {/* price */}
-                <div className="border border-black flex justify-center items-center h-25 md:text-4xl text-2xl font-bold">
-                  {item.pricing[selected]}
-                </div>
+          return (
+            <div
+              key={item.id}
+              className={`border rounded-xl shadow-sm hover:shadow-lg overflow-hidden bg-white flex flex-col transition-all ${colClass}`}
+            >
+              {/* IMAGE */}
+              <div className="relative w-full h-56">
+                <Image
+                  src={item.image}
+                  alt={item.category}
+                  fill
+                  className="object-cover object-center"
+                />
+              </div>
 
-                {/* button */}
-                <div className="border border-black flex justify-center md:text-2xl text-xl py-2">
-                  <button>Book now</button>
+              {/* BODY */}
+              <div className="flex flex-col flex-1 p-6 space-y-3">
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  {item.category}
+                </h2>
+                <p className="text-gray-600">{item.description}</p>
+
+                <ul className="grid grid-cols-1 lg:grid-cols-2 gap-x-3 gap-y-1 text-sm text-gray-700 flex-1">
+                  {item.list.map((f, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span>✓</span>
+                      <span>{f.replace(/^✅/g, "").trim()}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="mt-auto text-center border-t border-gray-100 pt-5">
+                  <p className="text-3xl font-bold mb-3">
+                    {item.pricing[selected]}
+                  </p>
+                  <button className="w-full px-4 py-2 border border-black text-black rounded-md hover:bg-black hover:text-white transition-colors font-medium">
+                    Book Now
+                  </button>
                 </div>
               </div>
-            );
-          })}
-        </div>
-
-        {/* end */}
+            </div>
+          );
+        })}
       </div>
-    </div>
+    </section>
   );
-};
-
-export default PricingTable;
+}
