@@ -1,6 +1,5 @@
 import React from "react";
 import Hero from "../../components/Hero";
-import PricingTable from "./components/PricingTable";
 import PrevEvent from "./components/PrevEvent";
 import Featured from "./components/Featured";
 import VirtualAdress from "./components/VirtualAdress";
@@ -13,7 +12,6 @@ const PackagesPage = () => {
   return (
     <div>
       <Hero title="Packages Option" imagePath={"/images/hero.png"} />
-      <PricingTable />
       <PrevEvent />
       <Featured />
       <VirtualAdress />
@@ -22,7 +20,6 @@ const PackagesPage = () => {
       <Amenities />
       <CTA
         title="Discover the albums of coworking at PortB"
-        imagePath={"/images/hero.png"}
       />
     </div>
   );

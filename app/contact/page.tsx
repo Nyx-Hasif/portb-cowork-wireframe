@@ -13,7 +13,6 @@ const ContactPage = () => {
 
       <CTA
         title="Discover the opportunity of coworking at PortB"
-        imagePath={"/images/hero.png"}
       />
     </div>
   );
