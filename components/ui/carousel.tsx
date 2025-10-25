@@ -1,123 +1,67 @@
 "use client";
 import { IconArrowNarrowRight } from "@tabler/icons-react";
-import { useState, useRef, useId, useEffect, useCallback } from "react";
-import Image from "next/image"; // ← Add this import
+import { useState, useRef, useId, useCallback } from "react";
+import Image, { StaticImageData } from "next/image";
 
-interface SlideData {
+interface CardData {
+  id: number;
+  icon: React.ReactNode;
   title: string;
-  button: string;
-  src: string;
+  img: StaticImageData; // ✅ Fix: ganti 'any' dengan proper type
+  description: string;
 }
 
 interface SlideProps {
-  slide: SlideData;
+  card: CardData; // ✅ Tukar dari cards[] kepada card (single)
   index: number;
   current: number;
   handleSlideClick: (index: number) => void;
 }
 
-const Slide = ({ slide, index, current, handleSlideClick }: SlideProps) => {
+const Slide = ({ card, index, current, handleSlideClick }: SlideProps) => {
   const slideRef = useRef<HTMLLIElement>(null);
-  const xRef = useRef(0);
-  const yRef = useRef(0);
-  const frameRef = useRef<number | undefined>(undefined); // ← Fix: Add initial value
-
-  const animate = useCallback(() => {
-    if (!slideRef.current) return;
-
-    const x = xRef.current;
-    const y = yRef.current;
-
-    slideRef.current.style.setProperty("--x", `${x}px`);
-    slideRef.current.style.setProperty("--y", `${y}px`);
-
-    frameRef.current = requestAnimationFrame(animate);
-  }, []);
-
-  useEffect(() => {
-    frameRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      if (frameRef.current) {
-        cancelAnimationFrame(frameRef.current);
-      }
-    };
-  }, [animate]);
-
-  const handleMouseMove = useCallback((event: React.MouseEvent) => {
-    const el = slideRef.current;
-    if (!el) return;
-
-    const r = el.getBoundingClientRect();
-    xRef.current = event.clientX - (r.left + Math.floor(r.width / 2));
-    yRef.current = event.clientY - (r.top + Math.floor(r.height / 2));
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    xRef.current = 0;
-    yRef.current = 0;
-  }, []);
-
-  const { src, button, title } = slide;
 
   return (
-    <div className="[perspective:1200px] [transform-style:preserve-3d]">
-      <li
-        ref={slideRef}
-        className="flex flex-1 flex-col items-center justify-center relative text-center text-white opacity-100 transition-all duration-300 ease-in-out w-[70vmin] h-[70vmin] mx-[4vmin] z-10"
-        onClick={() => handleSlideClick(index)}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        style={{
-          transform:
-            current !== index
-              ? "scale(0.98) rotateX(8deg)"
-              : "scale(1) rotateX(0deg)",
-          transition: "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-          transformOrigin: "bottom",
-        }}
-      >
-        <div
-          className="absolute top-0 left-0 w-full h-full bg-[#1D1F2F] rounded-[1%] overflow-hidden transition-all duration-150 ease-out"
-          style={{
-            transform:
-              current === index
-                ? "translate3d(calc(var(--x) / 30), calc(var(--y) / 30), 0)"
-                : "none",
-          }}
-        >
-          {/* Fix: Replace img with Next.js Image */}
-          <Image
-            className="absolute inset-0 object-cover opacity-100 transition-opacity duration-600 ease-in-out"
-            style={{
-              opacity: current === index ? 1 : 0.5,
-            }}
-            alt={title}
-            src={src}
-            fill // ← Use fill instead of width/height for absolute positioning
-            sizes="(max-width: 768px) 100vw, 70vmin"
-          />
-          {current === index && (
-            <div className="absolute inset-0 bg-black/30 transition-all duration-1000 z-10" />
-          )}
-        </div>
-
-        <article
-          className={`relative p-[4vmin] transition-opacity duration-1000 ease-in-out z-20 ${
-            current === index ? "opacity-100 visible" : "opacity-0 invisible"
-          }`}
-        >
-          <h2 className="text-lg md:text-2xl lg:text-4xl font-semibold relative">
-            {title}
-          </h2>
-          <div className="flex justify-center">
-            <button className="mt-6 px-4 py-2 w-fit mx-auto sm:text-sm text-black bg-white h-12 border border-transparent text-xs flex justify-center items-center rounded-2xl hover:shadow-lg transition duration-200 shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
-              {button}
-            </button>
+    <li
+      ref={slideRef}
+      className="flex-shrink-0 w-full px-4 transition-all duration-500"
+      onClick={() => handleSlideClick(index)}
+      style={{
+        opacity: current === index ? 1 : 0.5,
+        transform: current === index ? "scale(1)" : "scale(0.95)",
+      }}
+    >
+      {/* Single Card */}
+      <div className="max-w-2xl mx-auto">
+        <div className="group relative bg-white rounded-xl shadow-[0_3px_15px_rgba(0,0,0,0.08)] overflow-hidden transition-transform duration-300 hover:-translate-y-2">
+          {/* Image */}
+          <div className="relative w-full h-72 overflow-hidden">
+            <Image
+              src={card.img}
+              alt={card.title}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              quality={90}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
           </div>
-        </article>
-      </li>
-    </div>
+
+          {/* Content */}
+          <div className="p-8 flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              {card.icon}
+              <span className="uppercase tracking-wide text-sm text-[#004348] font-medium">
+                Professional Event
+              </span>
+            </div>
+            <h2 className="text-2xl font-semibold">{card.title}</h2>
+            <p className="text-gray-600 leading-relaxed text-base">
+              {card.description}
+            </p>
+          </div>
+        </div>
+      </div>
+    </li>
   );
 };
 
@@ -134,33 +78,39 @@ const CarouselControl = ({
 }: CarouselControlProps) => {
   return (
     <button
-      className={`w-10 h-10 flex items-center mx-2 justify-center bg-neutral-200 dark:bg-neutral-800 border-3 border-transparent rounded-full focus:border-[#6D64F7] focus:outline-none hover:-translate-y-0.5 active:translate-y-0.5 transition duration-200 ${
-        type === "previous" ? "rotate-180" : ""
-      }`}
+      className={`w-12 h-12 flex items-center mx-2 justify-center 
+        bg-white dark:bg-neutral-800 
+        border border-gray-200 dark:border-neutral-700
+        rounded-full 
+        shadow-md hover:shadow-lg
+        focus:ring-2 focus:ring-[#004348] focus:outline-none 
+        hover:-translate-y-1 active:translate-y-0 
+        transition-all duration-200 
+        ${type === "previous" ? "rotate-180" : ""}`}
       title={title}
       onClick={handleClick}
     >
-      <IconArrowNarrowRight className="text-neutral-600 dark:text-neutral-200" />
+      <IconArrowNarrowRight className="text-[#004348] dark:text-neutral-200" />
     </button>
   );
 };
 
 interface CarouselProps {
-  slides: SlideData[];
+  cards: CardData[];
 }
 
-export default function Carousel({ slides }: CarouselProps) {
+export default function Carousel({ cards }: CarouselProps) {
   const [current, setCurrent] = useState(0);
 
   const handlePreviousClick = useCallback(() => {
     const previous = current - 1;
-    setCurrent(previous < 0 ? slides.length - 1 : previous);
-  }, [current, slides.length]);
+    setCurrent(previous < 0 ? cards.length - 1 : previous);
+  }, [current, cards.length]);
 
   const handleNextClick = useCallback(() => {
     const next = current + 1;
-    setCurrent(next === slides.length ? 0 : next);
-  }, [current, slides.length]);
+    setCurrent(next === cards.length ? 0 : next);
+  }, [current, cards.length]);
 
   const handleSlideClick = useCallback(
     (index: number) => {
@@ -175,19 +125,19 @@ export default function Carousel({ slides }: CarouselProps) {
 
   return (
     <div
-      className="relative w-[70vmin] h-[70vmin] mx-auto"
+      className="relative w-full mx-auto overflow-hidden"
       aria-labelledby={`carousel-heading-${id}`}
     >
       <ul
-        className="absolute flex mx-[-4vmin] transition-transform duration-1000 ease-in-out"
+        className="flex transition-transform duration-700 ease-in-out"
         style={{
-          transform: `translateX(-${current * (100 / slides.length)}%)`,
+          transform: `translateX(-${current * 100}%)`,
         }}
       >
-        {slides.map((slide, index) => (
+        {cards.map((card, index) => (
           <Slide
-            key={index}
-            slide={slide}
+            key={card.id}
+            card={card} // ✅ Pass single card
             index={index}
             current={current}
             handleSlideClick={handleSlideClick}
@@ -195,7 +145,8 @@ export default function Carousel({ slides }: CarouselProps) {
         ))}
       </ul>
 
-      <div className="absolute flex justify-center w-full top-[calc(100%+1rem)]">
+      {/* Navigation buttons */}
+      <div className="flex justify-center w-full mt-12">
         <CarouselControl
           type="previous"
           title="Go to previous slide"
@@ -207,6 +158,22 @@ export default function Carousel({ slides }: CarouselProps) {
           title="Go to next slide"
           handleClick={handleNextClick}
         />
+      </div>
+
+      {/* Slide indicators (dots) */}
+      <div className="flex justify-center gap-2 mt-6">
+        {cards.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrent(index)}
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              current === index
+                ? "bg-[#004348] w-8"
+                : "bg-gray-300 hover:bg-gray-400"
+            }`}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
       </div>
     </div>
   );

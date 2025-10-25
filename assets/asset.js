@@ -23,6 +23,12 @@ import green_area from "./green_area.png";
 import fixed_desk from "./fixed_desk.png";
 import common_area from "./common_area.png";
 import event_space_area from "./event_space_area.png";
+import meeting_pitch from "./meeting_pitch.png";
+import codekids from "./codekids.png";
+import digital_event from "./digital_event.png";
+import recruit from "./recruit.png";
+import featured_event_1 from "./featured_event_1.png";
+import featured_event_2 from "./featured_event_2.png";
 
 
 
@@ -117,6 +123,12 @@ export const assets = {
   green_area,
   fixed_desk,
   common_area,
-  event_space_area
+  event_space_area,
+  meeting_pitch,
+  codekids,
+  digital_event,
+  recruit,
+  featured_event_1,
+  featured_event_2
 
 }

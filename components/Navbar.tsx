@@ -114,7 +114,7 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-[100] bg-white shadow-sm transition-transform duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-[300] bg-white shadow-sm transition-transform duration-300 ${
           isVisible ? "translate-y-0" : "-translate-y-full"
         }`}
       >
@@ -258,6 +258,7 @@ const Navbar = () => {
           </nav>
         </div>
 
+        {/* Gradient wave */}
         <div className="gradient-wave md:h-3 h-2 w-full" />
       </nav>
 

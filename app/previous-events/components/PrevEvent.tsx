@@ -1,97 +1,118 @@
+import { assets } from "@/assets/asset";
+import Carousel from "@/components/ui/carousel";
+import Image from "next/image";
 import React from "react";
+import {
+  HiLightBulb,
+  HiOutlineRocketLaunch,
+  HiOutlineUserGroup,
+  HiOutlinePresentationChartLine,
+} from "react-icons/hi2";
 
 const PrevEvent = () => {
   const cards = [
     {
       id: 1,
-      icon: "dart_icon",
+      icon: <HiOutlineUserGroup className="w-8 h-8 text-[#004348]" />,
       title: "Training Programs & Skill Development",
-      img: "IMG_1",
+      img: assets.codekids,
       description:
-        "Transform your space into a dynamic learning environment forprofessional development sessions and hands-on skill workshops,complete with all necessary equipment for interactivee xperiences.",
+        "Transform your space into a dynamic learning hub for professional development and interactive workshops. Our rooms are equipped to inspire engagement and growth.",
     },
     {
       id: 2,
-      icon: "rocket_icon",
+      icon: <HiOutlineRocketLaunch className="w-8 h-8 text-[#004348]" />,
       title: "Recruitment & Candidate Interviews",
-      img: "IMG_2",
+      img: assets.recruit,
       description:
-        "Create lasting first impressions by conducting interviews and hiring events in our sophisticated professional setting, ensuring a premium experience for potential candidates.",
+        "Leave a lasting impression with interviews and recruitment sessions in a polished, modern setting designed to highlight your brand professionalism.",
     },
     {
       id: 3,
-      icon: "bulb_icon",
+      icon: <HiLightBulb className="w-8 h-8 text-[#004348]" />,
       title: "Digital Events & Online Conferences",
-      img: "IMG_3",
+      img: assets.digital_event,
       description:
-        "Leverage our advanced video conferencing technology to seamlessly host virtual meetings, online seminars, and hybrid events that connect global participants.",
+        "Host seamless virtual or hybrid events using top-tier conferencing technology. Connect participants from across the world effortlessly and dynamically.",
     },
     {
       id: 4,
-      icon: "brain_icon",
+      icon: (
+        <HiOutlinePresentationChartLine className="w-8 h-8 text-[#004348]" />
+      ),
       title: "Business Pitches & Client Showcases",
-      img: "IMG_4",
+      img: assets.meeting_pitch,
       description:
-        "Make a powerful impact on clients and investors with our premium environment designed to support compelling presentations and seamless professional communication.",
+        "Deliver compelling presentations that captivate clients and investors. Designed for clarity, focus, and premium professional impact.",
     },
   ];
 
   return (
-    <div className="">
-      <div className="space-y-4">
-        {/* Previous and Upcoming events */}
-        <div className="border border-black py-8 space-y-4 text- bg-[#004348] text-white text-center">
-          <h1 className="text-4xl font-bold ">Previous and Upcoming events</h1>
-          <p className="text-2xl">
-            Discover the Multiple Applications of Our Conference Spaces
-          </p>
-        </div>
+    <section className="bg-[#f9fafb] text-gray-800 py-10">
+      {/* Hero */}
+      <header className="text-center space-y-4 lg:mb-14">
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[#004348]">
+          Previous and Upcoming Events
+        </h1>
+        <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          Discover how our multifunctional conference spaces bring every idea,
+          meeting, and collaboration to life through thoughtful design.
+        </p>
+      </header>
 
-        {/* text content title */}
-        <div className="text-center border border-black w-full max-w-7xl  mx-auto py-4 ">
-          <p className="text-2xl">
-            Our conference facilities offer incredible flexibility and can serve
-            multiple functions beyond conventional business meetings, providing
-            the perfect environment for various professional activities.
-          </p>
-        </div>
-
-        {/* Grid_cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-7xl mx-auto md:pb-8  ">
-          {/* card_1 */}
-          {cards.map((item, index) => (
-            <div key={index} className="border border-black  p-8 space-y-4 ">
-              <div className="border border-black h-15 w-20 flex justify-center items-center">
-                <i>{item.icon}</i>
-              </div>
-              <div className="border border-black">
-                <h2 className="text-3xl text-center">{item.title}</h2>
-              </div>
-              <div className="border-3 border-green-500 md:h-40 h-30 flex justify-center items-center ">
-                <p>{item.img}</p>
-              </div>
-              <div className="border border-black">
-                <p className="text-2xl leading-[1.7]">{item.description}</p>
-              </div>
-            </div>
-          ))}
-          {/* end */}
-        </div>
-
-        {/* Previous and Upcoming events */}
-        <div className="border border-black py-8 space-y-4 text- bg-[#004348] text-white text-center">
-          <h1 className="text-4xl font-bold ">
-            Flexible Spaces for Every Occasion
-          </h1>
-          <p className="text-2xl md:max-w-6xl mx-auto">
-            Whether you are hosting intimate team discussions or large-scale
-            presentations, our versatile meeting rooms adapt to your specific
-            needs with professional-grade facilities and modern amenities.
-          </p>
-        </div>
-        {/* end */}
+      {/* Mobile & Tablet: Carousel */}
+      <div className="block lg:hidden relative w-full py-12">
+        <Carousel cards={cards} />
       </div>
-    </div>
+
+      {/* Desktop: Grid 2x2 */}
+      <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 gap-10 max-w-7xl mx-auto px-4">
+        {cards.map((item) => (
+          <div
+            key={item.id}
+            className="group relative bg-white rounded-xl shadow-[0_3px_15px_rgba(0,0,0,0.08)] overflow-hidden transition-transform duration-300 hover:-translate-y-2"
+          >
+            {/* Image */}
+            <div className="relative w-full h-72 overflow-hidden">
+              <Image
+                src={item.img}
+                alt={item.title}
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                quality={90}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
+            </div>
+
+            {/* Content */}
+            <div className="p-8 flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                {item.icon}
+                <span className="uppercase tracking-wide text-sm text-[#004348] font-medium">
+                  Professional Event
+                </span>
+              </div>
+              <h2 className="text-2xl font-semibold">{item.title}</h2>
+              <p className="text-gray-600 leading-relaxed text-base">
+                {item.description}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Closing section */}
+      <footer className="lg:mt-16 text-center space-y-6">
+        <h2 className="text-3xl md:text-4xl font-semibold text-[#004348]">
+          Spaces That Adapt to You
+        </h2>
+        <p className="max-w-4xl mx-auto text-lg md:text-xl text-gray-600 leading-relaxed">
+          From intimate team sessions to large-scale presentations, our
+          configurable spaces support innovation, collaboration, and success —
+          all with quiet elegance.
+        </p>
+      </footer>
+    </section>
   );
 };
 

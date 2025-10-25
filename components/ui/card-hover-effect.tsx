@@ -1,14 +1,38 @@
-'use client'
+"use client";
 import { cn } from "@/lib/utils";
-import { AnimatePresence, motion } from "motion/react";
-
+import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
+import {
+  WifiIcon,
+  BeakerIcon,
+  SparklesIcon,
+  CloudIcon,
+  DeviceTabletIcon,
+  WrenchScrewdriverIcon,
+  MapPinIcon,
+  UsersIcon,
+  ShieldCheckIcon,
+} from "@heroicons/react/24/outline";
+
+const iconMap: Record<string, React.ElementType> = {
+  WIFI_ICON: WifiIcon,
+  Coffee_ICON: BeakerIcon,
+  WC_ICON: SparklesIcon,
+  SNOWFLAKE_ICON: CloudIcon,
+  LAPTOP_ICON: DeviceTabletIcon,
+  TUKUL_ICON: WrenchScrewdriverIcon,
+  LOCATION_ICON: MapPinIcon,
+  COMMUNITY_ICON: UsersIcon,
+  SECURITY_ICON: ShieldCheckIcon,
+};
 
 export const HoverEffect = ({
   items,
   className,
 }: {
   items: {
+    id: number;
+    icon?: string;
     title: string;
     description: string;
     link: string;
@@ -20,41 +44,58 @@ export const HoverEffect = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3  py-10",
+        "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 py-10 px-2 sm:px-4",
         className
       )}
     >
-      {items.map((item, idx) => (
-        <a
-          href={item?.link}
-          key={item?.link}
-          className="relative group  block p-2 h-full w-full"
-          onMouseEnter={() => setHoveredIndex(idx)}
-          onMouseLeave={() => setHoveredIndex(null)}
-        >
-          <AnimatePresence>
-            {hoveredIndex === idx && (
-              <motion.span
-                className="absolute inset-0 h-full w-full bg-neutral-200 dark:bg-slate-800/[0.8] block  rounded-3xl"
-                layoutId="hoverBackground"
-                initial={{ opacity: 0 }}
-                animate={{
-                  opacity: 1,
-                  transition: { duration: 0.15 },
-                }}
-                exit={{
-                  opacity: 0,
-                  transition: { duration: 0.15, delay: 0.2 },
-                }}
-              />
-            )}
-          </AnimatePresence>
-          <Card>
-            <CardTitle>{item.title}</CardTitle>
-            <CardDescription>{item.description}</CardDescription>
-          </Card>
-        </a>
-      ))}
+      {items.map((item, idx) => {
+        const IconComponent = item.icon ? iconMap[item.icon] : WifiIcon;
+        return (
+          <a
+            href={item.link}
+            key={item.id}
+            className="relative block h-full w-full group"
+            onMouseEnter={() => setHoveredIndex(idx)}
+            onMouseLeave={() => setHoveredIndex(null)}
+          >
+            {/* --- Hover Background (DEFAULT COLOR) --- */}
+            <AnimatePresence>
+              {hoveredIndex === idx && (
+                <motion.span
+                  layoutId="hoverBackground"
+                  className="absolute inset-0 h-full w-full rounded-3xl 
+                             bg-gray-800/40"
+                  initial={{ opacity: 0 }}
+                  animate={{
+                    opacity: 1,
+                    transition: { duration: 2, ease: "easeOut" },
+                  }}
+                  exit={{
+                    opacity: 0,
+                    transition: { duration: 2, ease: "easeInOut" },
+                  }}
+                />
+              )}
+            </AnimatePresence>
+
+            {/* --- CARD UI PUTIH CLEAN --- */}
+            <Card>
+              <div className="relative z-10 flex flex-col items-center text-center space-y-4">
+                <div
+                  className="w-14 h-14 flex items-center justify-center rounded-xl 
+                             bg-sky-200 text-sky-700 
+                             group-hover:bg-sky-500 group-hover:text-white 
+                             transition-colors duration-300"
+                >
+                  <IconComponent className="w-7 h-7" />
+                </div>
+                <CardTitle>{item.title}</CardTitle>
+                <CardDescription>{item.description}</CardDescription>
+              </div>
+            </Card>
+          </a>
+        );
+      })}
     </div>
   );
 };
@@ -65,48 +106,49 @@ export const Card = ({
 }: {
   className?: string;
   children: React.ReactNode;
-}) => {
-  return (
-    <div
-      className={cn(
-        "rounded-2xl h-full w-full p-4 overflow-hidden bg-black border border-transparent dark:border-white/[0.2] group-hover:border-slate-700 relative z-20",
-        className
-      )}
-    >
-      <div className="relative z-50">
-        <div className="p-4">{children}</div>
-      </div>
-    </div>
-  );
-};
+}) => (
+  <div
+    className={cn(
+      "rounded-3xl h-full w-full p-6 relative overflow-hidden",
+      "bg-white border border-gray-100 text-gray-900",
+      "transition-transform duration-500 hover:-translate-y-1 shadow-sm hover:shadow-xl",
+      className
+    )}
+  >
+    {children}
+  </div>
+);
+
 export const CardTitle = ({
   className,
   children,
 }: {
   className?: string;
   children: React.ReactNode;
-}) => {
-  return (
-    <h4 className={cn("text-zinc-100 font-bold tracking-wide mt-4", className)}>
-      {children}
-    </h4>
-  );
-};
+}) => (
+  <h4
+    className={cn(
+      "text-lg sm:text-xl md:text-2xl font-semibold tracking-tight",
+      className
+    )}
+  >
+    {children}
+  </h4>
+);
+
 export const CardDescription = ({
   className,
   children,
 }: {
   className?: string;
   children: React.ReactNode;
-}) => {
-  return (
-    <p
-      className={cn(
-        "mt-8 text-zinc-400 tracking-wide leading-relaxed text-sm",
-        className
-      )}
-    >
-      {children}
-    </p>
-  );
-};
+}) => (
+  <p
+    className={cn(
+      "text-gray-600 text-sm sm:text-base leading-relaxed max-w-xs mx-auto",
+      className
+    )}
+  >
+    {children}
+  </p>
+);
