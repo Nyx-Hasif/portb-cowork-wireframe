@@ -13,7 +13,7 @@ const Hero = ({title,imagePath} : HeroProps) => {
     <div className="min-h-auto">
       {/* gambar background */}
       {/* Fixed Height 500px, Full Width */}
-      <div className="w-full lg:h-[700px] md:h-[400px] h-[300px]  relative">
+      <div className="w-full lg:h-[700px] md:h-[400px] h-[300px] xl:-mt-[30px] md:-mt-[20px] -mt-[10px]  relative">
         {/* Layer 1 (Bottom)  */}
         <Image
           src={imagePath}

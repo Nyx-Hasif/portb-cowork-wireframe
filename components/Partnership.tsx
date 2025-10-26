@@ -162,7 +162,7 @@ const Partnership = () => {
             }
           }
           .marquee-track:hover {
-            animation-play-state: paused;
+            animation-play-state: unpaused;
           }
           @media (prefers-reduced-motion: reduce) {
             .marquee-track {

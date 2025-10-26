@@ -90,7 +90,7 @@ const Footer = () => {
         {/* footer bottom */}
         <div className="flex flex-col md:flex-row justify-between items-center mt-10 space-y-4 md:space-y-0 text-base md:text-lg text-gray-600 dark:text-gray-400">
           <p>© 2025 PortB. All rights reserved.</p>
-          <div className="flex gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {["Facebook", "TikTok", "Instagram", "Threads"].map((item) => (
               <a
                 key={item}
@@ -102,6 +102,7 @@ const Footer = () => {
             ))}
           </div>
         </div>
+        {/* end */}
       </div>
     </footer>
   );

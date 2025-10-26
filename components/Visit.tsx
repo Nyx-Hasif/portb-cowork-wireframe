@@ -101,7 +101,6 @@ const Visit = () => {
                   sizes="(max-width: 768px) 100vw, 800px"
                   className="w-full h-full object-cover bg-white"
                   quality={100}
-                  priority
                 />
               </CardFlipContent>
             </CardFlipFront>

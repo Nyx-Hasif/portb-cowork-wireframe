@@ -11,7 +11,7 @@ export function ImagesSliderDemo() {
   ];
   return (
     <ImagesSlider
-      className="lg:h-[90vh] md:h-[400px] h-[300px]  md:-mt-[20px]"
+      className="lg:h-[90vh] md:h-[400px] h-[300px] xl:-mt-[30px] md:-mt-[20px] -mt-[10px] "
       images={images}
     >
       <motion.div

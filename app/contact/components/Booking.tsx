@@ -1,184 +1,195 @@
-'use client'
-import React, { useState } from 'react'
+"use client";
+import React, { useState } from "react";
+import { motion, Variants, Easing } from "framer-motion";
+
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (i = 1) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.15,
+      duration: 0.5,
+      ease: [0.25, 0.46, 0.45, 0.94] as Easing,
+    },
+  }),
+};
 
 const Booking = () => {
-
-    const [selectedValue, setSelectedValue] = useState('');
+  const [selectedValue, setSelectedValue] = useState("");
 
   return (
-    <div className="">
-      <div className="p-4 border border-black">
-        {/* GRID CARDS */}
-        <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] w-full max-w-7xl mx-auto gap-4">
+    <section className="bg-[#fafafa] text-gray-800 py-20 px-6">
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.4 }}
+        className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-12"
+      >
+        {/* ---------- FORM ---------- */}
+        <motion.form
+          initial="hidden"
+          whileInView="visible"
+          variants={fadeUp}
+          className="bg-white border border-gray-200 rounded-2xl p-10 space-y-8 shadow-md hover:shadow-lg transition-shadow duration-300"
+        >
+          <motion.header variants={fadeUp} custom={0} className="space-y-2">
+            <h2 className="text-3xl md:text-4xl font-semibold text-gray-900">
+              Book a Tour or Get Information
+            </h2>
+            <p className="text-gray-500 text-base leading-relaxed">
+              Fill out the form below. We’ll respond within 24 hours.
+            </p>
+          </motion.header>
 
-          {/* form */}
-          <form
-            action=""
-            className="border border-black h-[max-content]   space-y-4 p-4"
+          {/* Inputs */}
+          <motion.div
+            variants={fadeUp}
+            custom={1}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
           >
-            {/* text title */}
-            <div className="border border-black md:space-y-4 space-y-2">
-              <h2 className='text-2xl font-medium'>Book a Tour or Get Information</h2>
-              <p className='text-xl'>
-                Fill out the form below and we will get back to you within 24
-                hours.
-              </p>
-            </div>
+            {[
+              {
+                label: "Name",
+                type: "text",
+                id: "name",
+                placeholder: "Your name",
+              },
+              {
+                label: "Email",
+                type: "email",
+                id: "email",
+                placeholder: "you@email.com",
+              },
+              {
+                label: "Phone Number",
+                type: "tel",
+                id: "phone",
+                placeholder: "+6014 329 8981",
+              },
+              {
+                label: "Company / Organization",
+                type: "text",
+                id: "company",
+                placeholder: "PortB Cowork",
+              },
+            ].map((f, i) => (
+              <motion.div key={f.id} variants={fadeUp} custom={i + 2}>
+                <label
+                  htmlFor={f.id}
+                  className="block font-medium text-sm mb-2"
+                >
+                  {f.label}
+                </label>
+                <input
+                  type={f.type}
+                  id={f.id}
+                  placeholder={f.placeholder}
+                  className="w-full rounded-md border border-gray-300 py-2.5 px-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-700 bg-white"
+                />
+              </motion.div>
+            ))}
+          </motion.div>
 
-            {/* container inputs */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* fullname */}
-              <div className="border border-black space-x-4">
-                <label htmlFor="name" className="block mb-2 font-medium">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  id="name"
-                  className="border border-black w-full"
-                />
-              </div>
-              {/* email */}
-              <div className="border border-black space-x-4">
-                <label htmlFor="email" className="block mb-2 font-medium">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  id="email"
-                  className="border border-black w-full"
-                />
-              </div>
-              {/* phone number */}
-              <div className="border border-black space-x-4">
-                <label htmlFor="email" className="block mb-2 font-medium">
-                  Phone Number
-                </label>
-                <input
-                  type="number"
-                  name="number"
-                  id="number"
-                  className="border border-black w-full"
-                />
-              </div>
-              {/* company/organization */}
-              <div className="border border-black space-x-4">
-                <label htmlFor="name" className="block mb-2 font-medium">
-                  Company/Organization
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  id="name"
-                  className="border border-black w-full"
-                />
-              </div>
-            </div>
-
-            {/* options */}
+          {/* Select */}
+          <motion.div variants={fadeUp} custom={3}>
+            <label htmlFor="type" className="block font-medium text-sm mb-2">
+              Choose a Space
+            </label>
             <select
+              id="type"
               value={selectedValue}
               onChange={(e) => setSelectedValue(e.target.value)}
-              className="border p-2"
+              className="w-full rounded-md border border-gray-300 py-2.5 px-3 text-sm bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-700"
             >
               <option value="">Select an option</option>
-              <option value="option1">meeting room</option>
-              <option value="option2">fixed desk</option>
-              <option value="option3">common room</option>
-              <option value="option3">event space</option>
+              <option value="meeting-room">Meeting Room</option>
+              <option value="fixed-desk">Fixed Desk</option>
+              <option value="common-room">Common Room</option>
+              <option value="event-space">Event Space</option>
             </select>
+          </motion.div>
 
-            {/* text message */}
-            <div className="border border-black ">
-              <label htmlFor="message" className="block mb-2 font-medium">
-                Message
-              </label>
-              <textarea
-                name="message"
-                id="message"
-                rows={5}
-                placeholder="Enter your message..."
-                className="w-full border border-gray-300 rounded p-3 focus:outline-none focus:border-blue-500"
-              ></textarea>
-            </div>
+          {/* Message */}
+          <motion.div variants={fadeUp} custom={4}>
+            <label htmlFor="message" className="block font-medium text-sm mb-2">
+              Message
+            </label>
+            <textarea
+              id="message"
+              rows={4}
+              placeholder="Write your message here..."
+              className="w-full rounded-md border border-gray-300 py-3 px-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-700 bg-white"
+            ></textarea>
+          </motion.div>
 
-            <div className="border border-black flex flex-col justify-center items-center gap-4">
-              <p>
-                Subscribe to our newsletter for updates on events and community
-                news
-              </p>
-              <button className="border border-black py-2 px-4 w-full">
-                Send Message
-              </button>
-            </div>
-          </form>
+          {/* CTA */}
+          <motion.div
+            variants={fadeUp}
+            custom={5}
+            className="border-t border-gray-100 pt-6 flex flex-col md:flex-row items-center justify-between gap-4"
+          >
+            <p className="text-gray-500 text-sm text-center md:text-left">
+              Subscribe to our newsletter for updates and news.
+            </p>
+            <button
+              type="submit"
+              className="bg-gray-900 text-white px-8 py-2.5 rounded-md font-medium hover:bg-gray-700 transition-colors w-full md:w-auto shadow-sm hover:shadow-md"
+            >
+              Send Message
+            </button>
+          </motion.div>
+        </motion.form>
 
-          {/* Container for cards in Column */}
-          <div className="flex flex-col gap-4">
-            {/* Contact information */}
-            <div className="border border-black  p-4 space-y-4">
-              {/* text */}
-              <div className="border border-black">
-                <h1 className="text-4xl font-medium">Contact Information</h1>
-              </div>
+        {/* ---------- CONTACT INFO ---------- */}
+        <motion.aside
+          initial="hidden"
+          whileInView="visible"
+          variants={fadeUp}
+          custom={2}
+          className="bg-white border border-gray-200 rounded-2xl h-max p-8 space-y-8 shadow-md hover:shadow-lg transition-shadow duration-300"
+        >
+          <header className="border-b border-gray-100 pb-5">
+            <h2 className="text-3xl font-semibold text-gray-900">
+              Contact Information
+            </h2>
+          </header>
 
-              {/* address */}
-              <div className="flex flex-row ">
-                <div className="border border-black p-6">
-                  <i>icon</i>
+          <div className="space-y-6">
+            {[
+              {
+                icon: "📍",
+                label: "Address",
+                value: "Siti Square, Kota Bharu",
+              },
+              { icon: "📞", label: "Phone", value: "+6014 329 8981" },
+              { icon: "✉️", label: "Email", value: "helloportb@gmail.com" },
+              {
+                icon: "⏰",
+                label: "Operating Hours",
+                value: "Sun – Thu (9 AM – 5 PM) • Sat (by request)",
+              },
+            ].map((c, i) => (
+              <motion.div
+                key={c.label}
+                variants={fadeUp}
+                custom={i + 3}
+                className="flex items-start gap-4 border-b last:border-none border-gray-100 pb-4"
+              >
+                <div className="text-2xl text-gray-500">{c.icon}</div>
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {c.label}
+                  </h3>
+                  <p className="text-gray-500 text-sm">{c.value}</p>
                 </div>
-                <div className="border border-black flex flex-col justify-center px-4 w-full ">
-                  <h1 className="text-2xl">Address</h1>
-                  <p className="text-xl">Siti Square,Kota Bharu</p>
-                </div>
-              </div>
-
-              {/* Phone */}
-              <div className="flex flex-row">
-                <div className="border border-black p-6">
-                  <i>icon</i>
-                </div>
-                <div className="border border-black flex flex-col justify-center px-4 w-full ">
-                  <h1 className="text-2xl">Phone</h1>
-                  <p className="text-xl">+6014 3298 981</p>
-                </div>
-              </div>
-
-              {/* Email*/}
-              <div className="flex flex-row">
-                <div className="border border-black p-6">
-                  <i>icon</i>
-                </div>
-                <div className="border border-black flex flex-col justify-center px-4 w-full ">
-                  <h1 className="text-2xl">Email</h1>
-                  <p className="text-xl">helloportb@gmail.com</p>
-                </div>
-              </div>
-
-              {/* Operating Hours */}
-              <div className="border border-black flex flex-col justify-center px-4 w-full">
-                <h1 className="text-2xl">Hours</h1>
-                <div className="text-xl grid grid-cols-[auto_1fr] gap-x-2 ">
-                  <span>Reception:</span>
-                  <div className="flex flex-col">
-                    <span className="font-bold">Sun-Thu 9AM-5PM</span>
-                    <span>Sat(by request)</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* map location */}
-            <div className="border border-black  h-100 flex flex-col justify-center items-center">
-              <p>MAP LOCATION</p>
-            </div>
+              </motion.div>
+            ))}
           </div>
-        </div>
-      </div>
-    </div>
+        </motion.aside>
+      </motion.div>
+    </section>
   );
-}
+};
 
-export default Booking
+export default Booking;
