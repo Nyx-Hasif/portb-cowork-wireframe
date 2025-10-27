@@ -3,6 +3,7 @@ import React from "react";
 import Image, { type StaticImageData } from "next/image";
 import { motion } from "framer-motion";
 import { assets } from "@/assets/asset";
+import BackgroundMeteors from "./ui/backgroundmeteors";
 
 type Section = {
   id: number;
@@ -18,9 +19,9 @@ const MissionVision = () => {
       id: 1,
       title: "Mission",
       description:
-        "Transform the way people in Kota Bharu work and grow by turning ordinary space into a place that works for you.",
+        "Transform the way people in Kota Bharu work and grow by turning ordinary space into a place that works for you.",
       image: assets.our_mission,
-      duotone: { highlight: "#EEead0", shadow: "#CA3D33" },
+      duotone: { highlight: "#ca3d33", shadow: "#ca3d33" },
     },
     {
       id: 2,
@@ -28,28 +29,21 @@ const MissionVision = () => {
       description:
         "Inspire entrepreneurs, freelancers, and creators to thrive, collaborate, and build meaningful connections that spark innovation.",
       image: assets.our_vision,
-      duotone: { highlight: "#2887BF", shadow: "#242659" },
+      duotone: { highlight: "#2887BF", shadow: "#2887BF" },
     },
     {
       id: 3,
       title: "Values",
       description:
-        "We believe in adaptability, community, and authenticity — spaces and solutions that grow with your needs.",
+        "We believe in adaptability, community, and authenticity — spaces and solutions that grow with your needs.",
       image: assets.our_values,
-      duotone: { highlight: "#02AA6D", shadow: "#251863" },
+      duotone: { highlight: "#02AA6D", shadow: "#02AA6D" },
     },
   ];
 
   return (
-    <section className="relative overflow-hidden py-24 bg-[#fafafa] dark:bg-gray-900">
-      {/* subtle ambience */}
-      <div className="absolute inset-0">
-        <div className="absolute -top-20 -left-32 h-96 w-96 bg-pink-300/30 rounded-full blur-3xl" />
-        <div className="absolute top-40 right-0 h-96 w-96 bg-teal-300/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-80 w-[40rem] bg-indigo-300/30 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-10 md:space-y-24">
+    <BackgroundMeteors>
+      <div className="relative z-10 h-auto max-w-6xl mx-auto px-6 md:px-10 py-15  md:space-y-24">
         {sections.map((item, i) => (
           <motion.div
             key={item.id}
@@ -72,6 +66,7 @@ const MissionVision = () => {
                   alt={item.title}
                   fill
                   quality={100}
+                  draggable={false}
                   className="object-cover object-center grayscale hover:grayscale-0 transition duration-700"
                 />
                 <div
@@ -85,7 +80,7 @@ const MissionVision = () => {
             </motion.div>
 
             {/* text side */}
-            <div className="md:w-1/2 w-full flex flex-col justify-center min-h-[350px] md:min-h-[500px] space-y-6 text-center md:text-left">
+            <div className="md:w-1/2 w-full flex flex-col justify-center min-h-[300px] md:min-h-[500px] space-y-6 text-center md:text-left">
               <h3
                 className="text-5xl md:text-6xl font-extrabold tracking-tight"
                 style={{ color: item.duotone.shadow }}
@@ -116,7 +111,7 @@ const MissionVision = () => {
           </motion.div>
         ))}
       </div>
-    </section>
+    </BackgroundMeteors>
   );
 };
 

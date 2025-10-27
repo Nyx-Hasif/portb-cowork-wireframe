@@ -19,7 +19,7 @@ const Booking = () => {
   const [selectedValue, setSelectedValue] = useState("");
 
   return (
-    <section className="bg-[#fafafa] text-gray-800 py-20 px-6">
+    <section className="bg-[#fafafa] lg:min-h-screen text-gray-800 py-10 px-6">
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}

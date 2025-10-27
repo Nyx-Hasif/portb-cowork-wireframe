@@ -70,7 +70,7 @@ const Partnership = () => {
   ];
 
   return (
-    <section className="w-full bg-[#e9eef3] overflow-hidden py-20 text-gray-900">
+    <section className="w-full bg-[#e9eef3] overflow-hidden py-10 md:py-15 text-gray-900 ">
       {/* intro */}
       <div className="max-w-6xl mx-auto px-6 text-center space-y-4 mb-16">
         <motion.h2
@@ -140,6 +140,7 @@ const Partnership = () => {
                 width={160}
                 height={80}
                 quality={100}
+                draggable={false}
                 className="object-contain w-[140px] h-[80px] sm:w-[160px] sm:h-[90px] md:w-[180px] md:h-[100px] opacity-90 hover:opacity-100 transition-opacity"
               />
             </div>

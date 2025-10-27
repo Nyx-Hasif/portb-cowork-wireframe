@@ -2,7 +2,7 @@
 import { assets } from "@/assets/asset";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
 
 const Navbar = () => {
@@ -12,89 +12,42 @@ const Navbar = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
-  const toggleButtonRef = useRef<HTMLButtonElement>(null);
-
-  // ✅ Simple toggle for links (no preventDefault)
-  const closeMenu = () => {
-    setIsMenuOpen(false);
-    setMobileDropdown(null);
-  };
-
-  // ✅ Toggle for button only (with preventDefault)
-  const toggleMenuButton = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsMenuOpen((prev) => !prev);
-    setMobileDropdown(null);
-  };
-
-  const toggleMobileDropdown = (menu: string) => {
-    setMobileDropdown(mobileDropdown === menu ? null : menu);
-  };
-
-  // Handle scroll
+  // Scroll behavior
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
 
-      if (currentScrollY < lastScrollY || currentScrollY < 10) {
-        setIsVisible(true);
-      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsVisible(false);
-        setActiveDropdown(null);
+          if (currentScrollY < lastScrollY || currentScrollY < 50) {
+            setIsVisible(true);
+          } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+            setIsVisible(false);
+            setActiveDropdown(null);
+          }
+
+          setLastScrollY(currentScrollY);
+          ticking = false;
+        });
+        ticking = true;
       }
-
-      setLastScrollY(currentScrollY);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
-  // Click outside handler
-  useEffect(() => {
-    if (!isMenuOpen) return;
-
-    const handleClickOutside = (event: Event) => {
-      const target = event.target as Node;
-
-      if (toggleButtonRef.current?.contains(target)) {
-        return;
-      }
-
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(target)) {
-        setIsMenuOpen(false);
-        setMobileDropdown(null);
-      }
-    };
-
-    const timeoutId = setTimeout(() => {
-      document.addEventListener("mousedown", handleClickOutside);
-      document.addEventListener("touchstart", handleClickOutside, {
-        passive: true,
-      });
-    }, 100);
-
-    return () => {
-      clearTimeout(timeoutId);
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
-    };
-  }, [isMenuOpen]);
-
-  // Prevent body scroll
+  // Lock body scroll when mobile menu open
   useEffect(() => {
     if (isMenuOpen) {
       document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = "";
     }
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = "";
     };
   }, [isMenuOpen]);
 
@@ -111,194 +64,194 @@ const Navbar = () => {
     ],
   };
 
+  const toggleMobileMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+    setMobileDropdown(null);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMenuOpen(false);
+    setMobileDropdown(null);
+  };
+
+  const toggleMobileDropdown = (menu: string) => {
+    setMobileDropdown(mobileDropdown === menu ? null : menu);
+  };
+
   return (
     <>
-      <nav
-        className={`fixed top-0 left-0 right-0 z-[100] bg-white shadow-sm transition-transform duration-300 ${
+      {/* Main Navbar */}
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 bg-white shadow-sm transition-transform duration-300 ease-out ${
           isVisible ? "translate-y-0" : "-translate-y-full"
         }`}
+        style={{
+          willChange: "transform",
+          backfaceVisibility: "hidden",
+        }}
       >
-        <div className="px-6">
-          <nav className="flex justify-between h-auto items-center py-4">
-            <div>
+        <div className="mx-auto px-6">
+          <nav className="flex items-center justify-between py-4">
+            {/* Logo */}
+            <Link href="/" className="flex-shrink-0">
               <Image
                 src={assets.portb_logo}
-                alt="logo"
+                alt="PortB Cowork"
                 width={120}
-                height={120}
+                height={40}
                 quality={100}
                 priority
+                className="h-auto w-auto"
               />
-            </div>
+            </Link>
 
-            {/* Desktop menu */}
-            <div className="hidden md:flex items-center space-x-8 text-lg">
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-8 text-lg">
               <Link
                 href="/"
-                className="text-gray-800 hover:text-green-600 transition-colors"
+                className="text-gray-800 hover:text-green-600 transition-colors duration-200"
               >
                 Home
               </Link>
 
               {/* Packages Dropdown */}
               <div
-                className="relative group"
+                className="relative"
                 onMouseEnter={() => setActiveDropdown("packages")}
                 onMouseLeave={() => setActiveDropdown(null)}
               >
-                <button className="flex items-center gap-1 text-gray-800 hover:text-green-600 transition-colors py-2">
+                <button className="flex items-center gap-1 text-gray-800 hover:text-green-600 transition-colors duration-200">
                   Packages
                   <ChevronDown
-                    className={`h-4 w-4 transition-transform duration-200 ${
+                    className={`w-4 h-4 transition-transform duration-200 ${
                       activeDropdown === "packages" ? "rotate-180" : ""
                     }`}
                   />
                 </button>
 
-                <div
-                  className={`absolute top-full left-0 pt-2 transition-all duration-200 ${
-                    activeDropdown === "packages" ? "visible" : "invisible"
-                  }`}
-                >
-                  <div
-                    className={`w-56 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden transition-all duration-200 ${
-                      activeDropdown === "packages"
-                        ? "opacity-100 translate-y-0"
-                        : "opacity-0 -translate-y-2"
-                    }`}
-                  >
-                    <div className="py-2">
+                {activeDropdown === "packages" && (
+                  <div className="absolute top-full left-0 pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="min-w-[220px] bg-white rounded-lg shadow-xl border border-gray-100 py-2">
                       {menuItems.packages.map((item) => (
                         <Link
                           key={item.href}
                           href={item.href}
-                          className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-green-600 transition-colors"
+                          className="block px-4 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-green-600 transition-colors"
                         >
                           {item.label}
                         </Link>
                       ))}
                     </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Community Dropdown */}
               <div
-                className="relative group"
+                className="relative"
                 onMouseEnter={() => setActiveDropdown("community")}
                 onMouseLeave={() => setActiveDropdown(null)}
               >
-                <button className="flex items-center gap-1 text-gray-800 hover:text-green-600 transition-colors py-2">
+                <button className="flex items-center gap-1 text-gray-800 hover:text-green-600 transition-colors duration-200">
                   Community
                   <ChevronDown
-                    className={`h-4 w-4 transition-transform duration-200 ${
+                    className={`w-4 h-4 transition-transform duration-200 ${
                       activeDropdown === "community" ? "rotate-180" : ""
                     }`}
                   />
                 </button>
 
-                <div
-                  className={`absolute top-full left-0 pt-2 transition-all duration-200 ${
-                    activeDropdown === "community" ? "visible" : "invisible"
-                  }`}
-                >
-                  <div
-                    className={`w-56 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden transition-all duration-200 ${
-                      activeDropdown === "community"
-                        ? "opacity-100 translate-y-0"
-                        : "opacity-0 -translate-y-2"
-                    }`}
-                  >
-                    <div className="py-2">
+                {activeDropdown === "community" && (
+                  <div className="absolute top-full left-0 pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="min-w-[220px] bg-white rounded-lg shadow-xl border border-gray-100 py-2">
                       {menuItems.community.map((item) => (
                         <Link
                           key={item.href}
                           href={item.href}
-                          className="block px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-green-600 transition-colors"
+                          className="block px-4 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-green-600 transition-colors"
                         >
                           {item.label}
                         </Link>
                       ))}
                     </div>
                   </div>
-                </div>
+                )}
               </div>
 
               <Link
                 href="/contact"
-                className="text-gray-800 hover:text-green-600 transition-colors"
+                className="text-gray-800 hover:text-green-600 transition-colors duration-200"
               >
                 Contact us
               </Link>
             </div>
 
-            <div className="hidden md:flex">
+            {/* Desktop Admin Button */}
+            <div className="hidden md:block">
               <Link
                 href="/login"
-                className="bg-gray-900 text-white rounded-lg px-6 py-2 hover:bg-gray-800 transition-colors"
+                className="bg-gray-900 text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors duration-200"
               >
                 Admin
               </Link>
             </div>
 
-            {/* ✅ Mobile button - guna toggleMenuButton */}
+            {/* Mobile Menu Button */}
             <button
-              ref={toggleButtonRef}
-              className="md:hidden p-2 z-[110] touch-manipulation"
-              onClick={toggleMenuButton}
-              onTouchEnd={toggleMenuButton}
+              onClick={toggleMobileMenu}
+              className="md:hidden p-2 -mr-2 text-gray-800 hover:bg-gray-100 rounded-md transition-colors"
               aria-label="Toggle menu"
             >
               {isMenuOpen ? (
-                <X className="h-6 w-6 text-gray-800" />
+                <X className="w-6 h-6" />
               ) : (
-                <Menu className="h-6 w-6 text-gray-800" />
+                <Menu className="w-6 h-6" />
               )}
             </button>
           </nav>
         </div>
 
-        {/* Gradient wave */}
-        <div className="gradient-wave md:h-3 h-2 w-full" />
-      </nav>
+        {/* Gradient Wave */}
+        <div className="gradient-wave h-2 md:h-3 w-full" />
+      </header>
 
+      {/* Spacer */}
       <div className="h-[100px] md:h-[110px]" />
 
-      {/* Backdrop */}
+      {/* Mobile Menu Backdrop */}
       {isMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[80] md:hidden"
-          onClick={closeMenu}
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
+          onClick={closeMobileMenu}
         />
       )}
 
-      {/* Mobile menu */}
+      {/* Mobile Menu */}
       <div
-        ref={mobileMenuRef}
-        className={`md:hidden fixed top-[100px] left-0 right-0 bg-white border-t border-gray-100 shadow-lg transition-all duration-300 z-[90] ${
+        className={`fixed top-[100px] left-0 right-0 bg-white border-t shadow-lg z-40 md:hidden transition-all duration-300 ${
           isMenuOpen
             ? "max-h-screen opacity-100"
             : "max-h-0 opacity-0 overflow-hidden"
         }`}
       >
-        <div className="py-4 px-4 space-y-2 max-h-[calc(100vh-100px)] overflow-y-auto">
-          {/* ✅ Links use closeMenu (no preventDefault) */}
+        <nav className="px-4 py-4 space-y-1 max-h-[calc(100vh-100px)] overflow-y-auto">
           <Link
             href="/"
-            className="block py-2 text-gray-800 hover:text-green-600"
-            onClick={closeMenu}
+            onClick={closeMobileMenu}
+            className="block py-2.5 text-gray-800 hover:text-green-600 transition-colors"
           >
             Home
           </Link>
 
+          {/* Packages Mobile Dropdown */}
           <div>
             <button
-              className="flex items-center justify-between w-full py-2 text-gray-800 hover:text-green-600"
               onClick={() => toggleMobileDropdown("packages")}
+              className="flex items-center justify-between w-full py-2.5 text-gray-800 hover:text-green-600 transition-colors"
             >
               <span>Packages</span>
               <ChevronDown
-                className={`h-4 w-4 transition-transform duration-200 ${
+                className={`w-4 h-4 transition-transform duration-200 ${
                   mobileDropdown === "packages" ? "rotate-180" : ""
                 }`}
               />
@@ -308,13 +261,13 @@ const Navbar = () => {
                 mobileDropdown === "packages" ? "max-h-48" : "max-h-0"
               }`}
             >
-              <div className="pl-4 py-2 space-y-2">
+              <div className="pl-4 space-y-1 py-2">
                 {menuItems.packages.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="block py-2 text-gray-600 hover:text-green-600"
-                    onClick={closeMenu}
+                    onClick={closeMobileMenu}
+                    className="block py-2 text-gray-600 hover:text-green-600 transition-colors"
                   >
                     {item.label}
                   </Link>
@@ -323,14 +276,15 @@ const Navbar = () => {
             </div>
           </div>
 
+          {/* Community Mobile Dropdown */}
           <div>
             <button
-              className="flex items-center justify-between w-full py-2 text-gray-800 hover:text-green-600"
               onClick={() => toggleMobileDropdown("community")}
+              className="flex items-center justify-between w-full py-2.5 text-gray-800 hover:text-green-600 transition-colors"
             >
               <span>Community</span>
               <ChevronDown
-                className={`h-4 w-4 transition-transform duration-200 ${
+                className={`w-4 h-4 transition-transform duration-200 ${
                   mobileDropdown === "community" ? "rotate-180" : ""
                 }`}
               />
@@ -340,13 +294,13 @@ const Navbar = () => {
                 mobileDropdown === "community" ? "max-h-48" : "max-h-0"
               }`}
             >
-              <div className="pl-4 py-2 space-y-2">
+              <div className="pl-4 space-y-1 py-2">
                 {menuItems.community.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="block py-2 text-gray-600 hover:text-green-600"
-                    onClick={closeMenu}
+                    onClick={closeMobileMenu}
+                    className="block py-2 text-gray-600 hover:text-green-600 transition-colors"
                   >
                     {item.label}
                   </Link>
@@ -357,8 +311,8 @@ const Navbar = () => {
 
           <Link
             href="/contact"
-            className="block py-2 text-gray-800 hover:text-green-600"
-            onClick={closeMenu}
+            onClick={closeMobileMenu}
+            className="block py-2.5 text-gray-800 hover:text-green-600 transition-colors"
           >
             Contact us
           </Link>
@@ -366,13 +320,13 @@ const Navbar = () => {
           <div className="pt-4">
             <Link
               href="/login"
-              className="block w-full text-center bg-gray-900 text-white rounded-lg px-6 py-2 hover:bg-gray-800 transition-colors"
-              onClick={closeMenu}
+              onClick={closeMobileMenu}
+              className="block text-center bg-gray-900 text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
             >
               Admin
             </Link>
           </div>
-        </div>
+        </nav>
       </div>
     </>
   );

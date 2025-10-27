@@ -36,7 +36,7 @@ const WhyUs = () => {
   ];
 
   return (
-    <section className="py-16 px-4 md:px-10 bg-[#e9eef3]">
+    <section className="py-10 px-4 md:px-10 bg-[#e9eef3] ">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* ---------- Left side ---------- */}
         <div className="flex flex-col justify-center text-center md:text-left space-y-6">

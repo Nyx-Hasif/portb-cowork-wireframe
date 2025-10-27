@@ -9,7 +9,7 @@ export default function AppleCardsCarouselDemo() {
   ));
 
   return (
-    <div className="w-full h-full py-20 bg-[#e9eef3]">
+    <section id="next-section" className="w-full h-full py-10 bg-[#e9eef3] ">
       <motion.h2
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -19,7 +19,7 @@ export default function AppleCardsCarouselDemo() {
         PortB CoWorking Space
       </motion.h2>
       <Carousel items={cards} />
-    </div>
+    </section>
   );
 }
 
