@@ -5,14 +5,34 @@ import { ArrowUp } from "lucide-react";
 export default function ScrollToTopButton() {
   const [visible, setVisible] = useState(false);
 
-  useEffect(() => {
-    const toggleVisibility = () => {
-      if (window.scrollY > 400) setVisible(true);
-      else setVisible(false);
-    };
-    window.addEventListener("scroll", toggleVisibility);
-    return () => window.removeEventListener("scroll", toggleVisibility);
-  }, []);
+useEffect(() => {
+  const toggleVisibility = () => {
+    const body = document.body;
+    const html = document.documentElement;
+
+    // ✅ detect bila modal buka oleh mana-mana library
+    const modalOpen =
+      body.style.overflow === "hidden" ||
+      html.style.overflow === "hidden" ||
+      body.classList.contains("overflow-hidden");
+
+    if (modalOpen) {
+      setVisible(false);
+      return;
+    }
+
+    if (window.scrollY > 400) setVisible(true);
+    else setVisible(false);
+  };
+
+  window.addEventListener("scroll", toggleVisibility);
+  const interval = setInterval(toggleVisibility, 300); // fallback check
+
+  return () => {
+    window.removeEventListener("scroll", toggleVisibility);
+    clearInterval(interval);
+  };
+}, []);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
