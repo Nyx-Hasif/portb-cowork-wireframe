@@ -10,6 +10,7 @@ import {
   Microscope,
   Laptop,
 } from "lucide-react";
+import React from "react";
 
 const Partnership = () => {
   /** pillars */
@@ -69,8 +70,12 @@ const Partnership = () => {
     { image: assets.sme_logo, name: "SME" },
   ];
 
+  /** ✅ trigger animation only after mount to avoid SSR compression */
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
+
   return (
-    <section className="w-full bg-[#e9eef3] overflow-hidden py-10 md:py-15 text-gray-900 ">
+    <section className="w-full bg-[#e9eef3] overflow-hidden py-10 md:py-16 text-gray-900">
       {/* intro */}
       <div className="max-w-6xl mx-auto px-6 text-center space-y-4 mb-16">
         <motion.h2
@@ -102,8 +107,7 @@ const Partnership = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: idx * 0.05 }}
               whileHover={{ y: -5 }}
-              className="rounded-3xl bg-white p-8 flex flex-col justify-between shadow-sm border border-gray-100
-                         hover:shadow-md hover:border-sky-300 transition-all duration-300"
+              className="rounded-3xl bg-white p-8 flex flex-col justify-between shadow-sm border border-gray-100 hover:shadow-md hover:border-sky-300 transition-all duration-300"
             >
               <div className="flex items-center justify-center w-16 h-16 mb-6 rounded-xl bg-sky-100 text-sky-600">
                 <Icon className="w-8 h-8" />
@@ -128,7 +132,11 @@ const Partnership = () => {
 
       {/* === PARTNERS MARQUEE === */}
       <div className="relative w-full overflow-hidden bg-[#e9eef3] mt-20">
-        <div className="marquee-track flex shrink-0 items-center gap-10 will-change-transform">
+        <div
+          className={`marquee-track inline-flex items-center gap-10 ${
+            mounted ? "animate-scroll" : ""
+          }`}
+        >
           {[...partners, ...partners].map((p, i) => (
             <div
               key={i}
@@ -147,13 +155,8 @@ const Partnership = () => {
           ))}
         </div>
 
-        {/* keyframes */}
+        {/* styles */}
         <style jsx global>{`
-          .marquee-track {
-            width: max-content;
-            animation: scroll-loop 40s linear infinite;
-            will-change: transform;
-          }
           @keyframes scroll-loop {
             0% {
               transform: translateX(0);
@@ -162,11 +165,15 @@ const Partnership = () => {
               transform: translateX(-50%);
             }
           }
-          .marquee-track:hover {
-            animation-play-state: unpaused;
+          .marquee-track {
+            min-width: 200%;
+            will-change: transform;
+          }
+          .animate-scroll {
+            animation: scroll-loop 40s linear infinite;
           }
           @media (prefers-reduced-motion: reduce) {
-            .marquee-track {
+            .animate-scroll {
               animation: none;
             }
           }

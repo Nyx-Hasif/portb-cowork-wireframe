@@ -34,6 +34,7 @@ export const cards = [
             "✅High-Speed WiFi",
             "✅Natural Lightning",
             "✅Private entrance",
+            "✅Power Supply",
         ],
     },
     {
@@ -50,14 +51,14 @@ export const cards = [
             Yearly: "RM1000",
         },
         list: [
-            "✅ 60 inches Smart Tv Display",
-            "✅Whiteboard",
-            "✅Projector Screen",
+      
             "✅Ergonomic seating",
             "✅Air Conditioning",
             "✅High-Speed WiFi",
             "✅Natural Lightning",
-            "✅Private entrance",
+            "✅Power Supply",
+
+          
         ],
     },
     {
@@ -74,14 +75,13 @@ export const cards = [
             Yearly: "RM800",
         },
         list: [
-            "✅ 60 inches Smart Tv Display",
-            "✅Whiteboard",
-            "✅Projector Screen",
-            "✅Ergonomic seating",
+           
+            "✅Common seating",
             "✅Air Conditioning",
             "✅High-Speed WiFi",
             "✅Natural Lightning",
-            "✅Private entrance",
+            "✅Power Supply",
+           
         ],
     },
     {
@@ -101,11 +101,10 @@ export const cards = [
             "✅ 60 inches Smart Tv Display",
             "✅Whiteboard",
             "✅Projector Screen",
-            "✅Ergonomic seating",
             "✅Air Conditioning",
             "✅High-Speed WiFi",
             "✅Natural Lightning",
-            "✅Private entrance",
+            "✅Power Supply",
         ],
     },
     {
@@ -125,11 +124,11 @@ export const cards = [
             "✅ 60 inches Smart Tv Display",
             "✅Whiteboard",
             "✅Projector Screen",
-            "✅Ergonomic seating",
             "✅Air Conditioning",
             "✅High-Speed WiFi",
             "✅Natural Lightning",
-            "✅Private entrance",
+            "✅Power Supply",
+         
         ],
     },
 ];

@@ -30,7 +30,7 @@ const Featured = () => {
       title: "Creative Collaboration",
       description:
         "Join professionals from multiple industries for this interactive event focused on teamwork and innovation.",
-      fee: "$30",
+      fee: "RM10",
       date: "Wed, Oct 18",
       time: "14:00 - 17:00",
       guests: "60 attending",
@@ -68,10 +68,10 @@ const Featured = () => {
                 priority
               />
               <div className="absolute top-4 inset-x-0 flex justify-between px-4">
-                <span className="bg-white/90 text-[#004348] text-sm font-medium px-3 py-1 rounded-md shadow-sm">
+                <span className="bg-[#3998ff] text-white text-sm font-medium px-3 py-1 rounded-md shadow-sm">
                   {item.category}
                 </span>
-                <span className="bg-[#004348] text-white text-sm font-medium px-3 py-1 rounded-md shadow-sm">
+                <span className="bg-[#275382] text-white text-sm font-medium px-3 py-1 rounded-md shadow-sm">
                   {item.feature}
                 </span>
               </div>

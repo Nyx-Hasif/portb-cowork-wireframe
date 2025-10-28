@@ -17,7 +17,15 @@ export function ImagesSliderDemo() {
 
   return (
     <ImagesSlider
-      className="lg:h-[95vh] md:h-[400px] h-[300px] xl:-mt-[30px] md:-mt-[20px] -mt-[10px]"
+      /* ✅ responsive height scaling */
+      className="
+        h-[70svh]          /* mobile base */
+        sm:h-[75vh]        /* small tablets */
+        md:h-[80vh]        /* tablets */
+        lg:h-[100vh]       /* desktop full screen */
+        xl:h-[100vh]
+        -mt-[10px] md:-mt-[20px] xl:-mt-[30px]
+      "
       images={images}
     >
       <motion.div
@@ -26,11 +34,11 @@ export function ImagesSliderDemo() {
         transition={{ duration: 0.8 }}
         className="relative z-50 flex flex-col items-center justify-center text-center text-white px-4 md:px-6"
       >
-        {/* Heading EMPOWERING - responsive dari mobile ke desktop */}
+        {/* === MAIN HEADING === */}
         <motion.h1
           className="font-extrabold tracking-tight text-neutral-50 drop-shadow-2xl uppercase"
           style={{
-            fontSize: "clamp(2.5rem, 10vw, 11rem)", // ✅ Mobile 2.5rem → Desktop 11rem
+            fontSize: "clamp(2.5rem, 10vw, 11rem)",
             lineHeight: "1",
             letterSpacing: "0.05em",
           }}
@@ -41,21 +49,21 @@ export function ImagesSliderDemo() {
           <AuroraText>EMPOWERING</AuroraText>
         </motion.h1>
 
-        {/* Row Section: Subtext + Button */}
+        {/* === SUBTEXT + BUTTON ROW === */}
         <motion.div
           className="mt-4 md:mt-6 w-full max-w-5xl flex flex-col md:flex-row items-center justify-center md:justify-between px-4 md:px-6 gap-4 md:gap-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.8 }}
         >
-          {/* Subtext paragraph - responsive wrap */}
-          <div className="flex  md:flex-row justify-center md:justify-start gap-2 md:gap-3 text-center md:text-left leading-tight max-w-lg ">
+          {/* Subtext */}
+          <div className="flex md:flex-row justify-center md:justify-start gap-2 md:gap-3 text-center md:text-left leading-tight max-w-lg">
             {["Your", "Work", "Experience", "At", "PortB"].map((word, i) => (
               <span
                 key={i}
                 className="font-light text-white"
                 style={{
-                  fontSize: "clamp(1.2rem, 3.5vw, 3.2rem)", // ✅ Mobile 1.2rem → Desktop 3.2rem
+                  fontSize: "clamp(1.2rem, 3.5vw, 3.2rem)",
                   letterSpacing: "0.08em",
                 }}
               >
@@ -64,7 +72,7 @@ export function ImagesSliderDemo() {
             ))}
           </div>
 
-          {/* Button - responsive sizing with smooth scroll */}
+          {/* CTA Button */}
           <button
             onClick={() => {
               document.getElementById("next-section")?.scrollIntoView({
@@ -82,7 +90,7 @@ export function ImagesSliderDemo() {
           </button>
         </motion.div>
 
-        {/* Optional Ratings - Responsive & High Quality */}
+        {/* === RATINGS & AVATARS === */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -102,7 +110,7 @@ export function ImagesSliderDemo() {
                 key={i}
                 className="relative rounded-full border-2 sm:border-3 border-white overflow-hidden"
                 style={{
-                  width: "clamp(2rem, 5vw, 3rem)", // Mobile 2rem → Desktop 3rem
+                  width: "clamp(2rem, 5vw, 3rem)",
                   height: "clamp(2rem, 5vw, 3rem)",
                 }}
               >
@@ -118,7 +126,7 @@ export function ImagesSliderDemo() {
               </div>
             ))}
 
-            {/* ✅ "+99" Badge - same size as avatars */}
+            {/* +99 Badge */}
             <div
               className="relative rounded-full border-2 sm:border-3 border-white bg-black flex items-center justify-center"
               style={{
@@ -129,7 +137,7 @@ export function ImagesSliderDemo() {
               <span
                 className="font-semibold text-white"
                 style={{
-                  fontSize: "clamp(0.65rem, 1.2vw, 0.9rem)", // Scales with circle
+                  fontSize: "clamp(0.65rem, 1.2vw, 0.9rem)",
                 }}
               >
                 +99
@@ -142,7 +150,7 @@ export function ImagesSliderDemo() {
             <div
               className="font-semibold text-white flex items-center gap-1"
               style={{
-                fontSize: "clamp(0.9rem, 1.5vw, 1.1rem)", // Responsive text
+                fontSize: "clamp(0.9rem, 1.5vw, 1.1rem)",
               }}
             >
               <span>5.0</span>

@@ -58,10 +58,11 @@ export function InfiniteMovingCards({
               key={`${loopIdx}-${i}`}
               className="w-[280px] sm:w-[340px] md:w-[400px] shrink-0"
             >
-              <article className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm hover:shadow-md transition-shadow h-55 flex flex-col justify-between">
+              {/* // change bg card marquee here */}
+              <article className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#004348] p-6 shadow-sm hover:shadow-md transition-shadow h-55 flex flex-col justify-between">
                 <div className="flex items-start gap-3 mb-4">
                   {/* avatar */}
-                  <div className="relative h-15 w-15 overflow-hidden rounded-full border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700">
+                  <div className="relative h-15 w-15 overflow-hidden rounded-full bg-white">
                     {item.image ? (
                       <Image
                         src={item.image}
@@ -86,7 +87,7 @@ export function InfiniteMovingCards({
                     </p>
                   </div>
                 </div>
-                    {/* quote */}
+                {/* quote */}
                 <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-4">
                   “{item.quote}”
                 </p>

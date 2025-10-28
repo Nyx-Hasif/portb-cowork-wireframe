@@ -12,29 +12,38 @@ const Reviews = () => {
         "It was the best of times, it was the worst of times, it was the age of wisdom...",
       name: "Charles Dickens",
       title: "A Tale of Two Cities",
+      image:
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200",
     },
     {
       quote:
         "To be, or not to be, that is the question: Whether 'tis nobler in the mind...",
       name: "William Shakespeare",
       title: "Hamlet",
+      image:
+        "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=200",
     },
     {
       quote: "All that we see or seem is but a dream within a dream.",
       name: "Edgar Allan Poe",
       title: "A Dream Within a Dream",
+      image:
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200",
     },
     {
       quote:
         "It is a truth universally acknowledged, that a single man in possession of a good fortune...",
       name: "Jane Austen",
       title: "Pride and Prejudice",
+      image: "https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?w=200",
     },
     {
       quote:
         "Call me Ishmael. Some years ago — never mind how long precisely — I thought I would sail about...",
       name: "Herman Melville",
       title: "Moby‑Dick",
+      image:
+        "https://plus.unsplash.com/premium_photo-1689551670902-19b441a6afde?w=200",
     },
   ];
 
@@ -94,7 +103,7 @@ const Reviews = () => {
         transition={{ duration: 0.7 }}
         className="w-full lg:hidden flex justify-center px-2"
       >
-        <TestimonialCarouselDemo/>
+        <TestimonialCarouselDemo />
       </motion.div>
     </section>
   );

@@ -87,7 +87,7 @@
   }
 }
 
-.gradient-wave { 
+.gradient-wave {
   background: linear-gradient(
     90deg,
     #2c3372,
@@ -126,5 +126,160 @@
       background-position: 0% 50%;
       transform: rotate(-5deg) scale(0.9);
     }
+  }
+}
+
+/* CTA animation */
+
+/* Dalam global.css atau styles file */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-10px) translateX(5px);
+  }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+.animate-float-delay-1 {
+  animation: float 6s ease-in-out 2s infinite;
+}
+.animate-float-delay-2 {
+  animation: float 6s ease-in-out 4s infinite;
+}
+
+@keyframes slow-zoom {
+  0%,
+  100% {
+    transform: scale(1.05);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+.animate-slow-zoom {
+  animation: slow-zoom 25s ease-in-out infinite;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out both;
+}
+.animation-delay-200 {
+  animation-delay: 0.2s;
+}
+.animation-delay-400 {
+  animation-delay: 0.4s;
+}
+/* coworking space animation section  */
+
+/* Dropdown animation */
+@keyframes dropdown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-dropdown {
+  animation: dropdown 0.3s ease-out;
+}
+
+/* Card fade in with slide up */
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-card-fade-in {
+  animation: cardFadeIn 0.6s ease-out;
+}
+
+/* List items fade in */
+@keyframes listItem {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-list-item {
+  animation: listItem 0.4s ease-out;
+}
+
+@keyframes dropdown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-dropdown {
+  animation: dropdown 0.25s ease-out;
+}
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-card-fade-in {
+  animation: cardFadeIn 0.6s ease-out forwards;
+}
+
+@keyframes listItem {
+  from {
+    opacity: 0;
+    transform: translateX(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.animate-list-item {
+  animation: listItem 0.4s ease-out forwards;
+}
+
+
+/* scroll button to top */
+
+@media (prefers-reduced-motion: no-preference) {
+  button.scroll-top {
+    transition: opacity 0.3s, transform 0.3s;
   }
 }

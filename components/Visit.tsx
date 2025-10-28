@@ -88,7 +88,7 @@ const Visit = () => {
         >
           <CardFlip
             isFlipped={flip}
-            className="w-full max-w-[800px] mx-auto aspect-auto h-110 lg:h-130"
+            className="w-full max-w-[800px] mx-auto aspect-auto h-110 sm:h-180 lg:h-130"
           >
             {/* FRONT SIDE - Image PortB */}
             <CardFlipFront>
