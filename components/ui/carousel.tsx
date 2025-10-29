@@ -9,6 +9,7 @@ interface CardData {
   title: string;
   img: StaticImageData; // ✅ Fix: ganti 'any' dengan proper type
   description: string;
+  category: string;
 }
 
 interface SlideProps {
@@ -51,7 +52,7 @@ const Slide = ({ card, index, current, handleSlideClick }: SlideProps) => {
             <div className="flex items-center gap-3">
               {card.icon}
               <span className="uppercase tracking-wide text-sm text-[#004348] font-medium">
-                Professional Event
+                {card.category}
               </span>
             </div>
             <h2 className="text-2xl font-semibold">{card.title}</h2>

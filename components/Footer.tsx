@@ -1,15 +1,14 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import {  Send, Mail } from "lucide-react"; //  social icons
+import { Send, Mail } from "lucide-react";
 import { assets } from "@/assets/asset";
-import { FaFacebook, FaInstagram, FaTiktok } from "react-icons/fa"; // 👈 consistent
+import { FaFacebook, FaInstagram, FaTiktok } from "react-icons/fa";
 import React from "react";
 
 const Footer = () => {
   return (
     <footer className="relative w-full bg-[#202020] text-gray-300 overflow-hidden">
-      {/* Accent gradient */}
       {/* Gradient Wave */}
       <div className="gradient-wave h-2 md:h-3 w-full" />
 
@@ -33,16 +32,21 @@ const Footer = () => {
           {/* Quick Links */}
           <div>
             <h3 className="text-xl font-semibold text-white mb-4">
-              Quick Links
+              Quick Links
             </h3>
             <ul className="space-y-2 text-gray-400 text-base">
-              {["Packages", "Community", "Contact Us"].map((item) => (
-                <li key={item}>
+              {/* ✅ Updated with actual routes */}
+              {[
+                { name: "Packages", href: "/coworking-space" },
+                { name: "Community", href: "/previous-events" },
+                { name: "Contact Us", href: "/contact" },
+              ].map((item) => (
+                <li key={item.name}>
                   <Link
-                    href="#"
+                    href={item.href}
                     className="hover:text-emerald-400 transition-colors duration-200"
                   >
-                    {item}
+                    {item.name}
                   </Link>
                 </li>
               ))}
@@ -52,22 +56,22 @@ const Footer = () => {
           {/* Contact info */}
           <div>
             <h3 className="text-xl font-semibold text-white mb-4">Contact</h3>
-            <p className="text-base text-gray-400">+60 14 3298 981</p>
+            <p className="text-base text-gray-400">+60 14 3298 981</p>
             <p className="text-base text-gray-400 mb-3">helloportb@gmail.com</p>
 
             <div className="flex items-center gap-3 text-sm text-gray-400">
               <Mail size={18} className="text-emerald-400" />
-              <span>We’d love to hear from you!</span>
+              <span>{"We'd love to hear from you!"}</span>
             </div>
           </div>
 
           {/* Newsletter */}
           <div>
             <h3 className="text-xl font-semibold text-white mb-4">
-              Stay Updated
+              Stay Updated
             </h3>
             <p className="text-gray-400 text-base mb-3">
-              Subscribe for events & latest updates.
+              Subscribe for events & latest updates.
             </p>
             {/* Email input */}
             <form
@@ -76,12 +80,12 @@ const Footer = () => {
             >
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Enter your email"
                 className="flex-1 bg-transparent px-4 py-3 text-sm text-gray-200 placeholder-gray-500 focus:outline-none"
               />
               <button
                 type="submit"
-                className="bg-emerald-500 hover:bg-emerald-600 px-4 flex items-center justify-center transition-colors"
+                className="bg-emerald-500 hover:bg-emerald-600 px-4 flex items-center justify-center transition-colors cursor-pointer"
               >
                 <Send size={18} className="text-white" />
               </button>
@@ -100,7 +104,9 @@ const Footer = () => {
           <div className="flex flex-wrap justify-center md:justify-end items-center gap-4">
             {/* Facebook */}
             <Link
-              href="#"
+              href="https://facebook.com/portb"
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label="Facebook"
               className="w-9 h-9 flex items-center justify-center rounded-full bg-[#1877F2] hover:bg-[#0c63d4] transition-colors"
             >
@@ -109,7 +115,9 @@ const Footer = () => {
 
             {/* TikTok */}
             <Link
-              href="#"
+              href="https://tiktok.com/@portb"
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label="TikTok"
               className="w-9 h-9 flex items-center justify-center rounded-full bg-[#000000] hover:bg-[#EE1D52] transition-colors"
             >
@@ -118,7 +126,9 @@ const Footer = () => {
 
             {/* Instagram */}
             <Link
-              href="#"
+              href="https://instagram.com/portb"
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label="Instagram"
               className="w-9 h-9 flex items-center justify-center rounded-full bg-gradient-to-tr from-[#FFDC80] via-[#F77737] to-[#C13584] hover:opacity-90 transition-opacity"
             >
@@ -127,7 +137,9 @@ const Footer = () => {
 
             {/* Threads */}
             <Link
-              href="#"
+              href="https://threads.net/@portb"
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label="Threads"
               className="w-9 h-9 flex items-center justify-center rounded-full bg-[#000000] hover:bg-[#333333] transition-colors"
             >
@@ -135,7 +147,6 @@ const Footer = () => {
             </Link>
           </div>
         </div>
-        {/* end */}
       </div>
     </footer>
   );
