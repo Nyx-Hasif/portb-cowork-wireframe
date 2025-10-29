@@ -56,6 +56,18 @@ import gallery_2020_1 from "./gallery_2020_1.png";
 import gallery_2020_2 from "./gallery_2020_2.png";
 import gallery_2020_3 from "./gallery_2020_3.png";
 import gallery_2020_4 from "./gallery_2020_4.png";
+import coffee_machine from "./coffee_machine.png";
+import fixed_desk_guests from "./fixed_desk_guests.png";
+import common_area_light from "./common_area_light.png";
+import common_area_guests from "./common_area_guests.png";
+import green_area_guests from "./green_area_guests.png";
+import pizza from "./pizza.png";
+import birthday_event from "./birthday_event.png";
+import sogno_cafe from "./sogno_cafe.png";
+import sogno_environment from "./sogno_environment.png";
+import sogno_menu from "./sogno_menu.png";
+import sogno_logo from "./sogno_logo.png";
+import sogno_signature from "./sogno_signature.png";
 
 /* ---- Gallery images ---- */
 export const images: GalleryYearGroup[] = [
@@ -193,6 +205,28 @@ export const assets = {
   night_pitch,
   event_session,
   workshop_session,
+  coffee_machine,
+  fixed_desk_guests,
+  common_area_light,
+  common_area_guests,
+  green_area_guests,
+  pizza,
+  birthday_event,
+  sogno_cafe,
+  sogno_menu,
+  sogno_environment,
+  sogno_logo,
+  sogno_signature
+
 };
 
-export const galleries = {};
+export const galleries = {
+  gallery_2019_1,
+  gallery_2019_2,
+  gallery_2019_3,
+  gallery_2019_4,
+  gallery_2020_1,
+  gallery_2020_2,
+  gallery_2020_3,
+  gallery_2020_4,
+};

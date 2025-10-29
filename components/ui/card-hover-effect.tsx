@@ -35,7 +35,7 @@ export const HoverEffect = ({
     icon?: string;
     title: string;
     description: string;
-    link: string;
+    // link: string;
   }[];
   className?: string;
 }) => {
@@ -52,7 +52,7 @@ export const HoverEffect = ({
         const IconComponent = item.icon ? iconMap[item.icon] : WifiIcon;
         return (
           <a
-            href={item.link}
+    
             key={item.id}
             className="relative block h-full w-full group"
             onMouseEnter={() => setHoveredIndex(idx)}

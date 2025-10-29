@@ -8,7 +8,7 @@ import Reviews from "../components/Reviews";
 // import Stats from "../components/Stats";
 import Visit from "../components/Visit";
 import WhyUs from "../components/WhyUs";
-import AppleCardsCarouselDemo from "@/components/apple-cards-carousel-demo";
+import AppleCardsCarouselDemo from "@/components/space-stations";
 import StatsCountDemo from "@/components/statscount-demo";
 
 export default function Home() {
@@ -22,8 +22,9 @@ export default function Home() {
       <AppleCardsCarouselDemo />
       {/* <Facilities /> */}
       <WhyUs />
-      <Partnership />
       <MissionVision />
+      <Partnership />
+
       <Visit />
       {/* <Stats /> */}
       <StatsCountDemo />

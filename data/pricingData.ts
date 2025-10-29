@@ -65,7 +65,7 @@ export const cards = [
         id: 3,
         image: assets.common_area,
         category: "Common Area",
-        description: "Ideal for 6-10 people",
+        description: "Ideal for 6-15 people",
         pricing: {
             "1 Hour": "RM20/Day",
             "4 Hour": "RM20/Day",
@@ -111,7 +111,7 @@ export const cards = [
         id: 5,
         image: assets.event_space_area,
         category: "Space Event",
-        description: "Ideal for 6-10 people",
+        description: "Ideal for 15-20 people",
         pricing: {
             "1 Hour": "RM300",
             "4 Hour": "RM500",

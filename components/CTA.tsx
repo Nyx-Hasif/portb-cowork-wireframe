@@ -34,18 +34,15 @@ const CTA = () => {
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
           <div className="max-w-4xl space-y-6">
             <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-white tracking-tight animate-fade-in-up">
-              <SparklesText className="inline-block">
-                Your Next Big Idea
-              </SparklesText>
+              <span className="text-white">Your Next Big Idea</span>
               <br />
-              <span className="bg-gradient-to-r from-sky-400 to-teal-300 bg-clip-text text-transparent">
-                Starts Here
-              </span>
+              <SparklesText >
+                Starts Here
+              </SparklesText>
             </h2>
-
             <p className="text-base md:text-lg text-white/80 max-w-2xl mx-auto animate-fade-in-up animation-delay-200">
               Discover inspiring coworking spaces designed to spark creativity,
-              boost productivity & connect vibrant communities.
+              boost productivity & connect vibrant communities.
             </p>
 
             {/* CTA Button */}
@@ -56,7 +53,7 @@ const CTA = () => {
               >
                 {/* Smooth shine line */}
                 <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent mix-blend-overlay group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
-                <span className="relative z-10">Explore Packages</span>
+                <span className="relative z-10">Explore Packages</span>
                 <ArrowRight className="relative z-10 w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
             </div>

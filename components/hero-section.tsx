@@ -17,12 +17,11 @@ export function ImagesSliderDemo() {
 
   return (
     <ImagesSlider
-      /* ✅ responsive height scaling */
       className="
-        h-[70svh]          /* mobile base */
-        sm:h-[75vh]        /* small tablets */
-        md:h-[80vh]        /* tablets */
-        lg:h-[100vh]       /* desktop full screen */
+        h-[70svh]
+        sm:h-[75vh]
+        md:h-[80vh]
+        lg:h-[100vh]
         xl:h-[100vh]
         -mt-[10px] md:-mt-[20px] xl:-mt-[30px]
       "
@@ -36,7 +35,7 @@ export function ImagesSliderDemo() {
       >
         {/* === MAIN HEADING === */}
         <motion.h1
-          className="font-extrabold tracking-tight text-neutral-50 drop-shadow-2xl uppercase"
+          className="enhanced-aurora-text font-extrabold tracking-tight text-neutral-50 drop-shadow-2xl uppercase"
           style={{
             fontSize: "clamp(2.5rem, 10vw, 11rem)",
             lineHeight: "1",

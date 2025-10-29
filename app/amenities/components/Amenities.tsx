@@ -9,63 +9,63 @@ const cards = [
     icon: "WIFI_ICON",
     title: "High‑Speed WiFi",
     description: "Lightning‑fast internet for seamless video calls.",
-    link: "#",
+    // link: "#",
   },
   {
     id: 2,
     icon: "Coffee_ICON",
     title: "Coffee & Refreshments",
     description: "Complimentary beverages to keep you energized.",
-    link: "#",
+    // link: "#",
   },
   {
     id: 3,
     icon: "WC_ICON",
     title: "Washroom & Surau",
     description: "Conveniently located within the workspace.",
-    link: "#",
+    // link: "#",
   },
   {
     id: 4,
     icon: "SNOWFLAKE_ICON",
     title: "Climate Control",
     description: "Perfect temperature for productive sessions.",
-    link: "#",
+    // link: "#",
   },
   {
     id: 5,
     icon: "LAPTOP_ICON",
     title: "Display Technology",
     description: "Smart screens and presentation equipment.",
-    link: "#",
+    // link: "#",
   },
   {
     id: 6,
     icon: "TUKUL_ICON",
     title: "Technical Support",
     description: "On‑site assistance whenever you need it.",
-    link: "#",
+    // link: "#",
   },
   {
     id: 7,
     icon: "LOCATION_ICON",
     title: "Prime Location",
     description: "Located in the heart of the city with easy public access.",
-    link: "#",
+    // link: "#",
   },
   {
     id: 8,
     icon: "COMMUNITY_ICON",
     title: "Community Events",
     description: "Regular networking events & creative workshops.",
-    link: "#",
+    // link: "#",
   },
   {
     id: 9,
     icon: "SECURITY_ICON",
     title: "Security Access",
     description: "24/7 CCTV and secure keycard entry.",
-    link: "#",
+    // link: "#",
   },
 ];
 
@@ -103,11 +103,11 @@ const Amenities = () => (
       animate="visible"
     >
       {/* Header */}
-      <motion.div className="text-center mb-10" variants={itemVariants}>
-        <h1 className="text-4xl md:text-6xl font-bold text-gray-900">
+      <motion.div className="text-center md:mb-10" variants={itemVariants}>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 ">
           What’s Always Included
         </h1>
-        <p className="text-lg md:text-xl text-gray-600 mt-3 max-w-2xl mx-auto">
+        <p className="text-base sm:text-lg md:text-xl text-gray-600 mt-3 max-w-2xl mx-auto">
           Every PortB workspace includes the essentials for comfort,
           productivity and community.
         </p>

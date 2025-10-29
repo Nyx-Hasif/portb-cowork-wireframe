@@ -68,6 +68,7 @@ const Partnership = () => {
     { image: assets.samurai_logo, name: "Samurai" },
     { image: assets.shell_logo, name: "Shell" },
     { image: assets.sme_logo, name: "SME" },
+    { image: assets.sogno_logo, name: "Sogno Coffee" },
   ];
 
   /** ✅ trigger animation only after mount to avoid SSR compression */

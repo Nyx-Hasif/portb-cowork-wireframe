@@ -1,8 +1,9 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { Facebook, Instagram, Send, MessageCircle, Mail } from "lucide-react"; //  social icons
+import {  Send, Mail } from "lucide-react"; //  social icons
 import { assets } from "@/assets/asset";
+import { FaFacebook, FaInstagram, FaTiktok } from "react-icons/fa"; // 👈 consistent
 import React from "react";
 
 const Footer = () => {
@@ -92,41 +93,49 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-5 pt-8">
           {/* Copyright */}
           <p className="text-sm text-gray-500 text-center md:text-left">
-            © 2025 PortB. All rights reserved.
+            © 2025 PortB. All rights reserved.
           </p>
 
           {/* Social media icons */}
           <div className="flex flex-wrap justify-center md:justify-end items-center gap-4">
+            {/* Facebook */}
             <Link
               href="#"
               aria-label="Facebook"
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-700 hover:bg-emerald-500 transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-[#1877F2] hover:bg-[#0c63d4] transition-colors"
             >
-              <Facebook size={18} className="text-white" />
+              <FaFacebook size={18} className="text-white" />
             </Link>
+
+            {/* TikTok */}
             <Link
               href="#"
               aria-label="TikTok"
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-700 hover:bg-emerald-500 transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-[#000000] hover:bg-[#EE1D52] transition-colors"
             >
-              <MessageCircle size={18} className="text-white" />
+              <FaTiktok size={18} className="text-white" />
             </Link>
+
+            {/* Instagram */}
             <Link
               href="#"
               aria-label="Instagram"
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-700 hover:bg-gradient-to-br hover:from-pink-500 hover:to-yellow-400 transition-all"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-gradient-to-tr from-[#FFDC80] via-[#F77737] to-[#C13584] hover:opacity-90 transition-opacity"
             >
-              <Instagram size={18} className="text-white" />
+              <FaInstagram size={18} className="text-white" />
             </Link>
+
+            {/* Threads */}
             <Link
               href="#"
               aria-label="Threads"
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-700 hover:bg-gray-900 transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-[#000000] hover:bg-[#333333] transition-colors"
             >
               <span className="text-white font-bold text-lg">@</span>
             </Link>
           </div>
         </div>
+        {/* end */}
       </div>
     </footer>
   );

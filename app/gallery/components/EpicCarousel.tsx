@@ -68,12 +68,12 @@ const EpicCarousel = () => {
   }, [resetTimer]);
 
   return (
-    <div className="bg-[#f9fafb] ">
-      {/* ✅ Added items-stretch to force equal height */}
+    <div className="bg-[#f9fafb]">
       <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8 p-6 w-full max-w-[1400px] mx-auto lg:items-stretch">
         {/* Left - Big Image */}
-        <div className="relative w-full h-[500px] lg:h-auto rounded-2xl overflow-hidden shadow-xl bg-gray-900">
-          {/* Background blur layer */}
+        {/* ✅ Adjusted height to better aspect ratio & removed gaps */}
+        <div className="relative w-full h-[450px] sm:h-[500px] md:h-[550px] lg:h-auto rounded-2xl overflow-hidden shadow-xl bg-gray-900">
+          {/* Background blur layer - ✅ Now also object-cover */}
           <Image
             src={cards[currentIndex].image}
             alt={cards[currentIndex].title}
@@ -82,7 +82,7 @@ const EpicCarousel = () => {
             quality={100}
           />
 
-          {/* Main sliding image */}
+          {/* Main sliding image - ✅ Always object-cover, no gaps */}
           <div
             key={currentIndex}
             className={`absolute inset-0 z-10 ${
@@ -95,61 +95,61 @@ const EpicCarousel = () => {
               src={cards[currentIndex].image}
               alt={cards[currentIndex].title}
               fill
+              // ✅ Always cover, center positioning
               className="object-cover"
+              style={{ objectPosition: "center center" }}
               quality={100}
+              priority
             />
           </div>
 
           {/* Navigation Buttons */}
-          <div className="absolute inset-0 flex justify-between items-center px-6 z-20">
+          <div className="absolute inset-0 flex justify-between items-center px-4 md:px-6 z-20">
             <button
               onClick={handlePrev}
-              className="w-12 h-12 flex items-center justify-center bg-black/40 hover:bg-black/70 backdrop-blur-sm rounded-full transition-all duration-200 hover:scale-110"
+              className="cursor-pointer w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-black/40 hover:bg-black/70 backdrop-blur-sm rounded-full transition-all duration-200 hover:scale-110"
               aria-label="Previous slide"
             >
-              <GrLinkPrevious className="text-xl text-white" />
+              <GrLinkPrevious className="text-lg md:text-xl text-white" />
             </button>
             <button
               onClick={handleNext}
-              className="w-12 h-12 flex items-center justify-center bg-black/40 hover:bg-black/70 backdrop-blur-sm rounded-full transition-all duration-200 hover:scale-110"
+              className="cursor-pointer w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-black/40 hover:bg-black/70 backdrop-blur-sm rounded-full transition-all duration-200 hover:scale-110"
               aria-label="Next slide"
             >
-              <GrLinkNext className="text-xl text-white" />
+              <GrLinkNext className="text-lg md:text-xl text-white" />
             </button>
           </div>
 
           {/* Bottom Info Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-8 z-20">
-            <h2 className="text-white text-3xl md:text-4xl font-bold mb-4 animate-fadeIn">
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 md:p-8 z-20">
+            <h2 className="text-white text-2xl md:text-3xl lg:text-4xl font-bold mb-2 md:mb-4 animate-fadeIn">
               {cards[currentIndex].title}
             </h2>
-            {/* <button className="bg-white text-black px-8 py-3 rounded-xl font-medium hover:bg-gray-100 transition-all hover:scale-105">
-              Learn More
-            </button> */}
           </div>
         </div>
 
-        {/* Right - Thumbnails (✅ Now matches left side height) */}
+        {/* Right - Thumbnails */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 lg:h-full">
           {cards.map((item, index) => (
             <div
               key={item.id}
               onClick={() => handleClick(index)}
-              className={`relative flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all duration-300 ${
+              className={`cursor-pointer relative flex items-center gap-4 p-4 rounded-xl transition-all duration-300 ${
                 currentIndex === index
                   ? "bg-white shadow-lg"
                   : "bg-gray-100 hover:bg-white hover:shadow-md"
               }`}
             >
               {/* Thumbnail */}
-              <div className="relative w-28 h-28 sm:w-32 sm:h-32 lg:w-28 lg:h-28 z-10 flex-shrink-0 rounded-lg overflow-hidden">
+              <div className="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-28 lg:h-28 z-10 flex-shrink-0 rounded-lg overflow-hidden">
                 <Image
                   src={item.image}
                   alt={item.title}
                   fill
                   className="object-cover"
                   quality={95}
-                  sizes="(max-width: 640px) 128px, (max-width: 1024px) 128px, 112px"
+                  sizes="(max-width: 640px) 96px, 112px"
                   draggable={false}
                 />
               </div>
@@ -158,7 +158,7 @@ const EpicCarousel = () => {
                 <div key={key} className="loading-bar"></div>
               )}
 
-              <p className="text-base lg:text-lg font-medium text-gray-800 z-10">
+              <p className="text-sm md:text-base lg:text-lg font-medium text-gray-800 z-10">
                 {item.title}
               </p>
             </div>

@@ -100,7 +100,7 @@
   animation: waveFlow 15s ease-in-out infinite;
 }
 
-/* aurora text component*/
+/* aurora text component - Medium Glow Version ⚡ */
 
 @theme inline {
   --animate-aurora: aurora 8s ease-in-out infinite alternate;
@@ -127,6 +127,63 @@
       transform: rotate(-5deg) scale(0.9);
     }
   }
+
+  /* White lightning flash - reduced intensity */
+  @keyframes lightning-flash {
+    0%,
+    100% {
+      opacity: 0;
+    }
+    10%,
+    30%,
+    50% {
+      opacity: 0.6; /* ✅ Reduced from 1 */
+    }
+    20%,
+    40%,
+    60% {
+      opacity: 0;
+    }
+  }
+
+  /* Medium glow pulse - much more subtle */
+  @keyframes text-glow {
+    0%,
+    100% {
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.15),
+        /* ✅ Reduced opacity */ 0 0 15px rgba(255, 255, 255, 0.1); /* ✅ Less layers */
+    }
+    50% {
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.25),
+        /* ✅ Moderate glow */ 0 0 20px rgba(255, 255, 255, 0.15),
+        0 0 30px rgba(255, 255, 255, 0.08); /* ✅ Very subtle outer glow */
+    }
+  }
+}
+
+/* Enhanced aurora text - Medium intensity */
+.enhanced-aurora-text {
+  position: relative;
+  display: inline-block;
+  animation: text-glow 3s ease-in-out infinite;
+}
+
+/* Lightning bolt - more subtle */
+.enhanced-aurora-text::after {
+  content: "⚡";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.4em;
+  opacity: 0;
+  animation: lightning-flash 6s infinite; /* ✅ Slower flash */
+  animation-delay: 2s;
+  filter: blur(1.5px); /* ✅ Slightly more blur for subtlety */
+  color: rgba(255, 255, 255, 0.7); /* ✅ Less bright */
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6); /* ✅ Softer shadow */
+  z-index: 2;
+  pointer-events: none;
 }
 
 /* CTA animation */
@@ -274,7 +331,6 @@
 .animate-list-item {
   animation: listItem 0.4s ease-out forwards;
 }
-
 
 /* scroll button to top */
 

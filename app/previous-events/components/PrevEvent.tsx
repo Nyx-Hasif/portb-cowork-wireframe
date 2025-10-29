@@ -14,6 +14,7 @@ const PrevEvent = () => {
     {
       id: 1,
       icon: <HiOutlineUserGroup className="w-8 h-8 text-[#004348]" />,
+      category: "Learning & Development", // ✅ Updated
       title: "Training Programs & Skill Development",
       img: assets.codekids,
       description:
@@ -22,6 +23,7 @@ const PrevEvent = () => {
     {
       id: 2,
       icon: <HiOutlineRocketLaunch className="w-8 h-8 text-[#004348]" />,
+      category: "Talent Acquisition", // ✅ Updated
       title: "Recruitment & Candidate Interviews",
       img: assets.recruit,
       description:
@@ -30,6 +32,7 @@ const PrevEvent = () => {
     {
       id: 3,
       icon: <HiLightBulb className="w-8 h-8 text-[#004348]" />,
+      category: "Virtual Collaboration", // ✅ Updated
       title: "Digital Events & Online Conferences",
       img: assets.digital_event,
       description:
@@ -40,6 +43,7 @@ const PrevEvent = () => {
       icon: (
         <HiOutlinePresentationChartLine className="w-8 h-8 text-[#004348]" />
       ),
+      category: "Business Presentation", // ✅ Updated
       title: "Business Pitches & Client Showcases",
       img: assets.meeting_pitch,
       description:
@@ -89,7 +93,7 @@ const PrevEvent = () => {
               <div className="flex items-center gap-3">
                 {item.icon}
                 <span className="uppercase tracking-wide text-sm text-[#004348] font-medium">
-                  Professional Event
+                  {item.category} {/* ✅ Dynamic category */}
                 </span>
               </div>
               <h2 className="text-2xl font-semibold">{item.title}</h2>
