@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { assets } from "@/assets/asset";
-import { MapPinIcon } from "lucide-react";
+import { MapPinIcon, MapPin, Clock, Phone } from "lucide-react";
 import {
   CardFlip,
   CardFlipFront,
@@ -15,7 +15,6 @@ const Visit = () => {
   const [open, setOpen] = useState(false);
   const [flip, setFlip] = useState(false);
 
-  // ESC to close modal (desktop)
   const handleEsc = useCallback((e: KeyboardEvent) => {
     if (e.key === "Escape" && window.innerWidth >= 768) setOpen(false);
   }, []);
@@ -26,104 +25,160 @@ const Visit = () => {
   }, [handleEsc]);
 
   return (
-    <section className="relative bg-[#f8fafb] py-20 overflow-hidden">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto px-4 md:px-8 items-center">
-        {/* LEFT */}
-        <motion.div
-          initial={{ opacity: 0, x: -40 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="space-y-6 text-center lg:text-left"
-        >
-          <h1 className="font-extrabold text-4xl md:text-6xl tracking-tight text-gray-900">
-            Visit{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-teal-600">
-              PortB
-            </span>{" "}
-            Today
-          </h1>
+    <section
+      id="visit"
+      className="py-16 md:py-24 bg-black relative overflow-hidden"
+    >
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Flex container: column on mobile, row on desktop */}
+        <div className="flex flex-col lg:flex-row gap-12">
+          {/* LEFT COLUMN — Content & Info */}
+          <div className="lg:w-1/2 lg:order-1 w-full">
+            <div className="space-y-8 text-center lg:text-left">
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="text-3xl md:text-4xl lg:text-5xl font-serif text-white"
+              >
+                Visit Port B Today
+              </motion.h2>
 
-          <p className="text-lg md:text-xl text-gray-700 leading-relaxed max-w-lg mx-auto lg:mx-0">
-            Ready to experience exceptional workplace services at PortB? Visit
-            our space, conveniently located near the mall. Our friendly team is
-            here to provide you with the highest standard of comfort and care.
-          </p>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="text-gray-400 text-base md:text-lg font-light max-w-md mx-auto lg:mx-0"
+              >
+                Ready to experience exceptional workplace services at PortB?
+                Visit our space, conveniently located near the mall. Our
+                friendly team is here to provide you with the highest standard
+                of comfort and care.
+              </motion.p>
 
-          {/* Buttons */}
-          <div className="flex flex-col lg:flex-row justify-center lg:justify-start gap-4">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => setOpen(true)}
-              className="inline-flex items-center cursor-pointer justify-center px-8 py-4 rounded-2xl text-lg md:text-xl font-semibold text-white bg-gradient-to-r from-green-500 to-emerald-600 shadow-md hover:shadow-lg transition"
-            >
-              🎬 View Video
-            </motion.button>
+              {/* Info Cards */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="space-y-6 pt-4 max-w-md mx-auto lg:mx-0"
+              >
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                  <MapPin className="w-6 h-6 text-white shrink-0" />
+                  <div className="text-center sm:text-left">
+                    <h4 className="text-white font-medium uppercase tracking-widest mb-1">
+                      Address
+                    </h4>
+                    <p className="text-gray-400">
+                      Jalan Telipot, Kampung Telipot
+                      <br />
+                      15200 Kota Bharu, Kelantan
+                    </p>
+                  </div>
+                </div>
 
-            {/* Flip control */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => setFlip((prev) => !prev)}
-              className={`inline-flex items-center cursor-pointer justify-center px-8 py-4 rounded-2xl text-lg md:text-xl font-semibold text-white shadow-md hover:shadow-lg transition ${
-                flip
-                  ? "bg-red-500 hover:bg-red-600"
-                  : "bg-gradient-to-r from-sky-500 to-blue-600"
-              }`}
-            >
-              <MapPinIcon className="w-6 h-6 mr-2" />
-              {flip ? "View Building  " : "View Location"}
-            </motion.button>
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                  <Clock className="w-6 h-6 text-white shrink-0" />
+                  <div className="text-center sm:text-left">
+                    <h4 className="text-white font-medium uppercase tracking-widest mb-1">
+                      Staffed Hours
+                    </h4>
+                    <p className="text-gray-400">
+                      Mon-Fri: 8:00 AM – 7:00 PM
+                      <br />
+                      Sat: 10:00 AM – 4:00 PM
+                    </p>
+                    <p className="text-gray-500 text-sm mt-1">
+                      *Members have 24/7 access
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                  <Phone className="w-6 h-6 text-white shrink-0" />
+                  <div className="text-center sm:text-left">
+                    <h4 className="text-white font-medium uppercase tracking-widest mb-1">
+                      Contact
+                    </h4>
+                    <p className="text-gray-400">+60 12-345 6789</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Buttons — centered on mobile, left on desktop */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="flex flex-col sm:flex-row gap-4 pt-2 justify-center lg:justify-start"
+              >
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setOpen(true)}
+                  className="inline-flex items-center cursor-pointer justify-center px-6 py-3 md:px-8 md:py-4 rounded-2xl text-base md:text-lg font-semibold text-white bg-[#217885] shadow-md hover:shadow-lg transition"
+                >
+                  🎬 View Video
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setFlip((prev) => !prev)}
+                  className={`inline-flex items-center cursor-pointer justify-center px-6 py-3 md:px-8 md:py-4 rounded-2xl text-base md:text-lg font-semibold text-white shadow-md hover:shadow-lg transition ${
+                    flip
+                      ? "bg-[#217885] hover:bg-[#217885]"
+                      : "bg-gradient-to-r from-sky-500 to-blue-600"
+                  }`}
+                >
+                  <MapPinIcon className="w-5 h-5 mr-2 md:w-6 md:h-6" />
+                  {flip ? "View Building" : "View Location"}
+                </motion.button>
+              </motion.div>
+            </div>
           </div>
-        </motion.div>
 
-        {/* RIGHT (Flip Card) */}
-        <motion.div
-          initial={{ opacity: 0, x: 40 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="relative rounded-3xl overflow-hidden shadow-xl flex justify-center"
-        >
-          <CardFlip
-            isFlipped={flip}
-            className="w-full max-w-[800px] mx-auto aspect-auto h-110 sm:h-180 lg:h-130"
-          >
-            {/* FRONT SIDE - Image PortB */}
-            <CardFlipFront>
-              <CardFlipContent>
-                <Image
-                  src={assets.portb_location}
-                  alt="PortB Location"
-                  width={800}
-                  height={600}
-                  sizes="(max-width: 768px) 100vw, 800px"
-                  className="w-full h-full object-cover bg-white"
-                  draggable={false}
-                  quality={100}
-                />
-              </CardFlipContent>
-            </CardFlipFront>
+          {/* RIGHT COLUMN — Flip Card */}
+          <div className="lg:w-1/2 lg:order-2 w-full flex justify-center">
+            <div className="w-full max-w-md lg:max-w-none h-[400px] lg:h-[500px] bg-neutral-800 relative overflow-hidden border border-white/10 rounded-3xl">
+              <CardFlip isFlipped={flip} className="w-full h-full">
+                <CardFlipFront>
+                  <CardFlipContent className="w-full h-full">
+                    <Image
+                      src={assets.portb_location}
+                      alt="PortB Location"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 500px"
+                      className="object-cover"
+                      draggable={false}
+                      quality={100}
+                    />
+                  </CardFlipContent>
+                </CardFlipFront>
 
-            {/* BACK SIDE - Google Maps Embed */}
-            <CardFlipBack>
-              <div className="relative w-full h-full bg-white overflow-hidden rounded-3xl">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3967.1052379941552!2d102.23847417498943!3d6.116533393870065!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31b6af1fb2d1a2ed%3A0x1b8a900bf3cb628f!2sPort%20B%20-%20Coworking%20Space%20%26%20Virtual%20Office!5e0!3m2!1sen!2smy!4v1761413265395!5m2!1sen!2smy"
-                  className="absolute inset-0 w-full h-full border-0"
-                  loading="lazy"
-                  allowFullScreen
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="PortB Location Map"
-                />
-              </div>
-            </CardFlipBack>
-          </CardFlip>
-        </motion.div>
+                <CardFlipBack>
+                  <div className="relative w-full h-full bg-white overflow-hidden rounded-3xl">
+                    <iframe
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3967.1052379941552!2d102.23847417498943!3d6.116533393870065!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31b6af1fb2d1a2ed%3A0x1b8a900bf3cb628f!2sPort%20B%20-%20Coworking%20Space%20%26%20Virtual%20Office!5e0!3m2!1sen!2smy!4v1761413265395!5m2!1sen!2smy"
+                      className="absolute inset-0 w-full h-full border-0"
+                      loading="lazy"
+                      allowFullScreen
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title="PortB Location Map"
+                    />
+                  </div>
+                </CardFlipBack>
+              </CardFlip>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Modal Video */}
+      {/* Video Modal (unchanged) */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -132,7 +187,7 @@ const Visit = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-[999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
           >
             <button
               onClick={() => setOpen(false)}
@@ -145,7 +200,7 @@ const Visit = () => {
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
               transition={{ duration: 0.25 }}
-              className="relative w-full max-w-5xl aspect-video bg-black rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/20"
+              className="w-full max-w-5xl aspect-video bg-black rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/20"
             >
               <iframe
                 src="https://www.youtube.com/embed/dQw4w9WgXcQ"

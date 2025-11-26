@@ -167,7 +167,10 @@ function TestimonialCardPrevious({
       data-slot="testimonial-card-previous"
       variant={variant}
       size={size}
-      className={cn("absolute size-8 rounded-full bg-black", className)}
+      className={cn(
+        "absolute size-8 rounded-full bg-black text-white",
+        className
+      )}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
       {...props}
@@ -190,7 +193,10 @@ function TestimonialCardNext({
       data-slot="testimonial-card-next"
       variant={variant}
       size={size}
-      className={cn("absolute size-8 rounded-full bg-black", className)}
+      className={cn(
+        "absolute size-8 rounded-full bg-black text-white",
+        className
+      )}
       disabled={!canScrollNext}
       onClick={scrollNext}
       {...props}
@@ -306,14 +312,14 @@ export default function TestimonialCarousel({
   }, [api, current]);
 
   return (
-    <div className="relative flex items-center justify-center w-full select-none px-2 sm:px-4 md:px-6 py-8 text-white ">
+    <div className="relative flex items-center justify-center w-full select-none px-2 sm:px-4 md:px-6 py-8 text-black ">
       <TestimonialCard className="relative max-w-4xl w-full " setApi={setApi}>
         <div className="relative w-full ">
           <TestimonialCardContent>
             {data.map((testimonial, index) => (
               <TestimonialCardItem key={index} className="basis-full  ">
                 {/* card edit bg====================================== */}
-                <Card className="bg-background  border h-full bg-[#004348]">
+                <Card className="bg-background  border h-full bg-[#ffffff]">
                   <CardContent className="p-4 sm:p-6 md:p-8 h-full flex items-center">
                     <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 w-full">
                       <AnimatedAvatarBorder

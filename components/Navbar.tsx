@@ -90,8 +90,8 @@ const Navbar = () => {
           backfaceVisibility: "hidden",
         }}
       >
-        <div className="mx-auto px-6">
-          <nav className="flex items-center justify-between py-4">
+        <div className="mx-auto px-6 md:px-12">
+          <nav className="flex items-center justify-between py-4 ">
             {/* Logo */}
             <Link href="/" className="flex-shrink-0">
               <Image

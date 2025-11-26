@@ -2,59 +2,11 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { assets } from "@/assets/asset";
-import {
-  GraduationCap,
-  HeartHandshake,
-  Leaf,
-  Palette,
-  Microscope,
-  Laptop,
-} from "lucide-react";
 import React from "react";
 
 const Partnership = () => {
-  /** pillars */
-  const pillars = [
-    {
-      id: 1,
-      icon: GraduationCap,
-      title: "Education",
-      text: "Empowering young minds with knowledge and mentorship.",
-    },
-    {
-      id: 2,
-      icon: HeartHandshake,
-      title: "Community Development",
-      text: "Nurturing inclusive communities through shared initiatives.",
-    },
-    {
-      id: 3,
-      icon: Leaf,
-      title: "Environment",
-      text: "Championing sustainability alongside our partners.",
-    },
-    {
-      id: 4,
-      icon: Palette,
-      title: "Arts & Public Spaces",
-      text: "Fostering creativity and vibrant urban life.",
-    },
-    {
-      id: 5,
-      icon: Microscope,
-      title: "Knowledge",
-      text: "Encouraging research, experimentation, and discovery.",
-    },
-    {
-      id: 6,
-      icon: Laptop,
-      title: "Creative Support",
-      text: "Providing technology & creative tools for modern work.",
-    },
-  ];
-
   const partners = [
-    { image: assets.b_logo, name: "B Logo" },
+    { image: assets.b_logo, name: "B Logo" },
     { image: assets.canon_logo, name: "Canon" },
     { image: assets.petron_logo, name: "Petron" },
     { image: assets.vci_logo, name: "VCI" },
@@ -71,77 +23,49 @@ const Partnership = () => {
     { image: assets.sogno_logo, name: "Sogno Coffee" },
   ];
 
-  /** ✅ trigger animation only after mount to avoid SSR compression */
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
 
+  // Duplicate partners 4x untuk extra smoothness
+  const duplicatedPartners = [
+    ...partners,
+    ...partners,
+    ...partners,
+    ...partners,
+  ];
+
   return (
-    <section className="w-full bg-[#e9eef3] overflow-hidden py-10 md:py-16 text-gray-900">
-      {/* intro */}
-      <div className="max-w-6xl mx-auto px-6 text-center space-y-4 mb-16">
-        <motion.h2
-          initial={{ opacity: 0, y: -20 }}
+    <section className="w-full bg-[#e9eef3] overflow-hidden py-16 md:py-24 text-gray-900">
+      {/* Header */}
+      <div className="max-w-7xl mx-auto px-6 mb-12 md:mb-16">
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-4xl md:text-5xl font-extrabold tracking-tight"
+          viewport={{ once: true }}
+          className="text-sm uppercase tracking-widest text-gray-500 mb-4 text-center"
         >
-          Building Capacity &amp; Vibrant Communities
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-lg md:text-xl text-gray-700"
-        >
-          Delivering social value across six core pillars
+          Partnership
         </motion.p>
-      </div>
 
-      {/* grid cards */}
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-        {pillars.map((p, idx) => {
-          const Icon = p.icon;
-          return (
-            <motion.div
-              key={p.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: idx * 0.05 }}
-              whileHover={{ y: -5 }}
-              className="rounded-3xl bg-white p-8 flex flex-col justify-between shadow-sm border border-gray-100 hover:shadow-md hover:border-sky-300 transition-all duration-300"
-            >
-              <div className="flex items-center justify-center w-16 h-16 mb-6 rounded-xl bg-sky-100 text-sky-600">
-                <Icon className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">{p.title}</h3>
-              <p className="text-gray-600 text-base">{p.text}</p>
-            </motion.div>
-          );
-        })}
-      </div>
-
-      {/* description */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-3xl mx-auto text-center text-base md:text-xl leading-relaxed text-gray-700 px-6"
-      >
-        For over a decade, we’ve driven social initiatives across Malaysia — 
-        ensuring inclusivity and equality through every one of our partnerships.
-      </motion.p>
-
-      {/* === PARTNERS MARQUEE === */}
-      <div className="relative w-full overflow-hidden bg-[#e9eef3] mt-20">
-        <div
-          className={`marquee-track inline-flex items-center gap-10 ${
-            mounted ? "animate-scroll" : ""
-          }`}
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          viewport={{ once: true }}
+          className="text-3xl md:text-4xl lg:text-5xl font-serif text-center text-gray-900"
         >
-          {[...partners, ...partners].map((p, i) => (
+          We have worked with
+        </motion.h2>
+      </div>
+
+      {/* Marquee Container */}
+      <div className="relative w-full overflow-hidden">
+        <div className={`marquee-wrapper ${mounted ? "is-animated" : ""}`}>
+          {duplicatedPartners.map((p, i) => (
             <div
               key={i}
-              className="flex items-center justify-center bg-white rounded-2xl w-[220px] h-[120px] sm:w-[240px] sm:h-[130px] md:w-[260px] md:h-[140px] shadow-sm hover:shadow-md border border-gray-100 transition"
+              className="marquee-item flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-100"
             >
               <Image
                 src={p.image}
@@ -150,36 +74,61 @@ const Partnership = () => {
                 height={80}
                 quality={100}
                 draggable={false}
-                className="object-contain w-[140px] h-[80px] sm:w-[160px] sm:h-[90px] md:w-[180px] md:h-[100px] opacity-90 hover:opacity-100 transition-opacity"
+                className="object-contain w-[120px] h-[60px] sm:w-[140px] sm:h-[70px] md:w-[160px] md:h-[80px] opacity-80"
               />
             </div>
           ))}
         </div>
 
-        {/* styles */}
-        <style jsx global>{`
-          @keyframes scroll-loop {
-            0% {
-              transform: translateX(0);
-            }
-            100% {
-              transform: translateX(-50%);
-            }
-          }
-          .marquee-track {
-            min-width: 200%;
-            will-change: transform;
-          }
-          .animate-scroll {
-            animation: scroll-loop 40s linear infinite;
-          }
-          @media (prefers-reduced-motion: reduce) {
-            .animate-scroll {
-              animation: none;
-            }
-          }
-        `}</style>
+        {/* Gradient Edges */}
+        <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-[#e9eef3] to-transparent pointer-events-none z-10" />
+        <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-[#e9eef3] to-transparent pointer-events-none z-10" />
       </div>
+
+      {/* Marquee Styles */}
+      <style jsx>{`
+        .marquee-wrapper {
+          display: flex;
+          gap: 2rem;
+          width: max-content;
+        }
+
+        .marquee-item {
+          flex-shrink: 0;
+          width: 180px;
+          height: 100px;
+        }
+
+        @media (min-width: 640px) {
+          .marquee-item {
+            width: 200px;
+            height: 110px;
+          }
+        }
+
+        @media (min-width: 768px) {
+          .marquee-item {
+            width: 240px;
+            height: 130px;
+          }
+          .marquee-wrapper {
+            gap: 2.5rem;
+          }
+        }
+
+        .is-animated {
+          animation: scroll 90s linear infinite;
+        }
+
+        @keyframes scroll {
+          0% {
+            transform: translate3d(0, 0, 0);
+          }
+          100% {
+            transform: translate3d(-50%, 0, 0);
+          }
+        }
+      `}</style>
     </section>
   );
 };

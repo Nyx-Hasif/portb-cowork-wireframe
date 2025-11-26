@@ -144,7 +144,7 @@ export const SparklesText: React.FC<SparklesTextProps> = ({
           <Sparkle key={sparkle.id} {...sparkle} />
         ))}
         {/* change sparkleTEXT color here */}
-        <strong className="bg-gradient-to-r from-sky-400 to-teal-300 bg-clip-text text-transparent text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight  tracking-tight animate-fade-in-up">
+        <strong className="bg-gradient-to-r from-white to-white bg-clip-text text-transparent text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight  tracking-tight animate-fade-in-up">
           {children}
         </strong>
       </span>

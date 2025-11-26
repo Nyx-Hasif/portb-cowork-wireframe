@@ -1,118 +1,78 @@
 "use client";
 import React from "react";
-import Image, { type StaticImageData } from "next/image";
-import { motion } from "framer-motion";
-import { assets } from "@/assets/asset";
-import BackgroundMeteors from "./ui/backgroundmeteors";
+import Image from "next/image"; // 👈 Import Image dari next/image
 
-type Section = {
-  id: number;
-  title: string;
-  description: string;
-  image: string | StaticImageData;
-  duotone: { highlight: string; shadow: string };
-};
+const content = [
+  {
+    title: "Our Mission",
+    description:
+      "Transform the way people in Kota Bharu work and grow by turning ordinary space into a place that works for you.",
+  },
+  {
+    title: "Our Vision",
+    description:
+      "Inspire entrepreneurs, freelancers, and creators to thrive, collaborate, and build meaningful connections that spark innovation.",
+  },
+  {
+    title: "Core Values",
+    description:
+      "We believe in adaptability, community, and authenticity — spaces and solutions that grow with your needs.",
+  },
+];
 
-const MissionVision = () => {
-  const sections: Section[] = [
-    {
-      id: 1,
-      title: "Mission",
-      description:
-        "Transform the way people in Kota Bharu work and grow by turning ordinary space into a place that works for you.",
-      image: assets.our_mission,
-      duotone: { highlight: "#ca3d33", shadow: "#ca3d33" },
-    },
-    {
-      id: 2,
-      title: "Vision",
-      description:
-        "Inspire entrepreneurs, freelancers, and creators to thrive, collaborate, and build meaningful connections that spark innovation.",
-      image: assets.our_vision,
-      duotone: { highlight: "#2887BF", shadow: "#2887BF" },
-    },
-    {
-      id: 3,
-      title: "Values",
-      description:
-        "We believe in adaptability, community, and authenticity — spaces and solutions that grow with your needs.",
-      image: assets.our_values,
-      duotone: { highlight: "#02AA6D", shadow: "#02AA6D" },
-    },
-  ];
-
+export default function MissionVisionValues() {
   return (
-    <BackgroundMeteors>
-      <div className="relative z-10 h-auto max-w-6xl mx-auto px-6 md:px-10 py-15  md:space-y-24">
-        {sections.map((item, i) => (
-          <motion.div
-            key={item.id}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.4 }}
-            transition={{ duration: 0.8, delay: i * 0.2 }}
-            className={`relative isolate flex flex-col md:flex-row items-center gap-10 ${
-              i % 2 === 1 ? "md:flex-row-reverse" : ""
-            }`}
-          >
-            {/* image side */}
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="relative md:w-1/2 w-full overflow-hidden rounded-3xl shadow-xl dark:shadow-gray-800"
-            >
-              <div className="relative h-full min-h-[450px] md:min-h-[500px] [aspect-ratio:4/5]">
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  fill
-                  quality={100}
-                  draggable={false}
-                  className="object-cover object-center grayscale hover:grayscale-0 transition duration-700"
-                />
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background: `linear-gradient(180deg, ${item.duotone.highlight}33, ${item.duotone.shadow}66)`,
-                    mixBlendMode: "multiply",
-                  }}
-                />
-              </div>
-            </motion.div>
+    <section
+      id="mission"
+      className="py-24 bg-black text-white relative overflow-hidden"
+    >
+      {/* Abstract decorative element */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
 
-            {/* text side */}
-            <div className="md:w-1/2 w-full flex flex-col justify-center min-h-[300px] md:min-h-[500px] space-y-6 text-center md:text-left">
-              <h3
-                className="text-5xl md:text-6xl font-extrabold tracking-tight"
-                style={{ color: item.duotone.shadow }}
-              >
-                {item.title}
-              </h3>
-              <p className="text-lg md:text-xl leading-relaxed text-gray-700 dark:text-gray-300 max-w-md mx-auto md:mx-0">
-                {item.description}
-              </p>
-              <div
-                className="mx-auto md:mx-0 h-[3px] w-24 rounded-full"
-                style={{
-                  background: `linear-gradient(90deg, transparent, ${item.duotone.highlight}, transparent)`,
-                }}
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="mb-16 md:mb-24 max-w-4xl">
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-serif leading-tight">
+            We believe workspace is a <br />{" "}
+            <span className="text-gray-500">state of mind.</span>
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
+          {/* Image Column — menggunakan Next.js Image */}
+          <div className="relative order-2 lg:order-1">
+            {/* Outer border effect (still using div) */}
+            <div className="absolute inset-0 border border-white/20 translate-x-3 translate-y-3 z-0"></div>
+
+            {/* Next.js Image — perlu width & height */}
+            <div className="relative z-10 w-full aspect-[3/4]">
+              <Image
+                src="https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                alt="Minimalist coworking space"
+                fill
+                className="object-cover grayscale"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                // Optional: tambah placeholder jika mahu
+                // placeholder="blur"
+                // blurDataURL="data:image/svg+xml;base64,..."
               />
             </div>
+          </div>
 
-            {/* glow halo */}
-            <div
-              className="absolute -z-10 h-[65%] w-[60%] blur-3xl opacity-25 rounded-full"
-              style={{
-                background: `radial-gradient(circle at center, ${item.duotone.highlight}55, transparent 70%)`,
-                top: "50%",
-                left: i % 2 === 0 ? "65%" : "20%",
-                transform: "translate(-50%, -50%)",
-              }}
-            />
-          </motion.div>
-        ))}
+          {/* Content Column */}
+          <div className="space-y-12 order-1 lg:order-2 lg:py-8">
+            {content.map((item, index) => (
+              <div key={index} className="group">
+                <h3 className="text-xs uppercase tracking-[0.25em] text-gray-400 mb-4 group-hover:text-white transition-colors">
+                  {item.title}
+                </h3>
+                <p className="text-lg md:text-xl font-light text-gray-300 leading-relaxed border-l border-white/20 pl-6 transition-all group-hover:border-white/60">
+                  {item.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-    </BackgroundMeteors>
+    </section>
   );
-};
-
-export default MissionVision;
+}

@@ -59,7 +59,7 @@ export function InfiniteMovingCards({
               className="w-[280px] sm:w-[340px] md:w-[400px] shrink-0"
             >
               {/* // change bg card marquee here */}
-              <article className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#004348] p-6 shadow-sm hover:shadow-md transition-shadow h-55 flex flex-col justify-between">
+              <article className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white  p-6 shadow-sm hover:shadow-md transition-shadow h-55 flex flex-col justify-between">
                 <div className="flex items-start gap-3 mb-4">
                   {/* avatar */}
                   <div className="relative h-15 w-15 overflow-hidden rounded-full bg-white">
@@ -72,23 +72,23 @@ export function InfiniteMovingCards({
                         className="object-cover h-full w-full"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-gray-500 font-semibold">
+                      <div className="flex h-full w-full items-center justify-center text-black font-semibold">
                         {item.name.charAt(0)}
                       </div>
                     )}
                   </div>
                   {/* name */}
                   <div className="flex-1">
-                    <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+                    <p className="font-semibold text-black text-sm">
                       {item.name}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                    <p className="text-xs text-black italic">
                       {item.title}
                     </p>
                   </div>
                 </div>
                 {/* quote */}
-                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-4">
+                <p className="text-sm text-black leading-relaxed line-clamp-4">
                   “{item.quote}”
                 </p>
               </article>

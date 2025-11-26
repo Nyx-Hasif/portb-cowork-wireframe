@@ -8,8 +8,9 @@ import Reviews from "../components/Reviews";
 // import Stats from "../components/Stats";
 import Visit from "../components/Visit";
 import WhyUs from "../components/WhyUs";
-import AppleCardsCarouselDemo from "@/components/space-stations";
+// import AppleCardsCarouselDemo from "@/components/space-stations";
 import StatsCountDemo from "@/components/statscount-demo";
+import SpacesGallery from "@/components/SpaceGallery";
 
 export default function Home() {
   return (
@@ -19,17 +20,17 @@ export default function Home() {
         imagePath={"/images/hero.png"}
       /> */}
       <ImagesSliderDemo />
-      <AppleCardsCarouselDemo />
+      {/* <AppleCardsCarouselDemo /> */}
+      <SpacesGallery />
       {/* <Facilities /> */}
       <WhyUs />
       <MissionVision />
-      <Partnership />
 
-      <Visit />
       {/* <Stats /> */}
       <StatsCountDemo />
+      <Partnership />
       <Reviews />
-
+      <Visit />
       <CTA />
     </div>
   );

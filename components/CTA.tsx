@@ -49,7 +49,7 @@ const CTA = () => {
             <div className="animate-fade-in-up animation-delay-400 pt-2">
               <Link
                 href="/coworking-space"
-                className="inline-flex items-center justify-center gap-3 px-8 py-3 rounded-full bg-gradient-to-r from-blue-600 to-teal-500 hover:from-teal-500 hover:to-blue-600 text-white font-semibold text-lg transition-all duration-300 hover:shadow-[0_0_25px_rgba(56,189,248,0.4)] hover:scale-105 relative overflow-hidden group"
+                className="inline-flex items-center justify-center gap-3 px-8 py-3 rounded-full bg-gradient-to-r from-white to-white hover:from-teal-500 hover:to-blue-600 text-black font-semibold text-lg transition-all duration-300 hover:shadow-[0_0_25px_rgba(56,189,248,0.4)] hover:scale-105 relative overflow-hidden group"
               >
                 {/* Smooth shine line */}
                 <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent mix-blend-overlay group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
