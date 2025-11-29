@@ -3,7 +3,7 @@ import { assets } from "@/assets/asset";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X, UserCircle } from "lucide-react"; // Add UserCircle icon
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -186,13 +186,15 @@ const Navbar = () => {
               </Link>
             </div>
 
-            {/* Desktop Admin Button */}
+            {/* Desktop Admin Icon Button */}
             <div className="hidden md:block">
               <Link
                 href="/login"
-                className="bg-gray-900 text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors duration-200"
+                className="inline-flex items-center justify-center p-2 text-gray-700 hover:text-green-600 hover:bg-gray-100 rounded-full transition-all duration-200"
+                aria-label="Admin Login"
+                title="Admin Login"
               >
-                Admin
+                <UserCircle className="w-7 h-7" />
               </Link>
             </div>
 
@@ -317,13 +319,15 @@ const Navbar = () => {
             Contact us
           </Link>
 
-          <div className="pt-4">
+          {/* Mobile Admin Login with Icon */}
+          <div className="pt-4 border-t">
             <Link
               href="/login"
               onClick={closeMobileMenu}
-              className="block text-center bg-gray-900 text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+              className="flex items-center justify-center gap-2 text-gray-800 py-2.5 hover:text-green-600 transition-colors"
             >
-              Admin
+              <UserCircle className="w-5 h-5" />
+              <span>Admin Login</span>
             </Link>
           </div>
         </nav>
