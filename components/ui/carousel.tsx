@@ -1,19 +1,21 @@
+// components/ui/carousel.tsx
 "use client";
 import { IconArrowNarrowRight } from "@tabler/icons-react";
 import { useState, useRef, useId, useCallback } from "react";
 import Image, { StaticImageData } from "next/image";
 
-interface CardData {
+// Accept both StaticImageData and string URL
+export interface CardData {
   id: number;
   icon: React.ReactNode;
   title: string;
-  img: StaticImageData; // ✅ Fix: ganti 'any' dengan proper type
+  img: StaticImageData | string;
   description: string;
   category: string;
 }
 
 interface SlideProps {
-  card: CardData; // ✅ Tukar dari cards[] kepada card (single)
+  card: CardData;
   index: number;
   current: number;
   handleSlideClick: (index: number) => void;
@@ -21,6 +23,8 @@ interface SlideProps {
 
 const Slide = ({ card, index, current, handleSlideClick }: SlideProps) => {
   const slideRef = useRef<HTMLLIElement>(null);
+  const hasValidImage =
+    card.img && (typeof card.img === "string" ? card.img.length > 0 : true);
 
   return (
     <li
@@ -32,18 +36,23 @@ const Slide = ({ card, index, current, handleSlideClick }: SlideProps) => {
         transform: current === index ? "scale(1)" : "scale(0.95)",
       }}
     >
-      {/* Single Card */}
       <div className="max-w-2xl mx-auto">
         <div className="group relative bg-white rounded-xl shadow-[0_3px_15px_rgba(0,0,0,0.08)] overflow-hidden transition-transform duration-300 hover:-translate-y-2">
           {/* Image */}
           <div className="relative w-full h-72 overflow-hidden">
-            <Image
-              src={card.img}
-              alt={card.title}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              quality={90}
-            />
+            {hasValidImage ? (
+              <Image
+                src={card.img}
+                alt={card.title}
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                quality={90}
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-[#004348] to-[#006d75] flex items-center justify-center">
+                <span className="text-white/60 text-lg">No image</span>
+              </div>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
           </div>
 
@@ -96,7 +105,7 @@ const CarouselControl = ({
   );
 };
 
-interface CarouselProps {
+export interface CarouselProps {
   cards: CardData[];
 }
 
@@ -124,7 +133,17 @@ export default function Carousel({ cards }: CarouselProps) {
 
   const id = useId();
 
+  // Handle empty cards
+  if (!cards || cards.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64 text-gray-500">
+        No items to display
+      </div>
+    );
+  }
+
   return (
+    // ⭐ Added: overflow-hidden to contain carousel
     <div
       className="relative w-full mx-auto overflow-hidden"
       aria-labelledby={`carousel-heading-${id}`}
@@ -138,7 +157,7 @@ export default function Carousel({ cards }: CarouselProps) {
         {cards.map((card, index) => (
           <Slide
             key={card.id}
-            card={card} // ✅ Pass single card
+            card={card}
             index={index}
             current={current}
             handleSlideClick={handleSlideClick}
@@ -147,35 +166,39 @@ export default function Carousel({ cards }: CarouselProps) {
       </ul>
 
       {/* Navigation buttons */}
-      <div className="flex justify-center w-full mt-12">
-        <CarouselControl
-          type="previous"
-          title="Go to previous slide"
-          handleClick={handlePreviousClick}
-        />
+      {cards.length > 1 && (
+        <div className="flex justify-center w-full mt-12">
+          <CarouselControl
+            type="previous"
+            title="Go to previous slide"
+            handleClick={handlePreviousClick}
+          />
 
-        <CarouselControl
-          type="next"
-          title="Go to next slide"
-          handleClick={handleNextClick}
-        />
-      </div>
+          <CarouselControl
+            type="next"
+            title="Go to next slide"
+            handleClick={handleNextClick}
+          />
+        </div>
+      )}
 
       {/* Slide indicators (dots) */}
-      <div className="flex justify-center gap-2 mt-6">
-        {cards.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrent(index)}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              current === index
-                ? "bg-[#004348] w-8"
-                : "bg-gray-300 hover:bg-gray-400"
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
+      {cards.length > 1 && (
+        <div className="flex justify-center gap-2 mt-6">
+          {cards.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrent(index)}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                current === index
+                  ? "bg-[#004348] w-8"
+                  : "bg-gray-300 hover:bg-gray-400"
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

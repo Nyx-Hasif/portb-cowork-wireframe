@@ -4,23 +4,22 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { User, Lock, AlertCircle, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/components/AuthProvider"; // ← Import useAuth hook
+import { useAuth } from "@/components/AuthProvider";
 
 const AdminLogin = () => {
   // 1️⃣ FORM STATES
-  const [email, setEmail] = useState(""); // Changed from username to email
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [isLoading, setIsLoading] = useState(false);
 
   // 2️⃣ GET AUTH FUNCTIONS
-  const { signIn, user, loading: authLoading } = useAuth(); // Get from AuthProvider
+  const { signIn, user, loading: authLoading } = useAuth();
   const router = useRouter();
 
   // 3️⃣ REDIRECT IF ALREADY LOGGED IN
   useEffect(() => {
     if (!authLoading && user) {
-      // User already logged in, go to dashboard
       router.push("/admin/dashboard");
     }
   }, [user, authLoading, router]);
@@ -49,20 +48,21 @@ const AdminLogin = () => {
 
     try {
       // 5️⃣ CALL SUPABASE LOGIN
-      const { error } = await signIn(email.trim(), password);
+      const { error: signInError } = await signIn(email.trim(), password);
 
-      if (error) {
+      if (signInError) {
         // Login failed - show error
-        if (error.message?.includes("Invalid login credentials")) {
+        if (signInError.message?.includes("Invalid login credentials")) {
           setError("Invalid email or password");
         } else {
-          setError(error.message || "Login failed. Please try again.");
+          setError(signInError.message || "Login failed. Please try again.");
         }
       } else {
         // Login success - redirect happens automatically
         router.push("/admin/dashboard");
       }
-    } catch (error) {
+    } catch (err) {
+      console.error(err);
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
@@ -116,7 +116,7 @@ const AdminLogin = () => {
 
           {/* Form */}
           <form onSubmit={handleLogin} className="space-y-6">
-            {/* Email Input - Changed from Username */}
+            {/* Email Input */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Email Address
@@ -135,7 +135,6 @@ const AdminLogin = () => {
             </div>
 
             {/* Password Input */}
-            {/* Password Input */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Password
@@ -153,7 +152,6 @@ const AdminLogin = () => {
                 />
               </div>
             </div>
-
 
             {/* Error Message */}
             {error && (

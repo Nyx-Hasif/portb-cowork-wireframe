@@ -341,3 +341,29 @@
 }
 
 
+
+/* globals.css - Add at the bottom */
+
+/* Fix for visual artifacts */
+section {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* Ensure cards don't overflow */
+.group {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Fix hover translate artifacts */
+.hover\:-translate-y-2:hover {
+  transform: translateY(-8px) translateZ(0);
+}
+
+/* Contain paint for sections */
+.overflow-hidden {
+  contain: paint;
+}

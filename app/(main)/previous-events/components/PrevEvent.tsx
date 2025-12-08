@@ -1,60 +1,103 @@
-import { assets } from "@/assets/asset";
+// app/(main)/previous-events/components/PrevEvent.tsx
+"use client";
+import React, { useState, useEffect } from "react";
 import Carousel from "@/components/ui/carousel";
 import Image from "next/image";
-import React from "react";
 import {
   HiLightBulb,
   HiOutlineRocketLaunch,
   HiOutlineUserGroup,
   HiOutlinePresentationChartLine,
 } from "react-icons/hi2";
+import { Loader2 } from "lucide-react";
+import { getPreviousEvents } from "@/lib/database"; // ⭐ Changed: Use getPreviousEvents (no limit)
+
+// Icon mapping
+const iconMap: { [key: string]: React.ReactNode } = {
+  users: <HiOutlineUserGroup className="w-8 h-8 text-[#004348]" />,
+  rocket: <HiOutlineRocketLaunch className="w-8 h-8 text-[#004348]" />,
+  lightbulb: <HiLightBulb className="w-8 h-8 text-[#004348]" />,
+  presentation: (
+    <HiOutlinePresentationChartLine className="w-8 h-8 text-[#004348]" />
+  ),
+};
+
+const defaultIcon = <HiOutlineUserGroup className="w-8 h-8 text-[#004348]" />;
+
+interface PreviousEvent {
+  id: number;
+  title: string;
+  description?: string;
+  category: string;
+  icon_name?: string;
+  image_url?: string;
+  created_at?: string;
+}
 
 const PrevEvent = () => {
-  const cards = [
-    {
-      id: 1,
-      icon: <HiOutlineUserGroup className="w-8 h-8 text-[#004348]" />,
-      category: "Learning & Development", // ✅ Updated
-      title: "Training Programs & Skill Development",
-      img: assets.codekids,
-      description:
-        "Transform your space into a dynamic learning hub for professional development and interactive workshops. Our rooms are equipped to inspire engagement and growth.",
-    },
-    {
-      id: 2,
-      icon: <HiOutlineRocketLaunch className="w-8 h-8 text-[#004348]" />,
-      category: "Talent Acquisition", // ✅ Updated
-      title: "Recruitment & Candidate Interviews",
-      img: assets.recruit,
-      description:
-        "Leave a lasting impression with interviews and recruitment sessions in a polished, modern setting designed to highlight your brand professionalism.",
-    },
-    {
-      id: 3,
-      icon: <HiLightBulb className="w-8 h-8 text-[#004348]" />,
-      category: "Virtual Collaboration", // ✅ Updated
-      title: "Digital Events & Online Conferences",
-      img: assets.digital_event,
-      description:
-        "Host seamless virtual or hybrid events using top-tier conferencing technology. Connect participants from across the world effortlessly and dynamically.",
-    },
-    {
-      id: 4,
-      icon: (
-        <HiOutlinePresentationChartLine className="w-8 h-8 text-[#004348]" />
-      ),
-      category: "Business Presentation", // ✅ Updated
-      title: "Business Pitches & Client Showcases",
-      img: assets.meeting_pitch,
-      description:
-        "Deliver compelling presentations that captivate clients and investors. Designed for clarity, focus, and premium professional impact.",
-    },
-  ];
+  const [events, setEvents] = useState<PreviousEvent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        // ⭐ Changed: Get ALL previous events (no limit)
+        const data = await getPreviousEvents();
+        setEvents(data);
+      } catch (error) {
+        console.error("Error fetching previous events:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  // Transform for Carousel
+  const cards = events.map((event) => ({
+    id: event.id,
+    icon: event.icon_name
+      ? iconMap[event.icon_name] || defaultIcon
+      : defaultIcon,
+    category: event.category,
+    title: event.title,
+    img: event.image_url || "",
+    description: event.description || "",
+  }));
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <section className="bg-[#f9fafb] text-gray-800 py-10">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="w-10 h-10 animate-spin text-[#004348]" />
+        </div>
+      </section>
+    );
+  }
+
+  // Empty state
+  if (events.length === 0) {
+    return (
+      <section className="bg-[#f9fafb] text-gray-800 py-10">
+        <header className="text-center space-y-4 lg:mb-14">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[#004348]">
+            Previous and Upcoming Events
+          </h1>
+          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Stay tuned for our upcoming events!
+          </p>
+        </header>
+      </section>
+    );
+  }
 
   return (
-    <section className="bg-[#f9fafb] text-gray-800 py-10">
+    // ⭐ Added: overflow-hidden to prevent content leaking
+    <section className="bg-[#f9fafb] text-gray-800 py-10 overflow-hidden">
       {/* Hero */}
-      <header className="text-center space-y-4 lg:mb-14">
+      <header className="text-center space-y-4 lg:mb-14 px-4">
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[#004348]">
           Previous and Upcoming Events
         </h1>
@@ -64,40 +107,50 @@ const PrevEvent = () => {
         </p>
       </header>
 
-      {/* Mobile & Tablet: Carousel */}
-      <div className="block lg:hidden relative w-full py-12">
+      {/* Mobile & Tablet: Carousel - ⭐ Added overflow-hidden wrapper */}
+      <div className="block lg:hidden relative w-full py-12 overflow-hidden">
         <Carousel cards={cards} />
       </div>
 
-      {/* Desktop: Grid 2x2 */}
-      <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 gap-10 max-w-7xl mx-auto px-4">
-        {cards.map((item) => (
+      {/* Desktop: Grid - ⭐ Changed to responsive grid that shows ALL events */}
+      <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 max-w-7xl mx-auto px-4">
+        {events.map((item) => (
           <div
             key={item.id}
             className="group relative bg-white rounded-xl shadow-[0_3px_15px_rgba(0,0,0,0.08)] overflow-hidden transition-transform duration-300 hover:-translate-y-2"
           >
             {/* Image */}
-            <div className="relative w-full h-72 overflow-hidden">
-              <Image
-                src={item.img}
-                alt={item.title}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                quality={90}
-              />
+            <div className="relative w-full h-56 overflow-hidden">
+              {item.image_url ? (
+                <Image
+                  src={item.image_url}
+                  alt={item.title}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  quality={90}
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-[#004348] to-[#006d75] flex items-center justify-center">
+                  <span className="text-white/60 text-lg">No image</span>
+                </div>
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
             </div>
 
             {/* Content */}
-            <div className="p-8 flex flex-col gap-3">
+            <div className="p-6 flex flex-col gap-3">
               <div className="flex items-center gap-3">
-                {item.icon}
+                {item.icon_name
+                  ? iconMap[item.icon_name] || defaultIcon
+                  : defaultIcon}
                 <span className="uppercase tracking-wide text-sm text-[#004348] font-medium">
-                  {item.category} {/* ✅ Dynamic category */}
+                  {item.category}
                 </span>
               </div>
-              <h2 className="text-2xl font-semibold">{item.title}</h2>
-              <p className="text-gray-600 leading-relaxed text-base">
+              <h2 className="text-xl font-semibold line-clamp-2">
+                {item.title}
+              </h2>
+              <p className="text-gray-600 leading-relaxed text-sm line-clamp-3">
                 {item.description}
               </p>
             </div>
@@ -106,7 +159,7 @@ const PrevEvent = () => {
       </div>
 
       {/* Closing section */}
-      <footer className="lg:mt-16 text-center space-y-6">
+      <footer className="lg:mt-16 text-center space-y-6 px-4">
         <h2 className="text-3xl md:text-4xl font-semibold text-[#004348]">
           Spaces That Adapt to You
         </h2>
