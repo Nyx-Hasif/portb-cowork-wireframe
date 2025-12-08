@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom"; // ✅ Add this
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { assets } from "@/assets/asset";
@@ -14,9 +15,15 @@ import {
 const Visit = () => {
   const [open, setOpen] = useState(false);
   const [flip, setFlip] = useState(false);
+  const [mounted, setMounted] = useState(false); // ✅ Add this
+
+  // ✅ Check if component mounted (client-side only)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleEsc = useCallback((e: KeyboardEvent) => {
-    if (e.key === "Escape" && window.innerWidth >= 768) setOpen(false);
+    if (e.key === "Escape") setOpen(false);
   }, []);
 
   useEffect(() => {
@@ -24,15 +31,27 @@ const Visit = () => {
     return () => window.removeEventListener("keydown", handleEsc);
   }, [handleEsc]);
 
+  // ✅ Prevent body scroll when modal open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [open]);
+
   return (
     <section
       id="visit"
       className="py-16 md:py-24 bg-black relative overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-6">
-        {/* Flex container: column on mobile, row on desktop */}
+        {/* ... your existing content ... */}
         <div className="flex flex-col lg:flex-row gap-12">
-          {/* LEFT COLUMN — Content & Info */}
+          {/* LEFT COLUMN */}
           <div className="lg:w-1/2 lg:order-1 w-full">
             <div className="space-y-8 text-center lg:text-left">
               <motion.h2
@@ -108,7 +127,7 @@ const Visit = () => {
                 </div>
               </motion.div>
 
-              {/* Buttons — centered on mobile, left on desktop */}
+              {/* Buttons */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -142,7 +161,7 @@ const Visit = () => {
             </div>
           </div>
 
-          {/* RIGHT COLUMN — Flip Card */}
+          {/* RIGHT COLUMN */}
           <div className="lg:w-1/2 lg:order-2 w-full flex justify-center">
             <div className="w-full max-w-md lg:max-w-none h-[400px] lg:h-[500px] bg-neutral-800 relative overflow-hidden border border-white/10 rounded-3xl">
               <CardFlip isFlipped={flip} className="w-full h-full">
@@ -178,41 +197,54 @@ const Visit = () => {
         </div>
       </div>
 
-      {/* Video Modal (unchanged) */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            key="modal"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-[999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-          >
-            <button
-              onClick={() => setOpen(false)}
-              className="absolute top-8 right-10 text-white bg-white/20 backdrop-blur-md hover:bg-white/40 transition rounded-full h-12 w-12 flex items-center justify-center text-3xl shadow-lg"
-            >
-              ✕
-            </button>
+      {/* VIDEO MODAL - Universal */}
+      {mounted &&
+        open &&
+        createPortal(
+          <AnimatePresence>
             <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
-              transition={{ duration: 0.25 }}
-              className="w-full max-w-5xl aspect-video bg-black rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/20"
+              key="video-modal"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-lg p-3 sm:p-6"
+              style={{ margin: 0 }}
             >
-              <iframe
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                title="PortB Tour Video"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
-              />
+              {/* Close Button */}
+              <button
+                onClick={() => setOpen(false)}
+                className="absolute top-3 right-3 sm:top-6 sm:right-6 md:top-8 md:right-10 text-white bg-red-500 hover:bg-red-600 active:bg-red-700 transition-all rounded-full h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center text-2xl sm:text-3xl shadow-2xl hover:scale-110 active:scale-95 z-[10000] touch-manipulation"
+                aria-label="Close video"
+              >
+                ✕
+              </button>
+
+              {/* Video Container */}
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                className="relative w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-6xl aspect-video max-h-[70vh] bg-black rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl ring-1 sm:ring-2 ring-white/20"
+              >
+                <iframe
+                  src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
+                  title="PortB Tour Video"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full"
+                />
+              </motion.div>
+
+              {/* Mobile Hint */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/50 text-xs bg-black/40 px-4 py-2 rounded-full backdrop-blur-sm sm:hidden animate-pulse">
+                Tap ✕ to close
+              </div>
             </motion.div>
-          </motion.div>
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
     </section>
   );
 };

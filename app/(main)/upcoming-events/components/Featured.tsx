@@ -8,7 +8,7 @@ import {
   HiOutlineUserGroup,
 } from "react-icons/hi2";
 import { Loader2 } from "lucide-react";
-import { getUpcomingEvents } from "@/lib/database"; // ⭐ Changed: Get ALL upcoming events
+import { getUpcomingEvents } from "@/lib/database";
 
 interface UpcomingEvent {
   id: number;
@@ -24,6 +24,48 @@ interface UpcomingEvent {
   created_at?: string;
 }
 
+// ✅ HELPER FUNCTIONS - Format Date & Time
+const formatDate = (dateString?: string): string => {
+  if (!dateString) return "TBA";
+
+  try {
+    const date = new Date(dateString);
+
+    // Check if valid date
+    if (isNaN(date.getTime())) return dateString;
+
+    // Format: "Dec 25, 2024" (US style) or use "en-GB" for "25 Dec 2024" (MY style)
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch (error) {
+    return dateString;
+  }
+};
+
+const formatTime = (timeString?: string): string => {
+  if (!timeString) return "TBA";
+
+  try {
+    // Handle HH:MM format (24-hour)
+    const [hours, minutes] = timeString.split(":");
+    const hour = parseInt(hours, 10);
+    const min = minutes || "00";
+
+    if (isNaN(hour)) return timeString;
+
+    // Convert to 12-hour format with AM/PM
+    const period = hour >= 12 ? "PM" : "AM";
+    const hour12 = hour % 12 || 12; // Convert 0 to 12
+
+    return `${hour12}:${min} ${period}`;
+  } catch (error) {
+    return timeString;
+  }
+};
+
 const Featured = () => {
   const [events, setEvents] = useState<UpcomingEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,7 +73,6 @@ const Featured = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        // ⭐ Changed: Get ALL upcoming events (no limit)
         const data = await getUpcomingEvents();
         setEvents(data);
       } catch (error) {
@@ -60,12 +101,11 @@ const Featured = () => {
     return null;
   }
 
-  // ⭐ Separate featured and regular events
+  // Separate featured and regular events
   const featuredEvents = events.filter((e) => e.is_featured);
   const regularEvents = events.filter((e) => !e.is_featured);
 
   return (
-    // ⭐ Added: overflow-hidden to prevent content leaking to footer
     <section className="bg-[#f9fafb] text-gray-800 py-10 overflow-hidden">
       {/* Featured Events Section */}
       {featuredEvents.length > 0 && (
@@ -122,19 +162,23 @@ const Featured = () => {
                     </p>
                   </div>
 
-                  {/* Timeline */}
-                  <div className="grid grid-cols-3 gap-3 text-gray-700">
+                  {/* ✅ Timeline - With Formatted Date/Time */}
+                  <div className="flex flex-col sm:grid sm:grid-cols-3 gap-3 text-gray-700">
                     <div className="flex items-center gap-2">
                       <HiOutlineCalendar className="text-[#004348] w-5 h-5 flex-shrink-0" />
-                      <p className="text-sm truncate">{item.date || "TBA"}</p>
+                      <p className="text-sm font-medium">
+                        {formatDate(item.date)}
+                      </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <HiOutlineClock className="text-[#004348] w-5 h-5 flex-shrink-0" />
-                      <p className="text-sm truncate">{item.time || "TBA"}</p>
+                      <p className="text-sm font-medium">
+                        {formatTime(item.time)}
+                      </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <HiOutlineUserGroup className="text-[#004348] w-5 h-5 flex-shrink-0" />
-                      <p className="text-sm truncate">
+                      <p className="text-sm font-medium truncate">
                         {item.guests || "Open"}
                       </p>
                     </div>
@@ -213,15 +257,19 @@ const Featured = () => {
                     </p>
                   </div>
 
-                  {/* Timeline */}
-                  <div className="flex flex-wrap gap-3 text-gray-600 text-sm">
-                    <div className="flex items-center gap-1">
-                      <HiOutlineCalendar className="text-[#004348] w-4 h-4" />
-                      <span>{item.date || "TBA"}</span>
+                  {/* ✅ Timeline - With Formatted Date/Time */}
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 text-gray-600 text-sm">
+                    <div className="flex items-center gap-1.5">
+                      <HiOutlineCalendar className="text-[#004348] w-4 h-4 flex-shrink-0" />
+                      <span className="font-medium">
+                        {formatDate(item.date)}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <HiOutlineClock className="text-[#004348] w-4 h-4" />
-                      <span>{item.time || "TBA"}</span>
+                    <div className="flex items-center gap-1.5">
+                      <HiOutlineClock className="text-[#004348] w-4 h-4 flex-shrink-0" />
+                      <span className="font-medium">
+                        {formatTime(item.time)}
+                      </span>
                     </div>
                   </div>
 
