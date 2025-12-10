@@ -15,11 +15,13 @@ interface StatItem {
   suffix?: string;
   label: string;
   showDecimal?: boolean;
+  icon?: string;
 }
 
 interface StatsCountProps {
   stats?: StatItem[];
   title?: string;
+  subtitle?: string;
   showDividers?: boolean;
   className?: string;
 }
@@ -28,24 +30,22 @@ const defaultStats: StatItem[] = [
   {
     value: 50,
     suffix: "+",
-    label: "Handcrafted animated components",
+    label: "Handcrafted Components",
     showDecimal: false,
   },
   {
     value: 12,
     suffix: "K+",
-    label: "Developers building with ScrollX-UI",
+    label: "Active Developers",
     showDecimal: false,
   },
   {
     value: 99,
     suffix: "%",
-    label: "Performance optimized for web",
+    label: "Performance Score",
     showDecimal: false,
   },
 ];
-
-const defaultTitle = "TRUSTED BY CREATORS AND INNOVATORS";
 
 function AnimatedCounter({
   value,
@@ -59,14 +59,15 @@ function AnimatedCounter({
   delay?: number;
   label: string;
   showDecimal?: boolean;
+  icon?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { margin: "-50px" });
+  const isInView = useInView(ref, { margin: "-50px", once: true });
 
   const motionValue = useMotionValue(0);
   const springValue = useSpring(motionValue, {
-    damping: 20,
-    stiffness: 50,
+    damping: 25,
+    stiffness: 60,
     mass: 1,
   });
 
@@ -89,9 +90,7 @@ function AnimatedCounter({
       motionValue.set(0);
       timeout = setTimeout(() => {
         motionValue.set(value);
-      }, delay * 300);
-    } else {
-      motionValue.set(0);
+      }, delay * 200);
     }
     return () => clearTimeout(timeout);
   }, [isInView, value, motionValue, delay]);
@@ -102,153 +101,118 @@ function AnimatedCounter({
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
       transition={{
-        duration: 0.8,
-        delay: delay * 0.2,
-        type: "spring",
-        stiffness: 80,
+        duration: 0.6,
+        delay: delay * 0.15,
+        ease: "easeOut",
       }}
-      className={cn(
-        "text-center flex-1 min-w-0 flex flex-col justify-center h-full"
-      )}
+      className="relative flex flex-col items-center text-center group"
     >
+ 
+
+      {/* Number - ✅ Changed to black */}
       <motion.div
-        className={cn(
-          "text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4 whitespace-nowrap"
-        )}
-        initial={{ scale: 0.8 }}
-        animate={isInView ? { scale: 1 } : { scale: 0.8 }}
+        className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-black mb-3 tracking-tight"
+        initial={{ scale: 0.5, opacity: 0 }}
+        animate={
+          isInView ? { scale: 1, opacity: 1 } : { scale: 0.5, opacity: 0 }
+        }
         transition={{
           duration: 0.6,
-          delay: delay * 0.2 + 0.3,
+          delay: delay * 0.15 + 0.3,
           type: "spring",
           stiffness: 100,
         }}
       >
         {showDecimal ? displayValue.toFixed(1) : Math.round(displayValue)}
-        {suffix}
+        <span className="text-black">{suffix}</span>
       </motion.div>
+
+      {/* Label - ✅ Changed to gray-600 */}
       <motion.p
-        className={cn(
-          "text-gray-600 dark:text-black text-xs sm:text-sm leading-relaxed px-1 sm:px-2 hyphens-auto break-words"
-        )}
-        style={{ wordBreak: "break-word", overflowWrap: "break-word" }}
+        className="text-sm sm:text-base md:text-lg text-gray-600 font-light max-w-[200px] leading-relaxed"
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-        transition={{ delay: delay * 0.2 + 0.6, duration: 0.6 }}
+        transition={{ delay: delay * 0.15 + 0.5, duration: 0.6 }}
       >
         {label}
       </motion.p>
+
     </motion.div>
   );
 }
 
 export default function StatsCount({
   stats = defaultStats,
-  title = defaultTitle,
-  showDividers = true,
+  title = "Trusted By Creators",
+  subtitle,
   className = "",
 }: StatsCountProps) {
-  const containerRef = useRef<HTMLElement>(null);
-  const isInView = useInView(containerRef, { margin: "-100px" });
+  const containerRef = useRef<HTMLElement>(null); // ✅ Fixed type
+  const isInView = useInView(containerRef, { margin: "-100px", once: true });
 
   return (
-    <motion.section
+    <section
       ref={containerRef}
       className={cn(
-        "py-8 sm:py-12 lg:py-20 px-2 sm:px-4 md:px-8 w-full overflow-hidden bg-[#f8fafb]",
+        "relative py-20 sm:py-28 md:py-32 lg:py-40 px-6 w-full overflow-hidden bg-white",
         className
       )}
-      initial={{ opacity: 0 }}
-      animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-      transition={{ duration: 0.8 }}
     >
-      <motion.div
-        className={cn("text-center mb-8 sm:mb-12 lg:mb-16")}
-        initial={{ opacity: 0, y: -20 }}
-        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
-        transition={{ duration: 0.8, delay: 0.2 }}
-      >
-        <h2
-          className={cn(
-            "text-sm sm:text-base md:text-lg lg:text-xl font-medium text-black tracking-wide px-4"
-          )}
-        >
-          <span className="hidden sm:inline">
-            {title.includes("BY") ? (
-              <>
-                {title.split("BY")[0]}BY{" "}
-                <span
-                  className={cn(
-                    "text-blue-600 dark:text-blue-400 font-semibold"
-                  )}
-                >
-                  {title.split("BY")[1]}
-                </span>
-              </>
-            ) : (
-              title
-            )}
-          </span>
-          <div
-            className={cn("flex flex-col items-center leading-tight sm:hidden")}
-          >
-            {title.includes("BY") ? (
-              <>
-                <span>{title.split("BY")[0].trim()}</span>
-                <span className={cn("text-center")}>BY</span>
-                <span
-                  className={cn(
-                    "text-blue-600 dark:text-blue-400 font-semibold"
-                  )}
-                >
-                  {title.split("BY")[1].trim()}
-                </span>
-              </>
-            ) : (
-              <span>{title}</span>
-            )}
-          </div>
-        </h2>
-      </motion.div>
+      {/* Grid Pattern Background */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-40" />
 
-      <div className={cn("w-full max-w-6xl mx-auto text-black")}>
-        <div
-          className={cn(
-            "flex flex-row items-stretch justify-between gap-2 sm:gap-4 lg:gap-8 w-full min-h-[120px] sm:min-h-[140px]"
-          )}
+      {/* Content */}
+      <div className="relative z-10 max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div
+          className="text-center mb-16 sm:mb-20 md:mb-24"
+          initial={{ opacity: 0, y: -20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
+          transition={{ duration: 0.8 }}
         >
+          {/* Eyebrow */}
+          <p className="text-xs md:text-sm uppercase tracking-[0.3em] text-gray-500 font-medium mb-4">
+            Our Impact
+          </p>
+
+          {/* Title */}
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-black leading-tight mb-4">
+            {title}
+          </h2>
+
+          {/* Subtitle */}
+          {subtitle && (
+            <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              {subtitle}
+            </p>
+          )}
+        </motion.div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16 sm:gap-y-20 md:gap-y-24">
           {stats.map((stat, index) => (
-            <div
-              key={index}
-              className={cn(
-                "relative flex-1 min-w-0 flex flex-col justify-center h-full"
-              )}
-            >
+            <div key={index} className="relative">
               <AnimatedCounter
                 value={stat.value}
                 suffix={stat.suffix}
                 delay={index}
                 label={stat.label}
                 showDecimal={stat.showDecimal}
+                icon={stat.icon}
               />
-              {index < stats.length - 1 && showDividers && (
-                <motion.div
-                  className={cn(
-                    "absolute -right-1 sm:-right-2 lg:-right-4 top-1/2 transform -translate-y-1/2 h-12 sm:h-16 lg:h-20 w-px bg-gray-200 dark:bg-gray-700"
-                  )}
-                  initial={{ opacity: 0, scaleY: 0 }}
-                  animate={
-                    isInView
-                      ? { opacity: 1, scaleY: 1 }
-                      : { opacity: 0, scaleY: 0 }
-                  }
-                  transition={{ delay: 1.5 + index * 0.2, duration: 0.6 }}
-                />
-              )}
             </div>
           ))}
         </div>
+
+        {/* Bottom Decorative Line */}
+        {/* <motion.div
+          className="mt-20 md:mt-32 h-px bg-gradient-to-r from-transparent via-black/20 to-transparent"
+          initial={{ scaleX: 0, opacity: 0 }}
+          animate={isInView ? { scaleX: 1, opacity: 1 } : { scaleX: 0, opacity: 0 }}
+          transition={{ delay: 1.5, duration: 1 }}
+        /> */}
       </div>
-    </motion.section>
+    </section>
   );
+
 }

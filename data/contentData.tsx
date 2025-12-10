@@ -17,7 +17,12 @@ export const spaceStationsData = [
     modalImage: assets.fixed_desk,
     description:
       "Get your own permanent desk in a shared office environment. Enjoy the stability of a fixed workspace with lockable storage, ergonomic chair, and 24/7 access. Perfect for freelancers and remote workers.",
-    features: ["Dedicated Desk", "Lockable Drawer", "Ergonomic Chair", "Power Ports"],
+    features: [
+      "Dedicated Desk",
+      "Lockable Drawer",
+      "Ergonomic Chair",
+      "Power Ports",
+    ],
   },
   {
     category: "Common Area",
@@ -35,6 +40,29 @@ export const spaceStationsData = [
     modalImage: assets.green_area,
     description:
       "Our outdoor green space offers a refreshing escape from your desk. Whether you need fresh air for a phone call or want to work under the shade of trees – this is your urban oasis.",
-    features: ["Natural Light", "Grass Carpet", "Outdoor Seating", "Outdoor View"],
+    features: [
+      "Natural Light",
+      "Grass Carpet",
+      "Outdoor Seating",
+      "Outdoor View",
+    ],
+  },
+  {
+    category: "Event Space",
+    title: "Community Events",
+    src: "https://images.unsplash.com/photo-1515168833906-d2a3b82b302a?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    modalImage: assets.event_space_area,
+    description:
+      "Our outdoor green space offers a refreshing escape from your desk. Whether you need fresh air for a phone call or want to work under the shade of trees – this is your urban oasis.",
+    features: [
+      "Natural Light",
+      "Grass Carpet",
+      "Outdoor Seating",
+      "Outdoor View",
+      "Lounge Seating",
+      "AV System",
+      "Whiteboard",
+      "Smart TV",
+    ],
   },
 ];

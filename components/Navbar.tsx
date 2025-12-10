@@ -2,15 +2,21 @@
 import { assets } from "@/assets/asset";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import React, { useState, useEffect } from "react";
-import { ChevronDown, Menu, X, UserCircle } from "lucide-react"; // Add UserCircle icon
+import { ChevronDown, Menu, X, UserCircle } from "lucide-react";
 
 const Navbar = () => {
+  const pathname = usePathname();
+  const isHomePage = pathname === "/";
+  const isLoginPage = pathname === "/login";
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileDropdown, setMobileDropdown] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   // Scroll behavior
   useEffect(() => {
@@ -21,11 +27,19 @@ const Navbar = () => {
         window.requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
 
-          if (currentScrollY < lastScrollY || currentScrollY < 50) {
+          setIsScrolled(currentScrollY > 50);
+
+          // Only hide/show on home page
+          if (isHomePage) {
+            if (currentScrollY < lastScrollY || currentScrollY < 50) {
+              setIsVisible(true);
+            } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+              setIsVisible(false);
+              setActiveDropdown(null);
+            }
+          } else {
+            // Always visible on other pages (including login)
             setIsVisible(true);
-          } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-            setIsVisible(false);
-            setActiveDropdown(null);
           }
 
           setLastScrollY(currentScrollY);
@@ -37,7 +51,7 @@ const Navbar = () => {
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
+  }, [lastScrollY, isHomePage]);
 
   // Lock body scroll when mobile menu open
   useEffect(() => {
@@ -78,20 +92,22 @@ const Navbar = () => {
     setMobileDropdown(mobileDropdown === menu ? null : menu);
   };
 
+  const isTransparent = isHomePage && !isScrolled && !isMenuOpen;
+
   return (
     <>
       {/* Main Navbar */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 bg-white shadow-sm transition-transform duration-300 ease-out ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out ${
           isVisible ? "translate-y-0" : "-translate-y-full"
-        }`}
+        } ${isTransparent ? "bg-transparent" : "bg-white shadow-sm"}`}
         style={{
           willChange: "transform",
           backfaceVisibility: "hidden",
         }}
       >
         <div className="mx-auto px-6 md:px-12">
-          <nav className="flex items-center justify-between py-4 ">
+          <nav className="flex items-center justify-between py-4">
             {/* Logo */}
             <Link href="/" className="flex-shrink-0">
               <Image
@@ -101,7 +117,9 @@ const Navbar = () => {
                 height={40}
                 quality={100}
                 priority
-                className="h-auto w-auto"
+                className={`h-auto w-auto transition-all duration-300 ${
+                  isTransparent ? "brightness-0 invert" : ""
+                }`}
               />
             </Link>
 
@@ -109,7 +127,11 @@ const Navbar = () => {
             <div className="hidden md:flex items-center gap-8 text-lg">
               <Link
                 href="/"
-                className="text-gray-800 hover:text-green-600 transition-colors duration-200"
+                className={`transition-colors duration-200 ${
+                  isTransparent
+                    ? "text-white hover:text-green-400"
+                    : "text-gray-800 hover:text-green-600"
+                }`}
               >
                 Home
               </Link>
@@ -120,7 +142,13 @@ const Navbar = () => {
                 onMouseEnter={() => setActiveDropdown("packages")}
                 onMouseLeave={() => setActiveDropdown(null)}
               >
-                <button className="flex items-center gap-1 text-gray-800 hover:text-green-600 transition-colors duration-200">
+                <button
+                  className={`flex items-center gap-1 transition-colors duration-200 ${
+                    isTransparent
+                      ? "text-white hover:text-green-400"
+                      : "text-gray-800 hover:text-green-600"
+                  }`}
+                >
                   Packages
                   <ChevronDown
                     className={`w-4 h-4 transition-transform duration-200 ${
@@ -152,7 +180,13 @@ const Navbar = () => {
                 onMouseEnter={() => setActiveDropdown("community")}
                 onMouseLeave={() => setActiveDropdown(null)}
               >
-                <button className="flex items-center gap-1 text-gray-800 hover:text-green-600 transition-colors duration-200">
+                <button
+                  className={`flex items-center gap-1 transition-colors duration-200 ${
+                    isTransparent
+                      ? "text-white hover:text-green-400"
+                      : "text-gray-800 hover:text-green-600"
+                  }`}
+                >
                   Community
                   <ChevronDown
                     className={`w-4 h-4 transition-transform duration-200 ${
@@ -180,28 +214,45 @@ const Navbar = () => {
 
               <Link
                 href="/contact"
-                className="text-gray-800 hover:text-green-600 transition-colors duration-200"
+                className={`transition-colors duration-200 ${
+                  isTransparent
+                    ? "text-white hover:text-green-400"
+                    : "text-gray-800 hover:text-green-600"
+                }`}
               >
                 Contact us
               </Link>
             </div>
 
-            {/* Desktop Admin Icon Button */}
-            <div className="hidden md:block">
-              <Link
-                href="/login"
-                className="inline-flex items-center justify-center p-2 text-gray-700 hover:text-green-600 hover:bg-gray-100 rounded-full transition-all duration-200"
-                aria-label="Admin Login"
-                title="Admin Login"
-              >
-                <UserCircle className="w-7 h-7" />
-              </Link>
-            </div>
+            {/* Desktop Admin Icon Button - HIDE kalau dah kat login page */}
+            {!isLoginPage && (
+              <div className="hidden md:block">
+                <Link
+                  href="/login"
+                  className={`inline-flex items-center justify-center p-2 rounded-full transition-all duration-200 ${
+                    isTransparent
+                      ? "text-white hover:text-green-400 hover:bg-white/10"
+                      : "text-gray-700 hover:text-green-600 hover:bg-gray-100"
+                  }`}
+                  aria-label="Admin Login"
+                  title="Admin Login"
+                >
+                  <UserCircle className="w-7 h-7" />
+                </Link>
+              </div>
+            )}
+
+            {/* Show empty div for spacing when on login page */}
+            {isLoginPage && <div className="hidden md:block w-10"></div>}
 
             {/* Mobile Menu Button */}
             <button
               onClick={toggleMobileMenu}
-              className="md:hidden p-2 -mr-2 text-gray-800 hover:bg-gray-100 rounded-md transition-colors"
+              className={`md:hidden p-2 -mr-2 rounded-md transition-colors ${
+                isTransparent
+                  ? "text-white hover:bg-white/10"
+                  : "text-gray-800 hover:bg-gray-100"
+              }`}
               aria-label="Toggle menu"
             >
               {isMenuOpen ? (
@@ -214,11 +265,15 @@ const Navbar = () => {
         </div>
 
         {/* Gradient Wave */}
-        <div className="gradient-wave h-2 md:h-3 w-full" />
+        <div
+          className={`gradient-wave h-2 md:h-3 w-full transition-opacity duration-300 ${
+            isTransparent ? "opacity-0" : "opacity-100"
+          }`}
+        />
       </header>
 
-      {/* Spacer */}
-      <div className="h-[100px] md:h-[110px]" />
+      {/* Spacer - untuk semua page KECUALI home page */}
+      {!isHomePage && <div className="h-[100px] md:h-[110px]" />}
 
       {/* Mobile Menu Backdrop */}
       {isMenuOpen && (
@@ -319,17 +374,19 @@ const Navbar = () => {
             Contact us
           </Link>
 
-          {/* Mobile Admin Login with Icon */}
-          <div className="pt-4 border-t">
-            <Link
-              href="/login"
-              onClick={closeMobileMenu}
-              className="flex items-center justify-center gap-2 text-gray-800 py-2.5 hover:text-green-600 transition-colors"
-            >
-              <UserCircle className="w-5 h-5" />
-              <span>Admin Login</span>
-            </Link>
-          </div>
+          {/* Mobile Admin Login - HIDE kalau dah kat login page */}
+          {!isLoginPage && (
+            <div className="pt-4 border-t">
+              <Link
+                href="/login"
+                onClick={closeMobileMenu}
+                className="flex items-center justify-center gap-2 text-gray-800 py-2.5 hover:text-green-600 transition-colors"
+              >
+                <UserCircle className="w-5 h-5" />
+                <span>Admin Login</span>
+              </Link>
+            </div>
+          )}
         </nav>
       </div>
     </>

@@ -68,6 +68,9 @@ import sogno_environment from "./sogno_environment.png";
 import sogno_menu from "./sogno_menu.png";
 import sogno_logo from "./sogno_logo.png";
 import sogno_signature from "./sogno_signature.png";
+import feedback_thumbnail_1 from "./feedback_thumbnail_1.png";
+import feedback_thumbnail_2 from "./feedback_thumbnail_2.png";
+import feedback_thumbnail_3 from "./feedback_thumbnail_3.png";
 
 /* ---- Gallery images ---- */
 export const images: GalleryYearGroup[] = [
@@ -216,7 +219,10 @@ export const assets = {
   sogno_menu,
   sogno_environment,
   sogno_logo,
-  sogno_signature
+  sogno_signature,
+  feedback_thumbnail_1,
+  feedback_thumbnail_2,
+  feedback_thumbnail_3,
 
 };
 

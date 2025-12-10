@@ -5,22 +5,26 @@ const stats = [
     value: 5,
     suffix: "",
     label: "Google Review Rating",
-    showDecimal: true, // ✅ Show 5.0
+    showDecimal: true,
+   
   },
   {
     value: 50,
     suffix: "+",
     label: "Events Hosted",
+  
   },
   {
     value: 5,
     suffix: "+",
     label: "Years of Service",
+  
   },
   {
     value: 20,
     suffix: "+",
     label: "Community Partners",
+  
   },
 ];
 
@@ -28,8 +32,9 @@ export default function StatsCountDemo() {
   return (
     <StatsCount
       stats={stats}
-      title="TRUSTED BY CREATORS AND INNOVATORS"
-      showDividers={true}
+      title="Trusted By Creators And Innovators"
+      subtitle="Building the future of coworking, one workspace at a time" // ✅ Optional
+      showDividers={false} // ✅ Clean look, no dividers
     />
   );
 }

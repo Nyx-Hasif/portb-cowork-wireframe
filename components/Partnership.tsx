@@ -26,7 +26,7 @@ const Partnership = () => {
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
 
-  // Duplicate partners 4x untuk extra smoothness
+  // Quadruple duplicate for smooth loop
   const duplicatedPartners = [
     ...partners,
     ...partners,
@@ -35,54 +35,73 @@ const Partnership = () => {
   ];
 
   return (
-    <section className="w-full bg-[#e9eef3] overflow-hidden py-16 md:py-24 text-gray-900">
-      {/* Header */}
-      <div className="max-w-7xl mx-auto px-6 mb-12 md:mb-16">
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
-          className="text-sm uppercase tracking-widest text-gray-500 mb-4 text-center"
-        >
-          Partnership
-        </motion.p>
+    <section className="w-full bg-black overflow-hidden py-20 md:py-32 relative">
+      {/* Subtle grid pattern background */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
 
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          viewport={{ once: true }}
-          className="text-3xl md:text-4xl lg:text-5xl font-serif text-center text-gray-900"
-        >
-          We have worked with
-        </motion.h2>
-      </div>
+      {/* Content Container */}
+      <div className="relative z-10">
+        {/* Header */}
+        <div className="max-w-7xl mx-auto px-6 mb-16 md:mb-24">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center space-y-4"
+          >
+            {/* Eyebrow */}
+            <p className="text-xs md:text-sm uppercase tracking-[0.3em] text-gray-400 font-medium">
+              Trusted By Industry Leaders
+            </p>
 
-      {/* Marquee Container */}
-      <div className="relative w-full overflow-hidden">
-        <div className={`marquee-wrapper ${mounted ? "is-animated" : ""}`}>
-          {duplicatedPartners.map((p, i) => (
-            <div
-              key={i}
-              className="marquee-item flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-100"
-            >
-              <Image
-                src={p.image}
-                alt={p.name}
-                width={160}
-                height={80}
-                quality={100}
-                draggable={false}
-                className="object-contain w-[120px] h-[60px] sm:w-[140px] sm:h-[70px] md:w-[160px] md:h-[80px] opacity-80"
-              />
-            </div>
-          ))}
+            {/* Main Heading */}
+            <h2 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-serif text-white leading-tight">
+              We&apos;ve Worked With
+              <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-400">
+                Great Companies
+              </span>
+            </h2>
+
+            {/* Subtext */}
+            <p className="text-base md:text-lg text-gray-400 max-w-2xl mx-auto mt-6 leading-relaxed">
+              Join over 20+ organizations that trust PortB for their workspace
+              needs
+            </p>
+          </motion.div>
         </div>
 
-        {/* Gradient Edges */}
-        <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-[#e9eef3] to-transparent pointer-events-none z-10" />
-        <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-[#e9eef3] to-transparent pointer-events-none z-10" />
+        {/* ✅ ORIGINAL Marquee (White Cards, Colored Logos) */}
+        <div className="relative w-full overflow-hidden">
+          <div className={`marquee-wrapper ${mounted ? "is-animated" : ""}`}>
+            {duplicatedPartners.map((p, i) => (
+              <div
+                key={i}
+                className="marquee-item flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-100"
+              >
+                <Image
+                  src={p.image}
+                  alt={p.name}
+                  width={160}
+                  height={80}
+                  quality={100}
+                  draggable={false}
+                  className="object-contain w-[120px] h-[60px] sm:w-[140px] sm:h-[70px] md:w-[160px] md:h-[80px] opacity-80"
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Gradient Edges - Updated for black background */}
+          <div className="absolute inset-y-0 left-0 w-24 md:w-40 bg-gradient-to-r from-black via-black/95 to-transparent pointer-events-none z-10" />
+          <div className="absolute inset-y-0 right-0 w-24 md:w-40 bg-gradient-to-l from-black via-black/95 to-transparent pointer-events-none z-10" />
+        </div>
+
+        {/* Bottom Decorative Line */}
+        <div className="max-w-7xl mx-auto px-6 mt-20 md:mt-32">
+          <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        </div>
       </div>
 
       {/* Marquee Styles */}
@@ -117,9 +136,10 @@ const Partnership = () => {
         }
 
         .is-animated {
-          animation: scroll 90s linear infinite;
+          animation: scroll 120s linear infinite;
         }
 
+      
         @keyframes scroll {
           0% {
             transform: translate3d(0, 0, 0);
@@ -127,6 +147,13 @@ const Partnership = () => {
           100% {
             transform: translate3d(-50%, 0, 0);
           }
+        }
+
+        /* Performance optimizations */
+        .marquee-wrapper {
+          will-change: transform;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
         }
       `}</style>
     </section>

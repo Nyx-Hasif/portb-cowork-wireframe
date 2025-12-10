@@ -367,3 +367,21 @@ section {
 .overflow-hidden {
   contain: paint;
 }
+
+/* globals.css */
+
+@layer utilities {
+  .animate-scroll {
+    animation: scroll var(--animation-duration, 40s) linear infinite;
+    animation-direction: var(--animation-direction, forwards);
+  }
+}
+
+@keyframes scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-50% - 10px));
+  }
+}

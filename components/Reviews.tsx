@@ -5,6 +5,15 @@ import { InfiniteMovingCards } from "./ui/infinite-moving-cards";
 import TestimonialCarouselDemo from "./testimonialsCarousel";
 import LustreText from "@/components/ui/lustretext";
 import { Play, Pause, ChevronLeft, ChevronRight } from "lucide-react";
+import { assets } from "@/assets/asset";
+import Image from "next/image";
+
+// Helper function untuk format seconds ke mm:ss
+const formatTime = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+};
 
 // Define types
 type VideoReview = {
@@ -72,30 +81,27 @@ const Reviews = () => {
   const videoReviews: VideoReview[] = [
     {
       id: 1,
-      videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
-      thumbnail:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500",
-      name: "Ahmad Razak",
-      role: "Startup Founder",
-      duration: "0:45",
+      videoUrl: "/videos/feedback_1.mp4",
+      thumbnail: assets.feedback_thumbnail_1.src,
+      name: "Sarah Santos",
+      role: "Accountant",
+      duration: "0:32",
     },
     {
       id: 2,
-      videoUrl: "https://www.w3schools.com/html/movie.mp4",
-      thumbnail:
-        "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=500",
-      name: "Sarah Lee",
-      role: "Creative Director",
-      duration: "1:02",
+      videoUrl: "/videos/feedback_2.mp4",
+      thumbnail: assets.feedback_thumbnail_2.src,
+      name: "Nadia Nordin",
+      role: "Make Up Artist",
+      duration: "0:25",
     },
     {
       id: 3,
-      videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
-      thumbnail:
-        "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=500",
-      name: "David Chen",
-      role: "Tech Lead",
-      duration: "0:58",
+      videoUrl: "/videos/feedback_3.mp4",
+      thumbnail: assets.feedback_thumbnail_3.src,
+      name: "Ameer Zikri",
+      role: "University Students",
+      duration: "0:37",
     },
     {
       id: 4,
@@ -109,7 +115,7 @@ const Reviews = () => {
   ];
 
   return (
-    <section className="relative w-full md:py-8 py-6 md:space-y-6 bg-[#e9eef3]">
+    <section className="relative w-full md:py-8 py-6 md:space-y-6 bg-white">
       {/* Heading / Intro */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -220,14 +226,21 @@ const VideoCard: React.FC<VideoCardProps> = ({
   onStop,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Effect untuk stop video bila video lain play
+  // Effect untuk stop & reset video bila video lain play
   React.useEffect(() => {
     if (!isActive && videoRef.current) {
       videoRef.current.pause();
-      videoRef.current.muted = true; // Mute bila stop
+      videoRef.current.currentTime = 0;
+      videoRef.current.muted = true;
+      videoRef.current.load();
       setIsPlaying(false);
+      setShowVideo(false);
+      setCurrentTime(0);
     }
   }, [isActive]);
 
@@ -235,64 +248,122 @@ const VideoCard: React.FC<VideoCardProps> = ({
     if (videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause();
-        videoRef.current.muted = true; // Mute bila pause
+        videoRef.current.muted = true;
         setIsPlaying(false);
         onStop();
       } else {
-        onPlay(); // Notify parent that this video is playing
-        videoRef.current.muted = false; // Auto unmute bila play
+        setShowVideo(true);
+        onPlay();
+        videoRef.current.muted = false;
         videoRef.current.play();
         setIsPlaying(true);
       }
     }
   };
 
-  // Handle video end
+  // Handle video end - reset balik ke thumbnail
   const handleVideoEnd = () => {
     setIsPlaying(false);
+    setShowVideo(false);
+    setCurrentTime(0);
     if (videoRef.current) {
-      videoRef.current.muted = true; // Mute bila video end
+      videoRef.current.muted = true;
+      videoRef.current.currentTime = 0;
+      videoRef.current.load();
     }
     onStop();
   };
 
+  // Handle time update - track current playback time
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      setCurrentTime(videoRef.current.currentTime);
+    }
+  };
+
+  // Handle loaded metadata - get video duration
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration);
+    }
+  };
+
   return (
-    <div className="relative group">
-      <div className="relative rounded-xl overflow-hidden bg-gray-900">
-        {/* Video - Start muted for autoplay policy compliance */}
+    <div className="relative group cursor-pointer">
+      <div
+        className="relative rounded-xl overflow-hidden bg-gray-900 cursor-pointer"
+        onClick={togglePlay}
+      >
+        {/* Thumbnail Overlay - Show bila tak playing */}
+        {!showVideo && (
+          <div className="absolute inset-0 z-10 cursor-pointer">
+            <Image
+              src={video.thumbnail}
+              alt={video.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 25vw"
+            />
+            {/* Play Button on Thumbnail */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm rounded-full p-4 hover:bg-white/30 hover:scale-110 transition-all cursor-pointer">
+              <Play className="w-8 h-8 text-white fill-white" />
+            </div>
+            {/* Duration Badge - Show total duration */}
+            <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
+              <span className="text-white text-xs">
+                {duration > 0 ? formatTime(duration) : video.duration}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Video Element */}
         <video
           ref={videoRef}
-          className="w-full aspect-[9/16] object-cover"
+          className="w-full aspect-[9/16] object-cover cursor-pointer"
           src={video.videoUrl}
           poster={video.thumbnail}
           muted
           playsInline
           onEnded={handleVideoEnd}
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleLoadedMetadata}
         />
 
-        {/* Overlay Controls */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-          {/* Play/Pause Button */}
-          <button
-            onClick={togglePlay}
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm rounded-full p-3 hover:bg-white/30 transition"
-          >
-            {isPlaying && isActive ? (
-              <Pause className="w-6 h-6 text-white" />
-            ) : (
-              <Play className="w-6 h-6 text-white" />
-            )}
-          </button>
+        {/* Overlay Controls - Show bila video playing */}
+        {showVideo && (
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+            {/* Play/Pause Button */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm rounded-full p-3 hover:bg-white/30 transition cursor-pointer">
+              {isPlaying ? (
+                <Pause className="w-6 h-6 text-white" />
+              ) : (
+                <Play className="w-6 h-6 text-white" />
+              )}
+            </div>
 
-          {/* Duration Badge */}
-          <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
-            <span className="text-white text-xs">{video.duration}</span>
+            {/* Duration Badge - Show current / total */}
+            <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
+              <span className="text-white text-xs">
+                {formatTime(currentTime)} / {formatTime(duration)}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Progress Bar */}
+        {showVideo && duration > 0 && (
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30 z-20">
+            <div
+              className="h-full bg-red-500 transition-all duration-100"
+              style={{ width: `${(currentTime / duration) * 100}%` }}
+            />
+          </div>
+        )}
 
         {/* Playing Indicator */}
         {isPlaying && isActive && (
-          <div className="absolute top-4 left-4 bg-red-600 rounded px-2 py-1 flex items-center gap-1">
+          <div className="absolute top-4 left-4 bg-red-600 rounded px-2 py-1 flex items-center gap-1 z-20">
             <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
             <span className="text-white text-xs">Playing</span>
           </div>
@@ -316,43 +387,63 @@ interface VideoCarouselProps {
 const VideoCarousel: React.FC<VideoCarouselProps> = ({ videos }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const nextVideo = () => {
-    setCurrentIndex((prev) => (prev + 1) % videos.length);
+  const resetVideo = () => {
     setIsPlaying(false);
+    setShowVideo(false);
+    setCurrentTime(0);
     if (videoRef.current) {
       videoRef.current.pause();
+      videoRef.current.currentTime = 0;
       videoRef.current.muted = true;
+      videoRef.current.load();
     }
   };
 
+  const nextVideo = () => {
+    resetVideo();
+    setDuration(0);
+    setCurrentIndex((prev) => (prev + 1) % videos.length);
+  };
+
   const prevVideo = () => {
+    resetVideo();
+    setDuration(0);
     setCurrentIndex((prev) => (prev - 1 + videos.length) % videos.length);
-    setIsPlaying(false);
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.muted = true;
-    }
   };
 
   const togglePlay = () => {
     if (videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause();
-        videoRef.current.muted = true; // Mute bila pause
+        videoRef.current.muted = true;
+        setIsPlaying(false);
       } else {
-        videoRef.current.muted = false; // Auto unmute bila play
+        setShowVideo(true);
+        videoRef.current.muted = false;
         videoRef.current.play();
+        setIsPlaying(true);
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
   const handleVideoEnd = () => {
-    setIsPlaying(false);
+    resetVideo();
+  };
+
+  const handleTimeUpdate = () => {
     if (videoRef.current) {
-      videoRef.current.muted = true;
+      setCurrentTime(videoRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration);
     }
   };
 
@@ -360,76 +451,114 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ videos }) => {
     <div className="max-w-md mx-auto px-4">
       <div className="relative">
         {/* Video Container */}
-        <div className="relative rounded-xl overflow-hidden bg-gray-900">
+        <div
+          className="relative rounded-xl overflow-hidden bg-gray-900 cursor-pointer"
+          onClick={togglePlay}
+        >
+          {/* Thumbnail Overlay */}
+          {!showVideo && (
+            <div className="absolute inset-0 z-10 cursor-pointer">
+              <Image
+                src={videos[currentIndex].thumbnail}
+                alt={videos[currentIndex].name}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm rounded-full p-4 hover:bg-white/30 hover:scale-110 transition-all cursor-pointer">
+                <Play className="w-8 h-8 text-white fill-white" />
+              </div>
+              <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
+                <span className="text-white text-sm">
+                  {duration > 0
+                    ? formatTime(duration)
+                    : videos[currentIndex].duration}
+                </span>
+              </div>
+            </div>
+          )}
+
           <video
             ref={videoRef}
-            className="w-full aspect-[9/16] object-cover"
+            className="w-full aspect-[9/16] object-cover cursor-pointer"
             src={videos[currentIndex].videoUrl}
             poster={videos[currentIndex].thumbnail}
             muted
             playsInline
             onEnded={handleVideoEnd}
+            onTimeUpdate={handleTimeUpdate}
+            onLoadedMetadata={handleLoadedMetadata}
           />
 
-          {/* Overlay Controls */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
-            {/* Play/Pause Button */}
-            <button
-              onClick={togglePlay}
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm rounded-full p-4 hover:bg-white/30 transition"
-            >
-              {isPlaying ? (
-                <Pause className="w-8 h-8 text-white" />
-              ) : (
-                <Play className="w-8 h-8 text-white" />
-              )}
-            </button>
-
-            {/* Duration Badge */}
-            <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
-              <span className="text-white text-sm">
-                {videos[currentIndex].duration}
-              </span>
-            </div>
-
-            {/* Playing Indicator */}
-            {isPlaying && (
-              <div className="absolute top-4 left-4 bg-red-600 rounded px-2 py-1 flex items-center gap-1">
-                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                <span className="text-white text-xs">Playing</span>
+          {/* Overlay Controls - bila playing */}
+          {showVideo && (
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent cursor-pointer">
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm rounded-full p-4 hover:bg-white/30 transition cursor-pointer">
+                {isPlaying ? (
+                  <Pause className="w-8 h-8 text-white" />
+                ) : (
+                  <Play className="w-8 h-8 text-white" />
+                )}
               </div>
-            )}
-          </div>
+
+              <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
+                <span className="text-white text-sm">
+                  {formatTime(currentTime)} / {formatTime(duration)}
+                </span>
+              </div>
+
+              {isPlaying && (
+                <div className="absolute top-4 left-4 bg-red-600 rounded px-2 py-1 flex items-center gap-1">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                  <span className="text-white text-xs">Playing</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Progress Bar */}
+          {showVideo && duration > 0 && (
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30 z-30">
+              <div
+                className="h-full bg-red-500 transition-all duration-100"
+                style={{ width: `${(currentTime / duration) * 100}%` }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Navigation Buttons */}
         <button
-          onClick={prevVideo}
-          className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full p-2 hover:bg-white transition"
+          onClick={(e) => {
+            e.stopPropagation();
+            prevVideo();
+          }}
+          className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full p-2 hover:bg-white transition z-20 cursor-pointer"
         >
           <ChevronLeft className="w-5 h-5 text-gray-900" />
         </button>
         <button
-          onClick={nextVideo}
-          className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full p-2 hover:bg-white transition"
+          onClick={(e) => {
+            e.stopPropagation();
+            nextVideo();
+          }}
+          className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full p-2 hover:bg-white transition z-20 cursor-pointer"
         >
           <ChevronRight className="w-5 h-5 text-gray-900" />
         </button>
 
         {/* Dots Indicator */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
           {videos.map((_, index) => (
             <button
               key={index}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
+                resetVideo();
+                setDuration(0);
                 setCurrentIndex(index);
-                setIsPlaying(false);
-                if (videoRef.current) {
-                  videoRef.current.pause();
-                  videoRef.current.muted = true;
-                }
               }}
-              className={`w-2 h-2 rounded-full transition ${
+              className={`w-2 h-2 rounded-full transition cursor-pointer ${
                 index === currentIndex ? "bg-white w-6" : "bg-white/50"
               }`}
             />

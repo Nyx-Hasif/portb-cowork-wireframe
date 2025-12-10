@@ -68,7 +68,7 @@ const EpicCarousel = () => {
   }, [resetTimer]);
 
   return (
-    <div className="bg-[#f9fafb]">
+    <div className="bg-[#f9fafb] mt-4">
       <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8 p-6 w-full max-w-[1400px] mx-auto lg:items-stretch">
         {/* Left - Big Image */}
         {/* ✅ Adjusted height to better aspect ratio & removed gaps */}

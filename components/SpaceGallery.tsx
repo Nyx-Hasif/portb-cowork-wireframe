@@ -13,7 +13,7 @@ type SpaceCardData = {
   modalImage?: string | StaticImageData;
   description?: string;
   features?: string[];
-  content?: React.ReactNode; // optional, tak guna dah
+  content?: React.ReactNode;
 };
 
 export default function SpacesGallery() {
@@ -41,6 +41,7 @@ export default function SpacesGallery() {
           <SpaceCard card={spaceStationsData[2]} colSpan="md:col-span-2" />
           <SpaceCard card={spaceStationsData[1]} colSpan="md:col-span-2" />
           <SpaceCard card={spaceStationsData[3]} colSpan="md:col-span-1" />
+          <SpaceCard card={spaceStationsData[4]} colSpan="md:col-span-3" />
         </div>
 
         {/* Mobile: show all cards in 1 column */}
@@ -65,10 +66,8 @@ const SpaceCard = ({
   card: SpaceCardData;
   colSpan?: string;
 }) => {
-  // ✅ Hooks mesti di paling atas
   const [isOpen, setIsOpen] = useState(false);
 
-  // ✅ Baru boleh ada conditional render
   if (!card) {
     return null;
   }
@@ -77,14 +76,17 @@ const SpaceCard = ({
 
   return (
     <>
+      {/* ✅ Modal will render to body via Portal */}
       <AppleModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         card={card}
       />
+
+      {/* Card */}
       <div
         onClick={() => setIsOpen(true)}
-        className={`group relative h-[500px] overflow-hidden border border-white/5 cursor-pointer ${colSpan}`}
+        className={`group relative h-[500px] overflow-hidden border border-white/5 cursor-pointer ${colSpan} rounded-lg`}
       >
         <div className="absolute inset-0 w-full h-full">
           <Image

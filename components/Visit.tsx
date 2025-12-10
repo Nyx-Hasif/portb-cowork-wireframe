@@ -1,10 +1,10 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { createPortal } from "react-dom"; // ✅ Add this
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { assets } from "@/assets/asset";
-import { MapPinIcon, MapPin, Clock, Phone } from "lucide-react";
+import { MapPinIcon, MapPin, Clock, Phone, Play } from "lucide-react";
 import {
   CardFlip,
   CardFlipFront,
@@ -15,9 +15,8 @@ import {
 const Visit = () => {
   const [open, setOpen] = useState(false);
   const [flip, setFlip] = useState(false);
-  const [mounted, setMounted] = useState(false); // ✅ Add this
+  const [mounted, setMounted] = useState(false);
 
-  // ✅ Check if component mounted (client-side only)
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -31,7 +30,6 @@ const Visit = () => {
     return () => window.removeEventListener("keydown", handleEsc);
   }, [handleEsc]);
 
-  // ✅ Prevent body scroll when modal open
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -49,7 +47,6 @@ const Visit = () => {
       className="py-16 md:py-24 bg-black relative overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-6">
-        {/* ... your existing content ... */}
         <div className="flex flex-col lg:flex-row gap-12">
           {/* LEFT COLUMN */}
           <div className="lg:w-1/2 lg:order-1 w-full">
@@ -106,13 +103,9 @@ const Visit = () => {
                       Staffed Hours
                     </h4>
                     <p className="text-gray-400">
-                      Mon-Fri: 8:00 AM – 7:00 PM
-                      <br />
-                      Sat: 10:00 AM – 4:00 PM
+                      Sun-Thu: 9:00 AM – 5:00 PM
                     </p>
-                    <p className="text-gray-500 text-sm mt-1">
-                      *Members have 24/7 access
-                    </p>
+                   
                   </div>
                 </div>
 
@@ -127,7 +120,7 @@ const Visit = () => {
                 </div>
               </motion.div>
 
-              {/* Buttons */}
+              {/* Buttons - Black & White Theme */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -135,26 +128,29 @@ const Visit = () => {
                 transition={{ duration: 0.5, delay: 0.3 }}
                 className="flex flex-col sm:flex-row gap-4 pt-2 justify-center lg:justify-start"
               >
+                {/* Primary Button - White bg, black text */}
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => setOpen(true)}
-                  className="inline-flex items-center cursor-pointer justify-center px-6 py-3 md:px-8 md:py-4 rounded-2xl text-base md:text-lg font-semibold text-white bg-[#217885] shadow-md hover:shadow-lg transition"
+                  className="group inline-flex items-center cursor-pointer justify-center px-6 py-3 md:px-8 md:py-4 rounded-full text-base md:text-lg font-semibold bg-white text-black hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all duration-300"
                 >
-                  🎬 View Video
+                  <Play className="w-5 h-5 mr-2 md:w-5 md:h-5 fill-black group-hover:scale-110 transition-transform" />
+                  View Video
                 </motion.button>
 
+                {/* Secondary Button - Outline style */}
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => setFlip((prev) => !prev)}
-                  className={`inline-flex items-center cursor-pointer justify-center px-6 py-3 md:px-8 md:py-4 rounded-2xl text-base md:text-lg font-semibold text-white shadow-md hover:shadow-lg transition ${
+                  className={`group inline-flex items-center cursor-pointer justify-center px-6 py-3 md:px-8 md:py-4 rounded-full text-base md:text-lg font-semibold border-2 transition-all duration-300 ${
                     flip
-                      ? "bg-[#217885] hover:bg-[#217885]"
-                      : "bg-gradient-to-r from-sky-500 to-blue-600"
+                      ? "bg-white text-black border-white hover:bg-gray-100"
+                      : "bg-transparent text-white border-white hover:bg-white hover:text-black"
                   }`}
                 >
-                  <MapPinIcon className="w-5 h-5 mr-2 md:w-6 md:h-6" />
+                  <MapPinIcon className="w-5 h-5 mr-2 md:w-5 md:h-5 group-hover:scale-110 transition-transform" />
                   {flip ? "View Building" : "View Location"}
                 </motion.button>
               </motion.div>
@@ -197,7 +193,7 @@ const Visit = () => {
         </div>
       </div>
 
-      {/* VIDEO MODAL - Universal */}
+      {/* VIDEO MODAL */}
       {mounted &&
         open &&
         createPortal(
@@ -211,10 +207,10 @@ const Visit = () => {
               className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-lg p-3 sm:p-6"
               style={{ margin: 0 }}
             >
-              {/* Close Button */}
+              {/* Close Button - Black & White */}
               <button
                 onClick={() => setOpen(false)}
-                className="absolute top-3 right-3 sm:top-6 sm:right-6 md:top-8 md:right-10 text-white bg-red-500 hover:bg-red-600 active:bg-red-700 transition-all rounded-full h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center text-2xl sm:text-3xl shadow-2xl hover:scale-110 active:scale-95 z-[10000] touch-manipulation"
+                className="absolute top-3 right-3 sm:top-6 sm:right-6 md:top-8 md:right-10 text-black bg-white hover:bg-gray-200 active:bg-gray-300 transition-all rounded-full h-12 w-12 sm:h-14 sm:w-14 flex items-center justify-center text-2xl sm:text-3xl font-bold shadow-2xl hover:scale-110 active:scale-95 z-[10000] touch-manipulation"
                 aria-label="Close video"
               >
                 ✕
@@ -238,7 +234,7 @@ const Visit = () => {
               </motion.div>
 
               {/* Mobile Hint */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/50 text-xs bg-black/40 px-4 py-2 rounded-full backdrop-blur-sm sm:hidden animate-pulse">
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/50 text-xs bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm sm:hidden animate-pulse">
                 Tap ✕ to close
               </div>
             </motion.div>

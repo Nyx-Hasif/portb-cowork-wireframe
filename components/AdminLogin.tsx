@@ -94,7 +94,7 @@ const AdminLogin = () => {
   }
 
   return (
-    <div className="min-h-screen flex mt-[-110px]">
+    <div className="min-h-screen flex ">
       {/* Left Side - Login Form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center p-8 lg:p-16 bg-white">
         {/* Login Form Container */}
