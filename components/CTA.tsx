@@ -1,68 +1,73 @@
 import { assets } from "@/assets/asset";
 import Image from "next/image";
 import Link from "next/link";
-import { SparklesText } from "./ui/sparkles-text";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, MessageCircle } from "lucide-react";
 import React from "react";
 
 const CTA = () => {
   return (
-    <section className="relative w-full overflow-hidden">
-      {/* Background image */}
-      <div className="relative h-[400px] md:h-[550px] lg:h-[700px] w-full">
+    <section className="relative h-[80vh] min-h-[600px] flex items-center justify-center overflow-hidden group bg-black -mb-1">
+      {/* Background Image with Zoom Effect */}
+      <div className="absolute inset-0 z-0">
         <Image
           src={assets.bg_cta_home}
-          alt="Coworking environment"
+          alt="Premium Coworking Space"
           fill
           priority
           quality={100}
           sizes="100vw"
-          className="object-cover object-center scale-105 animate-slow-zoom"
+          className="object-cover transition-transform duration-[2000ms] ease-out group-hover:scale-110 opacity-50"
         />
+        {/* Dark Overlay Gradients */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent"></div>
+        <div className="absolute inset-0 bg-black/40"></div>
+      </div>
 
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/60 to-transparent" />
+      {/* Decorative Lines */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-24 bg-gradient-to-b from-white/0 via-white/20 to-white/0"></div>
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-px h-24 bg-gradient-to-b from-white/0 via-white/20 to-white/0"></div>
 
-        {/* Decorative floating dots (very subtle, fewer) */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-10 left-10 w-3 h-3 bg-cyan-400/30 rounded-full blur-[2px] animate-float" />
-          <div className="absolute top-1/2 right-16 w-4 h-4 bg-blue-400/30 rounded-full blur-[2px] animate-float-delay-1" />
-          <div className="absolute bottom-14 left-1/3 w-2 h-2 bg-teal-400/30 rounded-full blur-[1px] animate-float-delay-2" />
-        </div>
+      {/* Content */}
+      <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
+        <span className="inline-block py-1 px-3 border border-white/20 rounded-full text-[10px] uppercase tracking-[0.3em] text-gray-300 mb-8 backdrop-blur-md">
+          Flexible Workspace
+        </span>
 
-        {/* Content */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-          <div className="max-w-4xl space-y-6">
-            <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-white tracking-tight animate-fade-in-up">
-              <span className="text-white">Your Next Big Idea</span>
-              <br />
-              <SparklesText >
-                Starts Here
-              </SparklesText>
-            </h2>
-            <p className="text-base md:text-lg text-white/80 max-w-2xl mx-auto animate-fade-in-up animation-delay-200">
-              Discover inspiring coworking spaces designed to spark creativity,
-              boost productivity & connect vibrant communities.
-            </p>
+        <h2 className="text-5xl md:text-7xl lg:text-8xl font-serif text-white mb-8 leading-tight tracking-tight">
+          Define Your <br />
+          <span className="italic text-gray-400">Legacy Here.</span>
+        </h2>
 
-            {/* CTA Button */}
-            <div className="animate-fade-in-up animation-delay-400 pt-2">
-              <Link
-                href="/coworking-space"
-                className="inline-flex items-center justify-center gap-3 px-8 py-3 rounded-full bg-gradient-to-r from-white to-white hover:from-teal-500 hover:to-blue-600 text-black font-semibold text-lg transition-all duration-300 hover:shadow-[0_0_25px_rgba(56,189,248,0.4)] hover:scale-105 relative overflow-hidden group"
-              >
-                {/* Smooth shine line */}
-                <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent mix-blend-overlay group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
-                <span className="relative z-10">Explore Packages</span>
-                <ArrowRight className="relative z-10 w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
-            </div>
-          </div>
+        <p className="text-lg md:text-xl text-gray-300 mb-12 font-light max-w-2xl mx-auto leading-relaxed">
+          Join a collective of visionaries in a space built for focus. Your best
+          work is waiting to be created.
+        </p>
+
+        <div className="flex flex-col md:flex-row gap-6 justify-center items-center">
+          {/* Explore Packages Button */}
+          <Link
+            href="/coworking-space"
+            className="relative overflow-hidden group/btn bg-white text-black px-12 py-5 text-sm uppercase tracking-widest font-bold transition-all hover:bg-gray-200"
+          >
+            <span className="relative z-10 flex items-center gap-3">
+              Explore Packages
+              <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
+            </span>
+          </Link>
+
+          {/* Chat with Us Button */}
+          <Link
+            href="/contact"
+            className="px-12 py-5 text-sm uppercase tracking-widest font-medium text-white border border-white/20 hover:bg-white/5 hover:border-white/40 transition-all backdrop-blur-sm flex items-center gap-3"
+          >
+            <MessageCircle className="w-4 h-4" />
+            Chat with Us
+          </Link>
         </div>
       </div>
 
-      {/* Optional soft bottom divider */}
-      <div className="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-[#e9eef3] to-transparent" />
+      {/* Bottom gradient untuk smooth transition ke footer */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-[#202020] pointer-events-none z-20" />
     </section>
   );
 };

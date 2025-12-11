@@ -29,7 +29,6 @@ const Navbar = () => {
 
           setIsScrolled(currentScrollY > 50);
 
-          // Only hide/show on home page
           if (isHomePage) {
             if (currentScrollY < lastScrollY || currentScrollY < 50) {
               setIsVisible(true);
@@ -38,7 +37,6 @@ const Navbar = () => {
               setActiveDropdown(null);
             }
           } else {
-            // Always visible on other pages (including login)
             setIsVisible(true);
           }
 
@@ -96,9 +94,9 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Main Navbar */}
+      {/* Main Navbar - 🔥 INCREASED Z-INDEX */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out ${
+        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ease-out ${
           isVisible ? "translate-y-0" : "-translate-y-full"
         } ${isTransparent ? "bg-transparent" : "bg-white shadow-sm"}`}
         style={{
@@ -136,7 +134,7 @@ const Navbar = () => {
                 Home
               </Link>
 
-              {/* Packages Dropdown */}
+              {/* Packages Dropdown - 🔥 EXPLICIT Z-INDEX */}
               <div
                 className="relative"
                 onMouseEnter={() => setActiveDropdown("packages")}
@@ -158,7 +156,7 @@ const Navbar = () => {
                 </button>
 
                 {activeDropdown === "packages" && (
-                  <div className="absolute top-full left-0 pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="absolute top-full left-0 pt-2 z-[200] animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="min-w-[220px] bg-white rounded-lg shadow-xl border border-gray-100 py-2">
                       {menuItems.packages.map((item) => (
                         <Link
@@ -174,7 +172,7 @@ const Navbar = () => {
                 )}
               </div>
 
-              {/* Community Dropdown */}
+              {/* Community Dropdown - 🔥 EXPLICIT Z-INDEX */}
               <div
                 className="relative"
                 onMouseEnter={() => setActiveDropdown("community")}
@@ -196,7 +194,7 @@ const Navbar = () => {
                 </button>
 
                 {activeDropdown === "community" && (
-                  <div className="absolute top-full left-0 pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="absolute top-full left-0 pt-2 z-[200] animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="min-w-[220px] bg-white rounded-lg shadow-xl border border-gray-100 py-2">
                       {menuItems.community.map((item) => (
                         <Link
@@ -224,7 +222,7 @@ const Navbar = () => {
               </Link>
             </div>
 
-            {/* Desktop Admin Icon Button - HIDE kalau dah kat login page */}
+            {/* Desktop Admin Icon Button */}
             {!isLoginPage && (
               <div className="hidden md:block">
                 <Link
@@ -242,7 +240,6 @@ const Navbar = () => {
               </div>
             )}
 
-            {/* Show empty div for spacing when on login page */}
             {isLoginPage && <div className="hidden md:block w-10"></div>}
 
             {/* Mobile Menu Button */}
@@ -272,7 +269,7 @@ const Navbar = () => {
         />
       </header>
 
-      {/* Spacer - untuk semua page KECUALI home page */}
+      {/* Spacer */}
       {!isHomePage && <div className="h-[100px] md:h-[110px]" />}
 
       {/* Mobile Menu Backdrop */}
@@ -374,7 +371,6 @@ const Navbar = () => {
             Contact us
           </Link>
 
-          {/* Mobile Admin Login - HIDE kalau dah kat login page */}
           {!isLoginPage && (
             <div className="pt-4 border-t">
               <Link

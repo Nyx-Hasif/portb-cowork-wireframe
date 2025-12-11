@@ -12,19 +12,23 @@ const Footer = () => {
       {/* Gradient Wave */}
       <div className="gradient-wave h-2 md:h-3 w-full" />
 
-      <div className="w-full max-w-[1300px] mx-auto px-6 md:px-10 lg:px-16 py-14">
+      {/* 🔥 REDUCED PADDING: py-14 → py-8 md:py-10 */}
+      <div className="w-full max-w-[1300px] mx-auto px-6 md:px-10 lg:px-16 py-8 md:py-10">
         {/* ---- Top Grid ---- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-12 pb-10 border-b border-gray-700">
+        {/* 🔥 REDUCED GAP: gap-10 md:gap-12 → gap-6 md:gap-8 */}
+        {/* 🔥 REDUCED BOTTOM PADDING: pb-10 → pb-6 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 pb-6 border-b border-gray-700">
           {/* Logo & tagline */}
           <div>
+            {/* 🔥 SMALLER LOGO: w-40 sm:w-48 → w-28 sm:w-32 */}
             <Image
               src={assets.portb_logo}
               alt="PortB logo"
-              width={200}
-              height={200}
+              width={150}
+              height={150}
               quality={100}
               priority
-              className="object-contain w-40 sm:w-48"
+              className="object-contain w-28 sm:w-32"
               draggable={false}
             />
           </div>
@@ -35,7 +39,6 @@ const Footer = () => {
               Quick Links
             </h3>
             <ul className="space-y-2 text-gray-400 text-base">
-              {/* ✅ Updated with actual routes */}
               {[
                 { name: "Packages", href: "/coworking-space" },
                 { name: "Community", href: "/previous-events" },
@@ -94,7 +97,8 @@ const Footer = () => {
         </div>
 
         {/* ---- Bottom Section ---- */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-5 pt-8">
+        {/* 🔥 REDUCED TOP PADDING: pt-8 → pt-5 */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-5 pt-5">
           {/* Copyright */}
           <p className="text-sm text-gray-500 text-center md:text-left">
             © 2025 PortB. All rights reserved.
