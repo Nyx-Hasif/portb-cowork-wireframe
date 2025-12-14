@@ -194,30 +194,66 @@ const AdminDashboard = () => {
   };
 
   // ==========================================
-  // ✅ LOCK BODY SCROLL WHEN SIDEBAR OPEN
+  // ✅ ENHANCED BODY SCROLL LOCK
   // ==========================================
   useEffect(() => {
     if (isSidebarOpen) {
-      // Lock body scroll
-      document.body.style.overflow = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.width = "100%";
-      document.body.style.height = "100%";
-    } else {
-      // Unlock body scroll
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
-      document.body.style.height = "";
-    }
+      // Save current scroll position
+      const scrollY = window.scrollY;
 
-    // Cleanup
-    return () => {
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
-      document.body.style.height = "";
-    };
+      // Lock body completely
+      document.documentElement.style.overflow = "hidden";
+      document.documentElement.style.position = "fixed";
+      document.documentElement.style.width = "100%";
+      document.documentElement.style.height = "100%";
+
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = "0";
+      document.body.style.right = "0";
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
+      document.body.style.overscrollBehavior = "none";
+
+      // Prevent touch scrolling on entire document
+      const preventScroll = (e: TouchEvent) => {
+        // Only prevent if target is not scrollable content
+        const target = e.target as Element;
+        const isScrollable = target.closest(".allow-scroll");
+
+        if (!isScrollable) {
+          e.preventDefault();
+        }
+      };
+
+      document.addEventListener("touchmove", preventScroll, { passive: false });
+      document.addEventListener("gesturestart", preventScroll as any, {
+        passive: false,
+      });
+
+      return () => {
+        // Restore everything
+        const scrollY = document.body.style.top;
+
+        document.documentElement.style.overflow = "";
+        document.documentElement.style.position = "";
+        document.documentElement.style.width = "";
+        document.documentElement.style.height = "";
+
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.left = "";
+        document.body.style.right = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
+        document.body.style.overscrollBehavior = "";
+
+        window.scrollTo(0, parseInt(scrollY || "0") * -1);
+
+        document.removeEventListener("touchmove", preventScroll);
+        document.removeEventListener("gesturestart", preventScroll as any);
+      };
+    }
   }, [isSidebarOpen]);
 
   // ==========================================
@@ -226,7 +262,6 @@ const AdminDashboard = () => {
   const toggleModal = (name: keyof typeof modals, value: boolean) => {
     setModals((prev) => ({ ...prev, [name]: value }));
 
-    // Clear images when CLOSING modals
     if (!value) {
       if (name === "createUpcoming") {
         clearImage("upcoming");
@@ -246,7 +281,6 @@ const AdminDashboard = () => {
       }
     }
 
-    // Clear when OPENING create modals
     if (value) {
       if (name === "createUpcoming") {
         resetUpcomingForm();
@@ -316,7 +350,6 @@ const AdminDashboard = () => {
     setFiles((prev) => ({ ...prev, [key]: null }));
     setPreviews((prev) => ({ ...prev, [key]: "" }));
 
-    // Reset file input
     if (key === "upcoming" && fileRefs.upcoming.current) {
       fileRefs.upcoming.current.value = "";
     } else if (key === "previous" && fileRefs.previous.current) {
@@ -666,7 +699,6 @@ const AdminDashboard = () => {
     </div>
   );
 
-  // Image Upload Component with Clear Button
   const ImageUploadArea = () => {
     const getPreviewKey = () => {
       if (modals.createUpcoming) return "upcoming";
@@ -705,7 +737,6 @@ const AdminDashboard = () => {
                 fill
                 className="object-cover"
               />
-              {/* X BUTTON - REMOVE IMAGE */}
               <button
                 type="button"
                 onClick={(e) => {
@@ -716,7 +747,6 @@ const AdminDashboard = () => {
               >
                 <X size={16} />
               </button>
-              {/* CHANGE IMAGE OVERLAY */}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
                 <p className="text-white font-bold text-sm opacity-0 group-hover:opacity-100 transition-opacity">
                   Click to change
@@ -735,7 +765,6 @@ const AdminDashboard = () => {
           )}
         </div>
 
-        {/* Hidden file inputs */}
         <input
           type="file"
           ref={fileRefs.upcoming}
@@ -799,34 +828,48 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex font-sans text-gray-900">
-      {/* ✅ MOBILE SIDEBAR BACKDROP - prevent touch scroll */}
+      {/* ✅ BACKDROP - Complete touch lock */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
-          style={{ touchAction: "none" }}
+          style={{
+            touchAction: "none",
+            overscrollBehavior: "none",
+            WebkitOverflowScrolling: "auto",
+          }}
         />
       )}
 
-      {/* ✅ SIDEBAR - overscroll protection */}
+      {/* ✅ SIDEBAR - Zero scroll allowed */}
       <aside
         className={`fixed lg:static inset-y-0 left-0 w-72 bg-white border-r border-gray-300 z-50 transform transition-transform duration-300 flex flex-col ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
         style={{
-          touchAction: "pan-y",
-          overscrollBehavior: "contain",
+          touchAction: "none",
+          overscrollBehavior: "none",
+          WebkitOverflowScrolling: "auto",
         }}
       >
-        {/* ✅ Sidebar Header - NO CLOSE BUTTON */}
-        <div className="h-20 flex items-center px-8 border-b border-gray-300 flex-shrink-0">
+        {/* Header */}
+        <div
+          className="h-20 flex items-center px-8 border-b border-gray-300 flex-shrink-0"
+          style={{ touchAction: "none" }}
+        >
           <h1 className="text-xl font-bold tracking-tight">
             Port B <span className="text-gray-400 font-normal">Admin</span>
           </h1>
         </div>
 
-        {/* ✅ Navigation - contained scroll */}
-        <nav className="flex-1 px-4 py-6 space-y-1 flex-shrink-0 min-h-0 overflow-y-auto overscroll-contain">
+        {/* Navigation */}
+        <nav
+          className="flex-1 px-4 py-6 space-y-1 flex-shrink-0 min-h-0"
+          style={{
+            touchAction: "none",
+            overscrollBehavior: "none",
+          }}
+        >
           <div className="mb-4 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
             Main Menu
           </div>
@@ -869,8 +912,11 @@ const AdminDashboard = () => {
           ))}
         </nav>
 
-        {/* ✅ Sidebar Footer / Profile - fixed bottom */}
-        <div className="p-4 border-t border-gray-300 bg-gray-50/50 flex-shrink-0">
+        {/* Footer */}
+        <div
+          className="p-4 border-t border-gray-300 bg-gray-50/50 flex-shrink-0"
+          style={{ touchAction: "none" }}
+        >
           <div className="bg-white border border-gray-300 p-3 rounded-xl flex items-center gap-3 mb-3 shadow-sm">
             <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 border border-gray-300">
               <User size={16} />
@@ -889,8 +935,14 @@ const AdminDashboard = () => {
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
-      <main className="flex-1 h-screen overflow-y-auto bg-gray-100">
+      {/* ✅ MAIN CONTENT - Normal scroll allowed */}
+      <main
+        className="flex-1 h-screen overflow-y-auto bg-gray-100"
+        style={{
+          overscrollBehavior: "contain",
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
         {/* Mobile Header */}
         <div className="lg:hidden h-16 bg-white sticky top-0 z-40 border-b border-gray-300 px-4 flex items-center justify-between shadow-sm">
           <h1 className="font-bold text-lg">Dashboard</h1>
@@ -921,7 +973,6 @@ const AdminDashboard = () => {
                   </p>
                 </div>
 
-                {/* Stats Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
                   <StatCard
                     icon={Calendar}
@@ -941,9 +992,8 @@ const AdminDashboard = () => {
                   <StatCard icon={CheckCircle2} label="Status" value="Active" />
                 </div>
 
-                {/* 3-Column Recent Content Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  {/* Column 1: Upcoming */}
+                  {/* Upcoming Column */}
                   <div className="bg-white rounded-2xl shadow-sm border border-gray-300 overflow-hidden h-fit">
                     <div className="p-5 border-b border-gray-300 flex justify-between items-center bg-gray-50/50">
                       <h3 className="font-bold text-gray-900 flex items-center gap-2">
@@ -996,7 +1046,7 @@ const AdminDashboard = () => {
                     </div>
                   </div>
 
-                  {/* Column 2: Previous */}
+                  {/* Previous Column */}
                   <div className="bg-white rounded-2xl shadow-sm border border-gray-300 overflow-hidden h-fit">
                     <div className="p-5 border-b border-gray-300 flex justify-between items-center bg-gray-50/50">
                       <h3 className="font-bold text-gray-900 flex items-center gap-2">
@@ -1048,7 +1098,7 @@ const AdminDashboard = () => {
                     </div>
                   </div>
 
-                  {/* Column 3: Gallery */}
+                  {/* Gallery Column */}
                   <div className="bg-white rounded-2xl shadow-sm border border-gray-300 overflow-hidden h-fit">
                     <div className="p-5 border-b border-gray-300 flex justify-between items-center bg-gray-50/50">
                       <h3 className="font-bold text-gray-900 flex items-center gap-2">
@@ -1191,7 +1241,6 @@ const AdminDashboard = () => {
 
                           {activeSection === "upcoming" && "date" in event ? (
                             <div className="flex flex-col gap-1.5 text-sm">
-                              {/* Date & Time */}
                               <div className="flex items-center gap-2 text-gray-600">
                                 <Calendar size={14} className="text-gray-400" />
                                 <span className="font-medium">
@@ -1202,7 +1251,6 @@ const AdminDashboard = () => {
                                 </span>
                               </div>
 
-                              {/* Fee & Guests */}
                               {"fee" in event &&
                                 (event.fee || event.guests) && (
                                   <div className="flex items-center gap-2 flex-wrap">
@@ -1219,12 +1267,10 @@ const AdminDashboard = () => {
                                   </div>
                                 )}
 
-                              {/* Category */}
                               <span className="text-gray-500 text-xs">
                                 {event.category}
                               </span>
 
-                              {/* Description */}
                               {event.description && (
                                 <p className="text-gray-400 line-clamp-2 text-xs mt-1">
                                   {event.description}
@@ -1232,7 +1278,6 @@ const AdminDashboard = () => {
                               )}
                             </div>
                           ) : (
-                            // Previous events display
                             <div className="flex flex-col gap-1 text-sm text-gray-500">
                               <span>{event.category}</span>
                               {event.description && (
@@ -1391,9 +1436,7 @@ const AdminDashboard = () => {
         </div>
       </main>
 
-      {/* ========================================== */}
-      {/* GLOBAL MODALS */}
-      {/* ========================================== */}
+      {/* MODALS */}
       <AnimatePresence>
         {(Object.values(modals).some((v) => v) ||
           showDeleteModal ||
@@ -1404,7 +1447,7 @@ const AdminDashboard = () => {
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           >
-            {/* INPUT FORM MODALS */}
+            {/* CREATE/EDIT MODALS */}
             {(modals.createUpcoming ||
               modals.createPrevious ||
               modals.createGallery ||
@@ -1456,10 +1499,8 @@ const AdminDashboard = () => {
                     }}
                     className="space-y-5"
                   >
-                    {/* Image Upload with Clear Button */}
                     <ImageUploadArea />
 
-                    {/* Dynamic Inputs */}
                     {(modals.createUpcoming || modals.editUpcoming) && (
                       <>
                         <input
@@ -1493,7 +1534,6 @@ const AdminDashboard = () => {
                           }
                         />
 
-                        {/* Date & Time */}
                         <div className="grid grid-cols-2 gap-4">
                           <input
                             type="date"
@@ -1526,7 +1566,6 @@ const AdminDashboard = () => {
                           />
                         </div>
 
-                        {/* Fee & Guests Inputs */}
                         <div className="grid grid-cols-2 gap-4">
                           <input
                             placeholder="Fee (e.g., Free, RM 50)"
@@ -1573,6 +1612,7 @@ const AdminDashboard = () => {
                             }))
                           }
                         />
+
                         <div
                           className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-300 cursor-pointer hover:bg-gray-100 transition-colors"
                           onClick={() =>
