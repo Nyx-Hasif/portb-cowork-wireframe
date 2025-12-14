@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence, type Variants } from "motion/react"; // 1. Imported 'Variants' type
+import { motion, AnimatePresence, type Variants } from "motion/react";
 import React, { useEffect, useState, useCallback } from "react";
 
 export const ImagesSlider = ({
@@ -69,9 +69,10 @@ export const ImagesSlider = ({
 
     let interval: NodeJS.Timeout | null = null;
     if (autoplay) {
+      // 👇 UBAH SINI: 8000ms = 8 saat (Masa tunggu sebelum tukar gambar)
       interval = setInterval(() => {
         handleNext();
-      }, 5000);
+      }, 10000);
     }
 
     return () => {
@@ -80,37 +81,36 @@ export const ImagesSlider = ({
     };
   }, [autoplay, handleNext, handlePrevious]);
 
-  // ✅ SMOOTH - No 3D transforms!
-  // 2. Explicitly typed this object as 'Variants' to fix the array inference error
   const slideVariants: Variants = {
     initial: {
       opacity: 0,
-      scale: 1.1,
+      scale: 1.05, // Kurangkan zoom sikit biar tak pening
     },
     visible: {
       opacity: 1,
       scale: 1,
       transition: {
-        duration: 0.7,
-        ease: [0.43, 0.13, 0.23, 0.96],
+        // 👇 UBAH SINI: 2.5s (Transition lebih perlahan & smooth)
+        duration: 0.2,
+        ease: [0.25, 0.1, 0.25, 1.0], // Easing yang lebih lembut
       },
     },
     upExit: {
       opacity: 0,
-      scale: 0.95,
-      y: "-20%",
+      scale: 1, // Tak perlu scale down masa exit biar nampak tenang
+      y: "-10%", // Kurangkan pergerakan y supaya tak nampak drastik sangat
       transition: {
-        duration: 0.7,
-        ease: [0.43, 0.13, 0.23, 0.96],
+        duration: 0.2,
+        ease: [0.25, 0.1, 0.25, 1.0],
       },
     },
     downExit: {
       opacity: 0,
-      scale: 0.95,
-      y: "20%",
+      scale: 1,
+      y: "10%",
       transition: {
-        duration: 0.7,
-        ease: [0.43, 0.13, 0.23, 0.96],
+        duration: 0.2,
+        ease: [0.25, 0.1, 0.25, 1.0],
       },
     },
   };
@@ -145,7 +145,6 @@ export const ImagesSlider = ({
             variants={slideVariants}
             className="image h-full w-full absolute inset-0 object-cover object-center"
             style={{
-              // ✅ Force GPU acceleration
               willChange: "transform, opacity",
               transform: "translateZ(0)",
               backfaceVisibility: "hidden",
