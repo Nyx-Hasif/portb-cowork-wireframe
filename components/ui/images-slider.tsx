@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, type Variants } from "motion/react"; // 1. Imported 'Variants' type
 import React, { useEffect, useState, useCallback } from "react";
 
 export const ImagesSlider = ({
@@ -21,7 +21,6 @@ export const ImagesSlider = ({
   direction?: "up" | "down";
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  // Removed 'loading' since it's not used
   const [loadedImages, setLoadedImages] = useState<string[]>([]);
 
   const handleNext = useCallback(() => {
@@ -68,12 +67,11 @@ export const ImagesSlider = ({
 
     window.addEventListener("keydown", handleKeyDown);
 
-    // autoplay - Fix: Use NodeJS.Timeout type
     let interval: NodeJS.Timeout | null = null;
     if (autoplay) {
       interval = setInterval(() => {
         handleNext();
-      }, 5000); // 5 seconds
+      }, 5000);
     }
 
     return () => {
@@ -82,34 +80,37 @@ export const ImagesSlider = ({
     };
   }, [autoplay, handleNext, handlePrevious]);
 
-  // Fix: Proper typing for Framer Motion variants
-  const slideVariants = {
+  // ✅ SMOOTH - No 3D transforms!
+  // 2. Explicitly typed this object as 'Variants' to fix the array inference error
+  const slideVariants: Variants = {
     initial: {
-      scale: 0,
       opacity: 0,
-      rotateX: 45,
+      scale: 1.1,
     },
     visible: {
-      scale: 1,
-      rotateX: 0,
       opacity: 1,
+      scale: 1,
       transition: {
-        duration: 0.5,
-        ease: [0.645, 0.045, 0.355, 1.0] as [number, number, number, number],
+        duration: 0.7,
+        ease: [0.43, 0.13, 0.23, 0.96],
       },
     },
     upExit: {
-      opacity: 1,
-      y: "-150%",
+      opacity: 0,
+      scale: 0.95,
+      y: "-20%",
       transition: {
-        duration: 1,
+        duration: 0.7,
+        ease: [0.43, 0.13, 0.23, 0.96],
       },
     },
     downExit: {
-      opacity: 1,
-      y: "150%",
+      opacity: 0,
+      scale: 0.95,
+      y: "20%",
       transition: {
-        duration: 1,
+        duration: 0.7,
+        ease: [0.43, 0.13, 0.23, 0.96],
       },
     },
   };
@@ -122,9 +123,6 @@ export const ImagesSlider = ({
         "overflow-hidden h-full w-full relative flex items-center justify-center",
         className
       )}
-      style={{
-        perspective: "1000px",
-      }}
     >
       {areImagesLoaded && children}
       {areImagesLoaded && overlay && (
@@ -137,7 +135,7 @@ export const ImagesSlider = ({
       )}
 
       {areImagesLoaded && (
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
           <motion.img
             key={currentIndex}
             src={loadedImages[currentIndex]}
@@ -146,6 +144,12 @@ export const ImagesSlider = ({
             exit={direction === "up" ? "upExit" : "downExit"}
             variants={slideVariants}
             className="image h-full w-full absolute inset-0 object-cover object-center"
+            style={{
+              // ✅ Force GPU acceleration
+              willChange: "transform, opacity",
+              transform: "translateZ(0)",
+              backfaceVisibility: "hidden",
+            }}
           />
         </AnimatePresence>
       )}
