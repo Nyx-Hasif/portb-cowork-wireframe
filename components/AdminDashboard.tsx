@@ -194,14 +194,12 @@ const AdminDashboard = () => {
   };
 
   // ==========================================
-  // ✅ ENHANCED BODY SCROLL LOCK
+  // ENHANCED BODY SCROLL LOCK
   // ==========================================
   useEffect(() => {
     if (isSidebarOpen) {
-      // Save current scroll position
       const scrollY = window.scrollY;
 
-      // Lock body completely
       document.documentElement.style.overflow = "hidden";
       document.documentElement.style.position = "fixed";
       document.documentElement.style.width = "100%";
@@ -215,7 +213,6 @@ const AdminDashboard = () => {
       document.body.style.overflow = "hidden";
       document.body.style.overscrollBehavior = "none";
 
-      // ✅ FIX: Type the event properly
       const preventScroll = (e: TouchEvent) => {
         const target = e.target as Element;
         const isScrollable = target.closest(".allow-scroll");
@@ -225,7 +222,6 @@ const AdminDashboard = () => {
         }
       };
 
-      // ✅ FIX: Use Event type instead of any
       const preventGesture = (e: Event) => {
         e.preventDefault();
       };
@@ -236,7 +232,6 @@ const AdminDashboard = () => {
       });
 
       return () => {
-        // Restore everything
         const scrollY = document.body.style.top;
 
         document.documentElement.style.overflow = "";
@@ -831,8 +826,8 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex font-sans text-gray-900">
-      {/* ✅ BACKDROP - Complete touch lock */}
+    <div className="min-h-screen bg-gray-100 flex font-sans text-gray-900 overflow-x-hidden">
+      {/* BACKDROP */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -845,7 +840,7 @@ const AdminDashboard = () => {
         />
       )}
 
-      {/* ✅ SIDEBAR - Zero scroll allowed */}
+      {/* SIDEBAR */}
       <aside
         className={`fixed lg:static inset-y-0 left-0 w-72 bg-white border-r border-gray-300 z-50 transform transition-transform duration-300 flex flex-col ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
@@ -856,7 +851,6 @@ const AdminDashboard = () => {
           WebkitOverflowScrolling: "auto",
         }}
       >
-        {/* Header */}
         <div
           className="h-20 flex items-center px-8 border-b border-gray-300 flex-shrink-0"
           style={{ touchAction: "none" }}
@@ -866,7 +860,6 @@ const AdminDashboard = () => {
           </h1>
         </div>
 
-        {/* Navigation */}
         <nav
           className="flex-1 px-4 py-6 space-y-1 flex-shrink-0 min-h-0"
           style={{
@@ -916,7 +909,6 @@ const AdminDashboard = () => {
           ))}
         </nav>
 
-        {/* Footer */}
         <div
           className="p-4 border-t border-gray-300 bg-gray-50/50 flex-shrink-0"
           style={{ touchAction: "none" }}
@@ -939,15 +931,14 @@ const AdminDashboard = () => {
         </div>
       </aside>
 
-      {/* ✅ MAIN CONTENT - Normal scroll allowed */}
+      {/* ✅ MAIN CONTENT - Prevent horizontal scroll */}
       <main
-        className="flex-1 h-screen overflow-y-auto bg-gray-100"
+        className="flex-1 h-screen overflow-y-auto overflow-x-hidden bg-gray-100"
         style={{
           overscrollBehavior: "contain",
           WebkitOverflowScrolling: "touch",
         }}
       >
-        {/* Mobile Header */}
         <div className="lg:hidden h-16 bg-white sticky top-0 z-40 border-b border-gray-300 px-4 flex items-center justify-between shadow-sm">
           <h1 className="font-bold text-lg">Dashboard</h1>
           <button
@@ -958,7 +949,8 @@ const AdminDashboard = () => {
           </button>
         </div>
 
-        <div className="p-6 sm:p-8 max-w-7xl mx-auto pb-24">
+        {/* ✅ Content wrapper - prevent overflow */}
+        <div className="p-6 sm:p-8 max-w-7xl mx-auto pb-24 overflow-x-hidden">
           <AnimatePresence mode="wait">
             {/* OVERVIEW SECTION */}
             {activeSection === "overview" && (
@@ -1144,7 +1136,7 @@ const AdminDashboard = () => {
               </motion.div>
             )}
 
-            {/* UPCOMING & PREVIOUS LISTS */}
+            {/* ✅ UPCOMING & PREVIOUS LISTS - Fixed horizontal scroll */}
             {["upcoming", "previous"].includes(activeSection) && (
               <motion.div
                 key={activeSection}
@@ -1207,15 +1199,16 @@ const AdminDashboard = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="bg-white p-4 rounded-2xl border border-gray-300 hover:border-gray-400 hover:shadow-md transition-all flex flex-col sm:flex-row gap-5 items-start sm:items-center group"
+                        className="bg-white p-4 rounded-2xl border border-gray-300 hover:border-gray-400 hover:shadow-md transition-all flex flex-col sm:flex-row gap-4 items-start sm:items-center group overflow-hidden"
                       >
+                        {/* ✅ Image container - fixed width on mobile/tablet */}
                         <div
                           onClick={() => {
                             setPreviewEvent(event);
                             setPreviewType(activeSection);
                             toggleModal("preview", true);
                           }}
-                          className="w-full sm:w-24 h-32 sm:h-24 bg-gray-100 rounded-xl relative overflow-hidden cursor-pointer flex-shrink-0 border border-gray-300"
+                          className="w-full sm:w-24 h-40 sm:h-24 sm:min-w-[96px] sm:max-w-[96px] bg-gray-100 rounded-xl relative overflow-hidden cursor-pointer flex-shrink-0 border border-gray-300"
                         >
                           {event.image_url ? (
                             <Image
@@ -1231,13 +1224,14 @@ const AdminDashboard = () => {
                           )}
                         </div>
 
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="text-lg font-bold text-gray-900 truncate">
+                        {/* ✅ Content - prevent overflow */}
+                        <div className="flex-1 min-w-0 w-full overflow-hidden">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate">
                               {event.title}
                             </h3>
                             {"is_featured" in event && event.is_featured && (
-                              <span className="px-2 py-0.5 bg-black text-white text-[10px] uppercase font-bold rounded">
+                              <span className="px-2 py-0.5 bg-black text-white text-[10px] uppercase font-bold rounded flex-shrink-0">
                                 Featured
                               </span>
                             )}
@@ -1246,8 +1240,11 @@ const AdminDashboard = () => {
                           {activeSection === "upcoming" && "date" in event ? (
                             <div className="flex flex-col gap-1.5 text-sm">
                               <div className="flex items-center gap-2 text-gray-600">
-                                <Calendar size={14} className="text-gray-400" />
-                                <span className="font-medium">
+                                <Calendar
+                                  size={14}
+                                  className="text-gray-400 flex-shrink-0"
+                                />
+                                <span className="font-medium truncate">
                                   {event.date || "TBA"}
                                   {"time" in event &&
                                     event.time &&
@@ -1259,19 +1256,19 @@ const AdminDashboard = () => {
                                 (event.fee || event.guests) && (
                                   <div className="flex items-center gap-2 flex-wrap">
                                     {event.fee && (
-                                      <span className="px-2 py-1 bg-green-50 text-green-700 rounded-md text-xs font-bold border border-green-200">
+                                      <span className="px-2 py-1 bg-green-50 text-green-700 rounded-md text-xs font-bold border border-green-200 whitespace-nowrap">
                                         💰 {event.fee}
                                       </span>
                                     )}
                                     {event.guests && (
-                                      <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-bold border border-blue-200">
+                                      <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-bold border border-blue-200 whitespace-nowrap">
                                         👥 {event.guests}
                                       </span>
                                     )}
                                   </div>
                                 )}
 
-                              <span className="text-gray-500 text-xs">
+                              <span className="text-gray-500 text-xs truncate">
                                 {event.category}
                               </span>
 
@@ -1283,7 +1280,7 @@ const AdminDashboard = () => {
                             </div>
                           ) : (
                             <div className="flex flex-col gap-1 text-sm text-gray-500">
-                              <span>{event.category}</span>
+                              <span className="truncate">{event.category}</span>
                               {event.description && (
                                 <span className="text-gray-400 line-clamp-1 text-xs">
                                   {event.description}
@@ -1293,7 +1290,8 @@ const AdminDashboard = () => {
                           )}
                         </div>
 
-                        <div className="flex gap-2 w-full sm:w-auto justify-end">
+                        {/* ✅ Action buttons */}
+                        <div className="flex gap-2 w-full sm:w-auto justify-end flex-shrink-0">
                           <button
                             onClick={() => {
                               setPreviewEvent(event);
@@ -1361,7 +1359,7 @@ const AdminDashboard = () => {
                 <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
                   <button
                     onClick={() => setGalleryFilter("all")}
-                    className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-all border ${
+                    className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-all border flex-shrink-0 ${
                       galleryFilter === "all"
                         ? "bg-black text-white border-black"
                         : "bg-white border-gray-300 text-gray-500 hover:border-gray-400 hover:text-black"
@@ -1373,7 +1371,7 @@ const AdminDashboard = () => {
                     <button
                       key={year}
                       onClick={() => setGalleryFilter(year)}
-                      className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-all border ${
+                      className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-all border flex-shrink-0 ${
                         galleryFilter === year
                           ? "bg-black text-white border-black"
                           : "bg-white border-gray-300 text-gray-500 hover:border-gray-400 hover:text-black"
