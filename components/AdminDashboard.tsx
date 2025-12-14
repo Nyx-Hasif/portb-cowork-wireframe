@@ -194,6 +194,33 @@ const AdminDashboard = () => {
   };
 
   // ==========================================
+  // ✅ LOCK BODY SCROLL WHEN SIDEBAR OPEN
+  // ==========================================
+  useEffect(() => {
+    if (isSidebarOpen) {
+      // Lock body scroll
+      document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.width = "100%";
+      document.body.style.height = "100%";
+    } else {
+      // Unlock body scroll
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+      document.body.style.height = "";
+    }
+
+    // Cleanup
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+      document.body.style.height = "";
+    };
+  }, [isSidebarOpen]);
+
+  // ==========================================
   // HELPERS & HANDLERS
   // ==========================================
   const toggleModal = (name: keyof typeof modals, value: boolean) => {
@@ -772,29 +799,34 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex font-sans text-gray-900">
-      {/* MOBILE SIDEBAR BACKDROP */}
+      {/* ✅ MOBILE SIDEBAR BACKDROP - prevent touch scroll */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
+          style={{ touchAction: "none" }}
         />
       )}
 
-      {/* SIDEBAR */}
+      {/* ✅ SIDEBAR - overscroll protection */}
       <aside
         className={`fixed lg:static inset-y-0 left-0 w-72 bg-white border-r border-gray-300 z-50 transform transition-transform duration-300 flex flex-col ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
+        style={{
+          touchAction: "pan-y",
+          overscrollBehavior: "contain",
+        }}
       >
-        {/* Sidebar Header - ✅ REMOVE CLOSE BUTTON */}
+        {/* ✅ Sidebar Header - NO CLOSE BUTTON */}
         <div className="h-20 flex items-center px-8 border-b border-gray-300 flex-shrink-0">
           <h1 className="text-xl font-bold tracking-tight">
             Port B <span className="text-gray-400 font-normal">Admin</span>
           </h1>
         </div>
 
-        {/* Navigation - ✅ ADD flex-shrink-0 & remove overflow */}
-        <nav className="flex-1 px-4 py-6 space-y-1 flex-shrink-0 min-h-0">
+        {/* ✅ Navigation - contained scroll */}
+        <nav className="flex-1 px-4 py-6 space-y-1 flex-shrink-0 min-h-0 overflow-y-auto overscroll-contain">
           <div className="mb-4 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
             Main Menu
           </div>
@@ -837,7 +869,7 @@ const AdminDashboard = () => {
           ))}
         </nav>
 
-        {/* Sidebar Footer / Profile - ✅ ADD flex-shrink-0 */}
+        {/* ✅ Sidebar Footer / Profile - fixed bottom */}
         <div className="p-4 border-t border-gray-300 bg-gray-50/50 flex-shrink-0">
           <div className="bg-white border border-gray-300 p-3 rounded-xl flex items-center gap-3 mb-3 shadow-sm">
             <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 border border-gray-300">
@@ -1157,7 +1189,6 @@ const AdminDashboard = () => {
                             )}
                           </div>
 
-                          {/* ✅ UPDATED - Show Fee & Guests for Upcoming */}
                           {activeSection === "upcoming" && "date" in event ? (
                             <div className="flex flex-col gap-1.5 text-sm">
                               {/* Date & Time */}
@@ -1495,7 +1526,7 @@ const AdminDashboard = () => {
                           />
                         </div>
 
-                        {/* ✅ Fee & Guests Inputs */}
+                        {/* Fee & Guests Inputs */}
                         <div className="grid grid-cols-2 gap-4">
                           <input
                             placeholder="Fee (e.g., Free, RM 50)"
