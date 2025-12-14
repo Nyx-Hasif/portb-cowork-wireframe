@@ -194,7 +194,7 @@ const AdminDashboard = () => {
   };
 
   // ==========================================
-  // ENHANCED BODY SCROLL LOCK
+  // ✅ SIDEBAR SCROLL LOCK
   // ==========================================
   useEffect(() => {
     if (isSidebarOpen) {
@@ -254,6 +254,74 @@ const AdminDashboard = () => {
       };
     }
   }, [isSidebarOpen]);
+
+  // ==========================================
+  // ✅ MODAL SCROLL LOCK (NEW!)
+  // ==========================================
+  useEffect(() => {
+    const anyModalOpen =
+      Object.values(modals).some((v) => v) ||
+      showDeleteModal ||
+      showLogoutModal;
+
+    if (anyModalOpen) {
+      const scrollY = window.scrollY;
+
+      document.documentElement.style.overflow = "hidden";
+      document.documentElement.style.position = "fixed";
+      document.documentElement.style.width = "100%";
+      document.documentElement.style.height = "100%";
+
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = "0";
+      document.body.style.right = "0";
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
+      document.body.style.overscrollBehavior = "none";
+
+      const preventScroll = (e: TouchEvent) => {
+        const target = e.target as Element;
+        // Allow scroll only inside modal content
+        const isModalContent = target.closest(".modal-scrollable");
+
+        if (!isModalContent) {
+          e.preventDefault();
+        }
+      };
+
+      const preventGesture = (e: Event) => {
+        e.preventDefault();
+      };
+
+      document.addEventListener("touchmove", preventScroll, { passive: false });
+      document.addEventListener("gesturestart", preventGesture, {
+        passive: false,
+      });
+
+      return () => {
+        const scrollY = document.body.style.top;
+
+        document.documentElement.style.overflow = "";
+        document.documentElement.style.position = "";
+        document.documentElement.style.width = "";
+        document.documentElement.style.height = "";
+
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.left = "";
+        document.body.style.right = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
+        document.body.style.overscrollBehavior = "";
+
+        window.scrollTo(0, parseInt(scrollY || "0") * -1);
+
+        document.removeEventListener("touchmove", preventScroll);
+        document.removeEventListener("gesturestart", preventGesture);
+      };
+    }
+  }, [modals, showDeleteModal, showLogoutModal]);
 
   // ==========================================
   // HELPERS & HANDLERS
@@ -931,7 +999,7 @@ const AdminDashboard = () => {
         </div>
       </aside>
 
-      {/* ✅ MAIN CONTENT - Prevent horizontal scroll */}
+      {/* MAIN CONTENT */}
       <main
         className="flex-1 h-screen overflow-y-auto overflow-x-hidden bg-gray-100"
         style={{
@@ -949,7 +1017,6 @@ const AdminDashboard = () => {
           </button>
         </div>
 
-        {/* ✅ Content wrapper - prevent overflow */}
         <div className="p-6 sm:p-8 max-w-7xl mx-auto pb-24 overflow-x-hidden">
           <AnimatePresence mode="wait">
             {/* OVERVIEW SECTION */}
@@ -1136,7 +1203,7 @@ const AdminDashboard = () => {
               </motion.div>
             )}
 
-            {/* ✅ UPCOMING & PREVIOUS LISTS - Fixed horizontal scroll */}
+            {/* UPCOMING & PREVIOUS LISTS */}
             {["upcoming", "previous"].includes(activeSection) && (
               <motion.div
                 key={activeSection}
@@ -1201,7 +1268,6 @@ const AdminDashboard = () => {
                         exit={{ opacity: 0, y: -20 }}
                         className="bg-white p-4 rounded-2xl border border-gray-300 hover:border-gray-400 hover:shadow-md transition-all flex flex-col sm:flex-row gap-4 items-start sm:items-center group overflow-hidden"
                       >
-                        {/* ✅ Image container - fixed width on mobile/tablet */}
                         <div
                           onClick={() => {
                             setPreviewEvent(event);
@@ -1224,7 +1290,6 @@ const AdminDashboard = () => {
                           )}
                         </div>
 
-                        {/* ✅ Content - prevent overflow */}
                         <div className="flex-1 min-w-0 w-full overflow-hidden">
                           <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate">
@@ -1290,7 +1355,6 @@ const AdminDashboard = () => {
                           )}
                         </div>
 
-                        {/* ✅ Action buttons */}
                         <div className="flex gap-2 w-full sm:w-auto justify-end flex-shrink-0">
                           <button
                             onClick={() => {
@@ -1438,7 +1502,7 @@ const AdminDashboard = () => {
         </div>
       </main>
 
-      {/* MODALS */}
+      {/* ✅ MODALS - WITH SCROLL LOCK */}
       <AnimatePresence>
         {(Object.values(modals).some((v) => v) ||
           showDeleteModal ||
@@ -1448,6 +1512,10 @@ const AdminDashboard = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            style={{
+              touchAction: "none",
+              overscrollBehavior: "none",
+            }}
           >
             {/* CREATE/EDIT MODALS */}
             {(modals.createUpcoming ||
@@ -1462,8 +1530,16 @@ const AdminDashboard = () => {
                 animate="visible"
                 exit="exit"
                 className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-gray-200"
+                style={{
+                  touchAction: "pan-y",
+                  overscrollBehavior: "contain",
+                }}
               >
-                <div className="p-6 border-b border-gray-300 flex justify-between items-center bg-gray-50/50">
+                {/* ✅ Modal Header - No scroll */}
+                <div
+                  className="p-6 border-b border-gray-300 flex justify-between items-center bg-gray-50/50 flex-shrink-0"
+                  style={{ touchAction: "none" }}
+                >
                   <h3 className="font-bold text-xl">
                     {modals.createUpcoming ||
                     modals.createPrevious ||
@@ -1489,7 +1565,14 @@ const AdminDashboard = () => {
                   </button>
                 </div>
 
-                <div className="p-6 overflow-y-auto">
+                {/* ✅ Modal Content - Allow scroll ONLY here */}
+                <div
+                  className="p-6 overflow-y-auto modal-scrollable flex-1"
+                  style={{
+                    overscrollBehavior: "contain",
+                    WebkitOverflowScrolling: "touch",
+                  }}
+                >
                   <form
                     onSubmit={(e) => {
                       if (modals.createUpcoming) createUpcoming(e);
@@ -1748,7 +1831,7 @@ const AdminDashboard = () => {
               </motion.div>
             )}
 
-            {/* PREVIEW MODAL */}
+            {/* ✅ PREVIEW MODAL */}
             {modals.preview && previewEvent && (
               <motion.div
                 variants={modalVariants}
@@ -1756,9 +1839,16 @@ const AdminDashboard = () => {
                 animate="visible"
                 exit="exit"
                 className="bg-white w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-gray-200"
+                style={{
+                  touchAction: "pan-y",
+                  overscrollBehavior: "contain",
+                }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="relative h-64 w-full bg-gray-100 border-b border-gray-200">
+                <div
+                  className="relative h-64 w-full bg-gray-100 border-b border-gray-200 flex-shrink-0"
+                  style={{ touchAction: "none" }}
+                >
                   {previewEvent.image_url ? (
                     <Image
                       src={previewEvent.image_url}
@@ -1778,7 +1868,13 @@ const AdminDashboard = () => {
                     <X size={20} />
                   </button>
                 </div>
-                <div className="p-8 overflow-y-auto">
+                <div
+                  className="p-8 overflow-y-auto modal-scrollable flex-1"
+                  style={{
+                    overscrollBehavior: "contain",
+                    WebkitOverflowScrolling: "touch",
+                  }}
+                >
                   <h2 className="text-3xl font-bold text-gray-900 mb-2">
                     {"title" in previewEvent
                       ? previewEvent.title
@@ -1841,7 +1937,7 @@ const AdminDashboard = () => {
               </motion.div>
             )}
 
-            {/* DELETE MODAL */}
+            {/* ✅ DELETE MODAL */}
             {showDeleteModal && deleteTarget && (
               <motion.div
                 variants={modalVariants}
@@ -1849,6 +1945,10 @@ const AdminDashboard = () => {
                 animate="visible"
                 exit="exit"
                 className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 border border-gray-200"
+                style={{
+                  touchAction: "none",
+                  overscrollBehavior: "none",
+                }}
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="text-center">
@@ -1885,7 +1985,7 @@ const AdminDashboard = () => {
               </motion.div>
             )}
 
-            {/* LOGOUT MODAL */}
+            {/* ✅ LOGOUT MODAL */}
             {showLogoutModal && (
               <motion.div
                 variants={modalVariants}
@@ -1893,6 +1993,10 @@ const AdminDashboard = () => {
                 animate="visible"
                 exit="exit"
                 className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 border border-gray-200"
+                style={{
+                  touchAction: "none",
+                  overscrollBehavior: "none",
+                }}
                 onClick={(e) => e.stopPropagation()}
               >
                 <h3 className="text-xl font-bold mb-2">Sign Out</h3>
