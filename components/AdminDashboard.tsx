@@ -786,21 +786,15 @@ const AdminDashboard = () => {
           isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
-        {/* Sidebar Header */}
-        <div className="h-20 flex items-center justify-between px-8 border-b border-gray-300">
+        {/* Sidebar Header - ✅ REMOVE CLOSE BUTTON */}
+        <div className="h-20 flex items-center px-8 border-b border-gray-300 flex-shrink-0">
           <h1 className="text-xl font-bold tracking-tight">
             Port B <span className="text-gray-400 font-normal">Admin</span>
           </h1>
-          <button
-            onClick={() => setIsSidebarOpen(false)}
-            className="lg:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-md"
-          >
-            <X size={20} />
-          </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+        {/* Navigation - ✅ ADD flex-shrink-0 & remove overflow */}
+        <nav className="flex-1 px-4 py-6 space-y-1 flex-shrink-0 min-h-0">
           <div className="mb-4 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
             Main Menu
           </div>
@@ -843,8 +837,8 @@ const AdminDashboard = () => {
           ))}
         </nav>
 
-        {/* Sidebar Footer / Profile */}
-        <div className="p-4 border-t border-gray-300 bg-gray-50/50">
+        {/* Sidebar Footer / Profile - ✅ ADD flex-shrink-0 */}
+        <div className="p-4 border-t border-gray-300 bg-gray-50/50 flex-shrink-0">
           <div className="bg-white border border-gray-300 p-3 rounded-xl flex items-center gap-3 mb-3 shadow-sm">
             <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 border border-gray-300">
               <User size={16} />
