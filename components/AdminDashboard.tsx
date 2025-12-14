@@ -215,9 +215,8 @@ const AdminDashboard = () => {
       document.body.style.overflow = "hidden";
       document.body.style.overscrollBehavior = "none";
 
-      // Prevent touch scrolling on entire document
+      // ✅ FIX: Type the event properly
       const preventScroll = (e: TouchEvent) => {
-        // Only prevent if target is not scrollable content
         const target = e.target as Element;
         const isScrollable = target.closest(".allow-scroll");
 
@@ -226,8 +225,13 @@ const AdminDashboard = () => {
         }
       };
 
+      // ✅ FIX: Use Event type instead of any
+      const preventGesture = (e: Event) => {
+        e.preventDefault();
+      };
+
       document.addEventListener("touchmove", preventScroll, { passive: false });
-      document.addEventListener("gesturestart", preventScroll as any, {
+      document.addEventListener("gesturestart", preventGesture, {
         passive: false,
       });
 
@@ -251,7 +255,7 @@ const AdminDashboard = () => {
         window.scrollTo(0, parseInt(scrollY || "0") * -1);
 
         document.removeEventListener("touchmove", preventScroll);
-        document.removeEventListener("gesturestart", preventScroll as any);
+        document.removeEventListener("gesturestart", preventGesture);
       };
     }
   }, [isSidebarOpen]);
