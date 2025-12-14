@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { InfiniteMovingCards } from "./ui/infinite-moving-cards";
 import TestimonialCarouselDemo from "./testimonialsCarousel";
 import LustreText from "@/components/ui/lustretext";
-import { Play, Pause, ChevronLeft, ChevronRight } from "lucide-react";
+import { Play, ChevronLeft, ChevronRight } from "lucide-react";
 import { assets } from "@/assets/asset";
 import Image from "next/image";
 
@@ -211,7 +211,7 @@ const Reviews = () => {
   );
 };
 
-// Video Card Component for Desktop
+// Video Card Component for Desktop - FIXED PAUSE ISSUE
 interface VideoCardProps {
   video: VideoReview;
   isActive: boolean;
@@ -247,13 +247,16 @@ const VideoCard: React.FC<VideoCardProps> = ({
   const togglePlay = () => {
     if (videoRef.current) {
       if (isPlaying) {
+        // PAUSE - jangan reset, just pause je
         videoRef.current.pause();
-        videoRef.current.muted = true;
         setIsPlaying(false);
-        onStop();
+        // TAK PANGGIL onStop() dan TAK reset showVideo!
       } else {
-        setShowVideo(true);
-        onPlay();
+        if (!showVideo) {
+          // First time play
+          setShowVideo(true);
+          onPlay();
+        }
         videoRef.current.muted = false;
         videoRef.current.play();
         setIsPlaying(true);
@@ -304,7 +307,7 @@ const VideoCard: React.FC<VideoCardProps> = ({
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 25vw"
             />
-            {/* Play Button on Thumbnail */}
+            {/* Play Button HANYA di thumbnail */}
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm rounded-full p-4 hover:bg-white/30 hover:scale-110 transition-all cursor-pointer">
               <Play className="w-8 h-8 text-white fill-white" />
             </div>
@@ -330,42 +333,40 @@ const VideoCard: React.FC<VideoCardProps> = ({
           onLoadedMetadata={handleLoadedMetadata}
         />
 
-        {/* Overlay Controls - Show bila video playing */}
+        {/* BILA PLAYING/PAUSED - TAK ADA BUTTON! */}
         {showVideo && (
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-            {/* Play/Pause Button */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm rounded-full p-3 hover:bg-white/30 transition cursor-pointer">
-              {isPlaying ? (
-                <Pause className="w-6 h-6 text-white" />
-              ) : (
-                <Play className="w-6 h-6 text-white" />
-              )}
-            </div>
-
-            {/* Duration Badge - Show current / total */}
-            <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
+          <div className="absolute inset-0 cursor-pointer">
+            {/* Duration Badge */}
+            <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm rounded px-2 py-1 z-20">
               <span className="text-white text-xs">
                 {formatTime(currentTime)} / {formatTime(duration)}
               </span>
             </div>
+
+            {/* Playing Indicator - Show HANYA bila tengah playing */}
+            {isPlaying && isActive && (
+              <div className="absolute top-4 left-4 bg-red-600 rounded px-2 py-1 flex items-center gap-1 z-20">
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                <span className="text-white text-xs">Playing</span>
+              </div>
+            )}
+
+            {/* Paused Indicator - Show bila paused */}
+            {!isPlaying && (
+              <div className="absolute top-4 left-4 bg-gray-600 rounded px-2 py-1 flex items-center gap-1 z-20">
+                <span className="text-white text-xs">Paused</span>
+              </div>
+            )}
           </div>
         )}
 
         {/* Progress Bar */}
         {showVideo && duration > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30 z-20">
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30 z-30">
             <div
               className="h-full bg-red-500 transition-all duration-100"
               style={{ width: `${(currentTime / duration) * 100}%` }}
             />
-          </div>
-        )}
-
-        {/* Playing Indicator */}
-        {isPlaying && isActive && (
-          <div className="absolute top-4 left-4 bg-red-600 rounded px-2 py-1 flex items-center gap-1 z-20">
-            <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-            <span className="text-white text-xs">Playing</span>
           </div>
         )}
       </div>
@@ -419,11 +420,13 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ videos }) => {
   const togglePlay = () => {
     if (videoRef.current) {
       if (isPlaying) {
+        // PAUSE - jangan reset, just pause je
         videoRef.current.pause();
-        videoRef.current.muted = true;
         setIsPlaying(false);
       } else {
-        setShowVideo(true);
+        if (!showVideo) {
+          setShowVideo(true);
+        }
         videoRef.current.muted = false;
         videoRef.current.play();
         setIsPlaying(true);
@@ -455,7 +458,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ videos }) => {
           className="relative rounded-xl overflow-hidden bg-gray-900 cursor-pointer"
           onClick={togglePlay}
         >
-          {/* Thumbnail Overlay */}
+          {/* Thumbnail Overlay - Show bila video TAK playing */}
           {!showVideo && (
             <div className="absolute inset-0 z-10 cursor-pointer">
               <Image
@@ -465,9 +468,11 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ videos }) => {
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
+              {/* Play Button on Thumbnail */}
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm rounded-full p-4 hover:bg-white/30 hover:scale-110 transition-all cursor-pointer">
                 <Play className="w-8 h-8 text-white fill-white" />
               </div>
+              {/* Duration Badge */}
               <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
                 <span className="text-white text-sm">
                   {duration > 0
@@ -478,6 +483,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ videos }) => {
             </div>
           )}
 
+          {/* Video Element */}
           <video
             ref={videoRef}
             className="w-full aspect-[9/16] object-cover cursor-pointer"
@@ -490,27 +496,28 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ videos }) => {
             onLoadedMetadata={handleLoadedMetadata}
           />
 
-          {/* Overlay Controls - bila playing */}
+          {/* Overlay - Show bila video playing (TAK ADA PAUSE BUTTON!) */}
           {showVideo && (
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent cursor-pointer">
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm rounded-full p-4 hover:bg-white/30 transition cursor-pointer">
-                {isPlaying ? (
-                  <Pause className="w-8 h-8 text-white" />
-                ) : (
-                  <Play className="w-8 h-8 text-white" />
-                )}
-              </div>
-
-              <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
+            <div className="absolute inset-0 cursor-pointer">
+              {/* Duration Badge - Always show bila video dah start */}
+              <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm rounded px-2 py-1 z-20">
                 <span className="text-white text-sm">
                   {formatTime(currentTime)} / {formatTime(duration)}
                 </span>
               </div>
 
+              {/* Playing Indicator - Show bila tengah playing */}
               {isPlaying && (
-                <div className="absolute top-4 left-4 bg-red-600 rounded px-2 py-1 flex items-center gap-1">
+                <div className="absolute top-4 left-4 bg-red-600 rounded px-2 py-1 flex items-center gap-1 z-20">
                   <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
                   <span className="text-white text-xs">Playing</span>
+                </div>
+              )}
+
+              {/* Paused Indicator - Show bila paused */}
+              {!isPlaying && (
+                <div className="absolute top-4 left-4 bg-gray-600 rounded px-2 py-1 flex items-center gap-1 z-20">
+                  <span className="text-white text-xs">Paused</span>
                 </div>
               )}
             </div>
@@ -533,7 +540,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ videos }) => {
             e.stopPropagation();
             prevVideo();
           }}
-          className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full p-2 hover:bg-white transition z-20 cursor-pointer"
+          className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full p-2 hover:bg-white transition z-40 cursor-pointer"
         >
           <ChevronLeft className="w-5 h-5 text-gray-900" />
         </button>
@@ -542,13 +549,13 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ videos }) => {
             e.stopPropagation();
             nextVideo();
           }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full p-2 hover:bg-white transition z-20 cursor-pointer"
+          className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full p-2 hover:bg-white transition z-40 cursor-pointer"
         >
           <ChevronRight className="w-5 h-5 text-gray-900" />
         </button>
 
         {/* Dots Indicator */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-40">
           {videos.map((_, index) => (
             <button
               key={index}
