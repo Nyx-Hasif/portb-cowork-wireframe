@@ -20,12 +20,21 @@ import {
   User,
   ChevronRight,
   LucideIcon,
+  Mail,
+  MailOpen,
+  Copy,
+  Clock3,
+  Building2,
+  Phone,
+  Star,
+  Check,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/lib/supabase";
 import {
   getUpcomingEvents,
   createUpcomingEvent,
@@ -81,8 +90,23 @@ interface GalleryImage {
   updated_at?: string;
 }
 
+interface ContactMessage {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  space_type?: string;
+  message: string;
+  is_read: boolean;
+  is_starred: boolean;
+  created_at: string;
+  updated_at?: string;
+}
+
 type AnyItem = UpcomingEvent | PreviousEvent | GalleryImage;
-type SectionType = "overview" | "upcoming" | "previous" | "gallery";
+type SectionType = "overview" | "upcoming" | "previous" | "gallery" | "inbox";
+type InboxFilter = "all" | "unread" | "starred";
 
 interface StatCardProps {
   icon: LucideIcon;
@@ -129,9 +153,13 @@ const AdminDashboard = () => {
   const [upcomingSearch, setUpcomingSearch] = useState("");
   const [previousSearch, setPreviousSearch] = useState("");
   const [galleryFilter, setGalleryFilter] = useState("all");
+  const [inboxSearch, setInboxSearch] = useState("");
+  const [inboxFilter, setInboxFilter] = useState<InboxFilter>("all");
 
   // Modals & Data
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
+  const [deleteAllConfirmText, setDeleteAllConfirmText] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<{
     type: string;
     id: number;
@@ -148,6 +176,7 @@ const AdminDashboard = () => {
     editPrevious: false,
     editGallery: false,
     preview: false,
+    messageDetail: false,
   });
 
   const [editingEvent, setEditingEvent] = useState<AnyItem | null>(null);
@@ -158,8 +187,18 @@ const AdminDashboard = () => {
   const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([]);
   const [previousEvents, setPreviousEvents] = useState<PreviousEvent[]>([]);
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
+  const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(
+    null
+  );
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [starredCount, setStarredCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isDataLoading, setIsDataLoading] = useState(true);
+
+  // Multi-select for inbox
+  const [selectedMessageIds, setSelectedMessageIds] = useState<number[]>([]);
+  const [isSelectMode, setIsSelectMode] = useState(false);
 
   // Refresh key
   const [refreshKey, setRefreshKey] = useState(0);
@@ -194,7 +233,340 @@ const AdminDashboard = () => {
   };
 
   // ==========================================
-  // ✅ SIDEBAR SCROLL LOCK
+  // INBOX FUNCTIONS
+  // ==========================================
+
+  const fetchMessages = useCallback(async () => {
+    try {
+      const response = await fetch("/api/contact");
+      const result = await response.json();
+
+      if (result.success) {
+        setContactMessages(result.data);
+        setUnreadCount(
+          result.data.filter((m: ContactMessage) => !m.is_read).length
+        );
+        setStarredCount(
+          result.data.filter((m: ContactMessage) => m.is_starred).length
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  }, []);
+
+  // Supabase Realtime Subscription
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel("contact_messages_changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "contact_messages",
+        },
+        (payload) => {
+          if (payload.eventType === "INSERT") {
+            const newMessage = payload.new as ContactMessage;
+            setContactMessages((prev) => [newMessage, ...prev]);
+            setUnreadCount((prev) => prev + 1);
+            toast.success(`New message from ${newMessage.name}!`, {
+              icon: "📬",
+              duration: 5000,
+            });
+          } else if (payload.eventType === "UPDATE") {
+            const updatedMessage = payload.new as ContactMessage;
+            setContactMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === updatedMessage.id ? updatedMessage : msg
+              )
+            );
+            // Recalculate counts
+            setContactMessages((prev) => {
+              setUnreadCount(prev.filter((m) => !m.is_read).length);
+              setStarredCount(prev.filter((m) => m.is_starred).length);
+              return prev;
+            });
+          } else if (payload.eventType === "DELETE") {
+            const deletedId = payload.old.id;
+            setContactMessages((prev) => {
+              const newMessages = prev.filter((msg) => msg.id !== deletedId);
+              setUnreadCount(newMessages.filter((m) => !m.is_read).length);
+              setStarredCount(newMessages.filter((m) => m.is_starred).length);
+              return newMessages;
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+  const markAsRead = async (id: number) => {
+    try {
+      const response = await fetch(`/api/contact/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_read: true }),
+      });
+
+      if (response.ok) {
+        setContactMessages((prev) =>
+          prev.map((msg) => (msg.id === id ? { ...msg, is_read: true } : msg))
+        );
+        setUnreadCount((prev) => Math.max(0, prev - 1));
+      }
+    } catch (error) {
+      console.error("Error marking as read:", error);
+    }
+  };
+
+  const markAsUnread = async (id: number) => {
+    try {
+      const response = await fetch(`/api/contact/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_read: false }),
+      });
+
+      if (response.ok) {
+        setContactMessages((prev) =>
+          prev.map((msg) => (msg.id === id ? { ...msg, is_read: false } : msg))
+        );
+        setUnreadCount((prev) => prev + 1);
+      }
+    } catch (error) {
+      console.error("Error marking as unread:", error);
+    }
+  };
+
+  const toggleStar = async (id: number, currentStarred: boolean) => {
+    try {
+      const response = await fetch(`/api/contact/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_starred: !currentStarred }),
+      });
+
+      if (response.ok) {
+        setContactMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === id ? { ...msg, is_starred: !currentStarred } : msg
+          )
+        );
+        setStarredCount((prev) =>
+          currentStarred ? Math.max(0, prev - 1) : prev + 1
+        );
+        toast.success(currentStarred ? "Star removed" : "Message starred!", {
+          icon: currentStarred ? "☆" : "⭐",
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling star:", error);
+    }
+  };
+
+  const deleteMessage = async (id: number) => {
+    setIsLoading(true);
+    const tid = toast.loading("Deleting message...");
+
+    try {
+      const response = await fetch(`/api/contact/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        const deletedMsg = contactMessages.find((m) => m.id === id);
+        setContactMessages((prev) => prev.filter((msg) => msg.id !== id));
+
+        if (deletedMsg && !deletedMsg.is_read) {
+          setUnreadCount((prev) => Math.max(0, prev - 1));
+        }
+        if (deletedMsg && deletedMsg.is_starred) {
+          setStarredCount((prev) => Math.max(0, prev - 1));
+        }
+
+        setShowDeleteModal(false);
+        setDeleteTarget(null);
+        toggleModal("messageDetail", false);
+        setSelectedMessage(null);
+        toast.success("Message deleted!", { id: tid });
+      } else {
+        toast.error("Failed to delete message", { id: tid });
+      }
+    } catch (error) {
+      console.error("Error deleting message:", error);
+      toast.error("Failed to delete message", { id: tid });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteSelectedMessages = async () => {
+    if (selectedMessageIds.length === 0) return;
+
+    setIsLoading(true);
+    const tid = toast.loading(
+      `Deleting ${selectedMessageIds.length} messages...`
+    );
+
+    try {
+      const response = await fetch("/api/contact/bulk", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selectedMessageIds }),
+      });
+
+      if (response.ok) {
+        const deletedMessages = contactMessages.filter((m) =>
+          selectedMessageIds.includes(m.id)
+        );
+        const unreadDeleted = deletedMessages.filter((m) => !m.is_read).length;
+        const starredDeleted = deletedMessages.filter(
+          (m) => m.is_starred
+        ).length;
+
+        setContactMessages((prev) =>
+          prev.filter((msg) => !selectedMessageIds.includes(msg.id))
+        );
+        setUnreadCount((prev) => Math.max(0, prev - unreadDeleted));
+        setStarredCount((prev) => Math.max(0, prev - starredDeleted));
+        setSelectedMessageIds([]);
+        setIsSelectMode(false);
+        toast.success(`${selectedMessageIds.length} messages deleted!`, {
+          id: tid,
+        });
+      } else {
+        toast.error("Failed to delete messages", { id: tid });
+      }
+    } catch (error) {
+      console.error("Error deleting messages:", error);
+      toast.error("Failed to delete messages", { id: tid });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteAllMessages = async () => {
+    if (deleteAllConfirmText !== "DELETE ALL") return;
+
+    setIsLoading(true);
+    const tid = toast.loading("Deleting all messages...");
+
+    try {
+      const response = await fetch("/api/contact/bulk", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deleteAll: true }),
+      });
+
+      if (response.ok) {
+        setContactMessages([]);
+        setUnreadCount(0);
+        setStarredCount(0);
+        setSelectedMessageIds([]);
+        setIsSelectMode(false);
+        setShowDeleteAllModal(false);
+        setDeleteAllConfirmText("");
+        toast.success("All messages deleted!", { id: tid });
+      } else {
+        toast.error("Failed to delete all messages", { id: tid });
+      }
+    } catch (error) {
+      console.error("Error deleting all messages:", error);
+      toast.error("Failed to delete all messages", { id: tid });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const copyToClipboard = (text: string, type: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${type} copied!`, { icon: "📋" });
+  };
+
+  const formatFullDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-MY", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  const formatRelativeTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins} min ago`;
+    if (diffHours < 24)
+      return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+
+    return "";
+  };
+
+  const formatSpaceType = (type?: string) => {
+    if (!type) return "Not specified";
+    return type
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  const openMessageDetail = (message: ContactMessage) => {
+    setSelectedMessage(message);
+    toggleModal("messageDetail", true);
+
+    if (!message.is_read) {
+      markAsRead(message.id);
+    }
+  };
+
+  const toggleMessageSelection = (id: number) => {
+    setSelectedMessageIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const selectAllMessages = () => {
+    if (selectedMessageIds.length === filteredMessages.length) {
+      setSelectedMessageIds([]);
+    } else {
+      setSelectedMessageIds(filteredMessages.map((m) => m.id));
+    }
+  };
+
+  // Filter messages
+  const filteredMessages = contactMessages
+    .filter((msg) => {
+      if (inboxFilter === "unread") return !msg.is_read;
+      if (inboxFilter === "starred") return msg.is_starred;
+      return true;
+    })
+    .filter(
+      (msg) =>
+        msg.name.toLowerCase().includes(inboxSearch.toLowerCase()) ||
+        msg.email.toLowerCase().includes(inboxSearch.toLowerCase()) ||
+        msg.message.toLowerCase().includes(inboxSearch.toLowerCase())
+    );
+
+  // ==========================================
+  // SIDEBAR SCROLL LOCK
   // ==========================================
   useEffect(() => {
     if (isSidebarOpen) {
@@ -256,12 +628,13 @@ const AdminDashboard = () => {
   }, [isSidebarOpen]);
 
   // ==========================================
-  // ✅ MODAL SCROLL LOCK (NEW!)
+  // MODAL SCROLL LOCK
   // ==========================================
   useEffect(() => {
     const anyModalOpen =
       Object.values(modals).some((v) => v) ||
       showDeleteModal ||
+      showDeleteAllModal ||
       showLogoutModal;
 
     if (anyModalOpen) {
@@ -282,7 +655,6 @@ const AdminDashboard = () => {
 
       const preventScroll = (e: TouchEvent) => {
         const target = e.target as Element;
-        // Allow scroll only inside modal content
         const isModalContent = target.closest(".modal-scrollable");
 
         if (!isModalContent) {
@@ -321,7 +693,7 @@ const AdminDashboard = () => {
         document.removeEventListener("gesturestart", preventGesture);
       };
     }
-  }, [modals, showDeleteModal, showLogoutModal]);
+  }, [modals, showDeleteModal, showDeleteAllModal, showLogoutModal]);
 
   // ==========================================
   // HELPERS & HANDLERS
@@ -345,6 +717,8 @@ const AdminDashboard = () => {
         clearImage("editPrevious");
       } else if (name === "editGallery") {
         clearImage("editGallery");
+      } else if (name === "messageDetail") {
+        setSelectedMessage(null);
       }
     }
 
@@ -373,13 +747,15 @@ const AdminDashboard = () => {
       setUpcomingEvents(up);
       setPreviousEvents(prev);
       setGalleryImages(gal);
+
+      await fetchMessages();
     } catch (e) {
       console.error(e);
       toast.error("Failed to load data");
     } finally {
       setIsDataLoading(false);
     }
-  }, []);
+  }, [fetchMessages]);
 
   useEffect(() => {
     if (user) loadData();
@@ -417,6 +793,7 @@ const AdminDashboard = () => {
     setFiles((prev) => ({ ...prev, [key]: null }));
     setPreviews((prev) => ({ ...prev, [key]: "" }));
 
+    // Reset file input
     if (key === "upcoming" && fileRefs.upcoming.current) {
       fileRefs.upcoming.current.value = "";
     } else if (key === "previous" && fileRefs.previous.current) {
@@ -561,6 +938,11 @@ const AdminDashboard = () => {
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
+
+    if (deleteTarget.type === "message") {
+      await deleteMessage(deleteTarget.id);
+      return;
+    }
 
     setIsLoading(true);
     const tid = toast.loading("Deleting...");
@@ -751,18 +1133,22 @@ const AdminDashboard = () => {
   const SectionHeader = ({
     title,
     onAdd,
+    showAddButton = true,
   }: {
     title: string;
-    onAdd: () => void;
+    onAdd?: () => void;
+    showAddButton?: boolean;
   }) => (
     <div className="flex justify-between items-center mb-6">
       <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-      <button
-        onClick={onAdd}
-        className="bg-black text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors flex items-center gap-2 shadow-sm border border-black"
-      >
-        <Plus size={16} /> Add New
-      </button>
+      {showAddButton && onAdd && (
+        <button
+          onClick={onAdd}
+          className="bg-black text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors flex items-center gap-2 shadow-sm border border-black"
+        >
+          <Plus size={16} /> Add New
+        </button>
+      )}
     </div>
   );
 
@@ -943,6 +1329,7 @@ const AdminDashboard = () => {
             { id: "upcoming", icon: Calendar, label: "Upcoming Events" },
             { id: "previous", icon: Clock, label: "Previous Events" },
             { id: "gallery", icon: ImageIcon, label: "Photo Gallery" },
+            { id: "inbox", icon: Mail, label: "Inbox", badge: unreadCount },
           ].map((item) => (
             <button
               key={item.id}
@@ -951,6 +1338,11 @@ const AdminDashboard = () => {
                 setIsSidebarOpen(false);
                 if (item.id === "gallery") {
                   setGalleryFilter("all");
+                }
+                if (item.id === "inbox") {
+                  setInboxFilter("all");
+                  setIsSelectMode(false);
+                  setSelectedMessageIds([]);
                 }
               }}
               className={`group w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 border ${
@@ -970,9 +1362,24 @@ const AdminDashboard = () => {
                 />
                 {item.label}
               </div>
-              {activeSection === item.id && (
-                <ChevronRight size={14} className="text-gray-400" />
-              )}
+              <div className="flex items-center gap-2">
+                {"badge" in item &&
+                  item.badge !== undefined &&
+                  item.badge > 0 && (
+                    <span
+                      className={`px-2 py-0.5 text-xs font-bold rounded-full ${
+                        activeSection === item.id
+                          ? "bg-white text-black"
+                          : "bg-red-500 text-white"
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                {activeSection === item.id && (
+                  <ChevronRight size={14} className="text-gray-400" />
+                )}
+              </div>
             </button>
           ))}
         </nav>
@@ -1052,7 +1459,11 @@ const AdminDashboard = () => {
                     label="Gallery"
                     value={galleryImages.length}
                   />
-                  <StatCard icon={CheckCircle2} label="Status" value="Active" />
+                  <StatCard
+                    icon={Mail}
+                    label="Messages"
+                    value={contactMessages.length}
+                  />
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -1161,40 +1572,78 @@ const AdminDashboard = () => {
                     </div>
                   </div>
 
-                  {/* Gallery Column */}
+                  {/* Messages Column */}
                   <div className="bg-white rounded-2xl shadow-sm border border-gray-300 overflow-hidden h-fit">
                     <div className="p-5 border-b border-gray-300 flex justify-between items-center bg-gray-50/50">
                       <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                        <ImageIcon size={16} className="text-gray-500" />{" "}
-                        Gallery
+                        <Mail size={16} className="text-gray-500" /> Messages
+                        {unreadCount > 0 && (
+                          <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-red-500 text-white">
+                            {unreadCount}
+                          </span>
+                        )}
                       </h3>
                       <button
-                        onClick={() => {
-                          setActiveSection("gallery");
-                          setGalleryFilter("all");
-                        }}
+                        onClick={() => setActiveSection("inbox")}
                         className="text-xs font-semibold text-gray-600 hover:text-black hover:underline transition-colors"
                       >
                         View All
                       </button>
                     </div>
-                    <div className="p-5 grid grid-cols-3 gap-3">
-                      {galleryImages.slice(0, 9).map((img) => (
+                    <div className="divide-y divide-gray-200">
+                      {contactMessages.slice(0, 3).map((msg) => (
                         <div
-                          key={img.id}
-                          className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative border border-gray-300"
+                          key={msg.id}
+                          onClick={() => openMessageDetail(msg)}
+                          className={`p-4 flex gap-4 hover:bg-gray-50 transition-colors group cursor-pointer ${
+                            !msg.is_read ? "bg-red-50/50" : ""
+                          }`}
                         >
-                          <Image
-                            src={img.image_url}
-                            alt=""
-                            fill
-                            className="object-cover"
-                          />
+                          <div
+                            className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${
+                              msg.is_read
+                                ? "bg-green-50 border-green-300"
+                                : "bg-red-50 border-red-300"
+                            }`}
+                          >
+                            {msg.is_read ? (
+                              <MailOpen size={18} className="text-green-500" />
+                            ) : (
+                              <Mail size={18} className="text-red-500" />
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <p
+                                className={`text-sm truncate ${
+                                  msg.is_read
+                                    ? "font-medium text-gray-600"
+                                    : "font-bold text-gray-900"
+                                }`}
+                              >
+                                {msg.name}
+                              </p>
+                              {msg.is_starred && (
+                                <Star
+                                  size={14}
+                                  className="text-yellow-500 fill-yellow-500 flex-shrink-0"
+                                />
+                              )}
+                              {!msg.is_read && (
+                                <span className="px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded uppercase">
+                                  New
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500 mt-0.5 truncate">
+                              {msg.message}
+                            </p>
+                          </div>
                         </div>
                       ))}
-                      {galleryImages.length === 0 && (
-                        <p className="col-span-3 py-8 text-center text-sm text-gray-400">
-                          No images
+                      {contactMessages.length === 0 && (
+                        <p className="p-8 text-center text-sm text-gray-400">
+                          No messages
                         </p>
                       )}
                     </div>
@@ -1498,25 +1947,605 @@ const AdminDashboard = () => {
                 </div>
               </motion.div>
             )}
+
+            {/* INBOX SECTION */}
+            {activeSection === "inbox" && (
+              <motion.div
+                key="inbox"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                <SectionHeader title="Message Inbox" showAddButton={false} />
+
+                {/* Filter Tabs */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {[
+                    { id: "all", label: "All", count: contactMessages.length },
+                    { id: "unread", label: "Unread", count: unreadCount },
+                    {
+                      id: "starred",
+                      label: "Starred",
+                      count: starredCount,
+                      icon: Star,
+                    },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setInboxFilter(tab.id as InboxFilter)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all border flex items-center gap-2 ${
+                        inboxFilter === tab.id
+                          ? "bg-black text-white border-black"
+                          : "bg-white border-gray-300 text-gray-600 hover:border-gray-400"
+                      }`}
+                    >
+                      {tab.icon && (
+                        <tab.icon
+                          size={14}
+                          className={
+                            inboxFilter === tab.id
+                              ? "text-yellow-300"
+                              : "text-yellow-500"
+                          }
+                        />
+                      )}
+                      {tab.label}
+                      <span
+                        className={`px-1.5 py-0.5 text-xs rounded-full ${
+                          inboxFilter === tab.id
+                            ? "bg-white/20 text-white"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        {tab.count}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Search */}
+                <div className="relative mb-4">
+                  <Search
+                    className="absolute left-3 top-3 text-gray-400"
+                    size={18}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Search messages..."
+                    value={inboxSearch}
+                    onChange={(e) => setInboxSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-1 focus:ring-black focus:border-black outline-none transition-all shadow-sm"
+                  />
+                </div>
+
+                {/* Toolbar */}
+                <div className="flex flex-wrap items-center gap-3 mb-4 p-3 bg-white rounded-xl border border-gray-300">
+                  <button
+                    onClick={() => {
+                      setIsSelectMode(!isSelectMode);
+                      if (isSelectMode) {
+                        setSelectedMessageIds([]);
+                      }
+                    }}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all border flex items-center gap-2 ${
+                      isSelectMode
+                        ? "bg-black text-white border-black"
+                        : "bg-gray-50 border-gray-300 text-gray-600 hover:border-gray-400"
+                    }`}
+                  >
+                    <Check size={16} />
+                    {isSelectMode ? "Cancel" : "Select"}
+                  </button>
+
+                  {isSelectMode && (
+                    <>
+                      <button
+                        onClick={selectAllMessages}
+                        className="px-3 py-2 rounded-lg text-sm font-medium bg-gray-50 border border-gray-300 text-gray-600 hover:border-gray-400 transition-all flex items-center gap-2"
+                      >
+                        {selectedMessageIds.length === filteredMessages.length
+                          ? "Deselect All"
+                          : "Select All"}
+                      </button>
+
+                      {selectedMessageIds.length > 0 && (
+                        <button
+                          onClick={deleteSelectedMessages}
+                          disabled={isLoading}
+                          className="px-3 py-2 rounded-lg text-sm font-medium bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 transition-all flex items-center gap-2"
+                        >
+                          <Trash2 size={16} />
+                          Delete ({selectedMessageIds.length})
+                        </button>
+                      )}
+                    </>
+                  )}
+
+                  <div className="flex-1" />
+
+                  {contactMessages.length > 0 && (
+                    <button
+                      onClick={() => setShowDeleteAllModal(true)}
+                      className="px-3 py-2 rounded-lg text-sm font-medium bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 transition-all flex items-center gap-2"
+                    >
+                      <AlertTriangle size={16} />
+                      Delete All
+                    </button>
+                  )}
+                </div>
+
+                {/* Messages List */}
+                {isDataLoading ? (
+                  <div className="grid gap-3">
+                    {[1, 2, 3].map((i) => (
+                      <SkeletonCard key={i} />
+                    ))}
+                  </div>
+                ) : filteredMessages.length === 0 ? (
+                  <div className="text-center py-16 text-gray-400 text-sm bg-white rounded-2xl border border-gray-300 border-dashed">
+                    <Mail size={48} className="mx-auto mb-4 text-gray-300" />
+                    <p>No messages found</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {filteredMessages.map((message) => (
+                      <motion.div
+                        key={message.id}
+                        variants={itemVariants}
+                        layout
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className={`bg-white p-4 rounded-2xl border-2 hover:shadow-md transition-all cursor-pointer group ${
+                          message.is_read
+                            ? "border-green-300 bg-green-50/30"
+                            : "border-red-300 bg-red-50/50"
+                        }`}
+                      >
+                        <div className="flex flex-col sm:flex-row gap-4">
+                          {/* Checkbox (Select Mode) */}
+                          {isSelectMode && (
+                            <div
+                              className="flex items-start pt-1"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <button
+                                onClick={() =>
+                                  toggleMessageSelection(message.id)
+                                }
+                                className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all ${
+                                  selectedMessageIds.includes(message.id)
+                                    ? "bg-black border-black text-white"
+                                    : "bg-white border-gray-300 hover:border-gray-400"
+                                }`}
+                              >
+                                {selectedMessageIds.includes(message.id) && (
+                                  <Check size={14} />
+                                )}
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Star Button */}
+                          <div
+                            className="flex items-start pt-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <button
+                              onClick={() =>
+                                toggleStar(message.id, message.is_starred)
+                              }
+                              className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                              <Star
+                                size={20}
+                                className={
+                                  message.is_starred
+                                    ? "text-yellow-500 fill-yellow-500"
+                                    : "text-gray-300 hover:text-yellow-500"
+                                }
+                              />
+                            </button>
+                          </div>
+
+                          {/* Avatar */}
+                          <div
+                            onClick={() => openMessageDetail(message)}
+                            className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${
+                              message.is_read
+                                ? "bg-green-100 border-green-400"
+                                : "bg-red-100 border-red-400"
+                            }`}
+                          >
+                            {message.is_read ? (
+                              <MailOpen size={20} className="text-green-600" />
+                            ) : (
+                              <Mail size={20} className="text-red-600" />
+                            )}
+                          </div>
+
+                          {/* Content */}
+                          <div
+                            className="flex-1 min-w-0"
+                            onClick={() => openMessageDetail(message)}
+                          >
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h3
+                                  className={`text-base truncate ${
+                                    message.is_read
+                                      ? "font-medium text-gray-700"
+                                      : "font-bold text-gray-900"
+                                  }`}
+                                >
+                                  {message.name}
+                                </h3>
+                                {!message.is_read && (
+                                  <span className="px-2 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded uppercase animate-pulse">
+                                    NEW
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              <span className="text-sm text-gray-500 truncate">
+                                {message.email}
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  copyToClipboard(message.email, "Email");
+                                }}
+                                className="p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
+                                title="Copy email"
+                              >
+                                <Copy size={14} className="text-gray-400" />
+                              </button>
+                              {message.phone && (
+                                <>
+                                  <span className="text-gray-300">|</span>
+                                  <span className="text-sm text-gray-500">
+                                    {message.phone}
+                                  </span>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      copyToClipboard(message.phone!, "Phone");
+                                    }}
+                                    className="p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
+                                    title="Copy phone"
+                                  >
+                                    <Copy size={14} className="text-gray-400" />
+                                  </button>
+                                </>
+                              )}
+                            </div>
+
+                            <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+                              {message.message}
+                            </p>
+
+                            {/* Date & Tags */}
+                            <div className="flex items-center gap-3 flex-wrap">
+                              <span className="text-xs text-gray-400 flex items-center gap-1">
+                                <Clock3 size={12} />
+                                {formatFullDate(message.created_at)}
+                                {formatRelativeTime(message.created_at) && (
+                                  <span className="text-gray-300">
+                                    ({formatRelativeTime(message.created_at)})
+                                  </span>
+                                )}
+                              </span>
+                              {message.space_type && (
+                                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-xs font-medium border border-gray-200">
+                                  {formatSpaceType(message.space_type)}
+                                </span>
+                              )}
+                              {message.company && (
+                                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-xs font-medium border border-gray-200 flex items-center gap-1">
+                                  <Building2 size={10} />
+                                  {message.company}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Actions */}
+                          <div
+                            className="flex sm:flex-col gap-2 flex-shrink-0"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <button
+                              onClick={() =>
+                                message.is_read
+                                  ? markAsUnread(message.id)
+                                  : markAsRead(message.id)
+                              }
+                              className={`p-2.5 rounded-xl transition-colors border ${
+                                message.is_read
+                                  ? "text-gray-600 bg-gray-50 hover:bg-gray-100 border-gray-300"
+                                  : "text-green-600 bg-green-50 hover:bg-green-100 border-green-200"
+                              }`}
+                              title={
+                                message.is_read
+                                  ? "Mark as unread"
+                                  : "Mark as read"
+                              }
+                            >
+                              {message.is_read ? (
+                                <Mail size={18} />
+                              ) : (
+                                <MailOpen size={18} />
+                              )}
+                            </button>
+                            <button
+                              onClick={() => {
+                                setDeleteTarget({
+                                  type: "message",
+                                  id: message.id,
+                                  title: `Message from ${message.name}`,
+                                });
+                                setShowDeleteModal(true);
+                              }}
+                              className="p-2.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors border border-red-200"
+                              title="Delete message"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
       </main>
 
-      {/* ✅ MODALS - WITH SCROLL LOCK */}
+      {/* MODALS */}
       <AnimatePresence>
         {(Object.values(modals).some((v) => v) ||
           showDeleteModal ||
+          showDeleteAllModal ||
           showLogoutModal) && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => {
+              setModals({
+                createUpcoming: false,
+                createPrevious: false,
+                createGallery: false,
+                editUpcoming: false,
+                editPrevious: false,
+                editGallery: false,
+                preview: false,
+                messageDetail: false,
+              });
+              setShowDeleteModal(false);
+              setShowDeleteAllModal(false);
+              setShowLogoutModal(false);
+            }}
             style={{
               touchAction: "none",
               overscrollBehavior: "none",
             }}
           >
+            {/* MESSAGE DETAIL MODAL */}
+            {modals.messageDetail && selectedMessage && (
+              <motion.div
+                variants={modalVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-gray-200"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Header */}
+                <div
+                  className={`p-6 border-b-2 flex justify-between items-start flex-shrink-0 ${
+                    selectedMessage.is_read
+                      ? "bg-green-50 border-green-200"
+                      : "bg-red-50 border-red-200"
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={`w-12 h-12 rounded-full flex items-center justify-center border-2 ${
+                        selectedMessage.is_read
+                          ? "bg-green-100 border-green-400"
+                          : "bg-red-100 border-red-400"
+                      }`}
+                    >
+                      {selectedMessage.is_read ? (
+                        <MailOpen size={20} className="text-green-600" />
+                      ) : (
+                        <Mail size={20} className="text-red-600" />
+                      )}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-xl">
+                          {selectedMessage.name}
+                        </h3>
+                        <button
+                          onClick={() =>
+                            toggleStar(
+                              selectedMessage.id,
+                              selectedMessage.is_starred
+                            )
+                          }
+                          className="p-1 hover:bg-white/50 rounded-lg transition-colors"
+                        >
+                          <Star
+                            size={18}
+                            className={
+                              selectedMessage.is_starred
+                                ? "text-yellow-500 fill-yellow-500"
+                                : "text-gray-400 hover:text-yellow-500"
+                            }
+                          />
+                        </button>
+                      </div>
+                      <p className="text-sm text-gray-500">
+                        {formatFullDate(selectedMessage.created_at)}
+                        {formatRelativeTime(selectedMessage.created_at) && (
+                          <span className="text-gray-400">
+                            {" "}
+                            ({formatRelativeTime(selectedMessage.created_at)})
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => toggleModal("messageDetail", false)}
+                    className="p-2 hover:bg-white/50 rounded-full transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                {/* Content */}
+                <div className="p-6 overflow-y-auto modal-scrollable flex-1 space-y-4">
+                  {/* Contact Info */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                      <Mail size={18} className="text-gray-400" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-gray-500">Email</p>
+                        <p className="text-sm font-medium truncate">
+                          {selectedMessage.email}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() =>
+                          copyToClipboard(selectedMessage.email, "Email")
+                        }
+                        className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                        title="Copy email"
+                      >
+                        <Copy size={16} className="text-gray-500" />
+                      </button>
+                    </div>
+
+                    {selectedMessage.phone && (
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                        <Phone size={18} className="text-gray-400" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-gray-500">Phone</p>
+                          <p className="text-sm font-medium">
+                            {selectedMessage.phone}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() =>
+                            copyToClipboard(selectedMessage.phone!, "Phone")
+                          }
+                          className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                          title="Copy phone"
+                        >
+                          <Copy size={16} className="text-gray-500" />
+                        </button>
+                      </div>
+                    )}
+
+                    {selectedMessage.company && (
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                        <Building2 size={18} className="text-gray-400" />
+                        <div className="flex-1">
+                          <p className="text-xs text-gray-500">Company</p>
+                          <p className="text-sm font-medium">
+                            {selectedMessage.company}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedMessage.space_type && (
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                        <ImageIcon size={18} className="text-gray-400" />
+                        <div className="flex-1">
+                          <p className="text-xs text-gray-500">Interested In</p>
+                          <p className="text-sm font-medium">
+                            {formatSpaceType(selectedMessage.space_type)}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Message */}
+                  <div className="mt-4">
+                    <p className="text-xs text-gray-500 uppercase font-bold mb-2">
+                      Message
+                    </p>
+                    <div className="p-4 bg-gray-50 rounded-xl">
+                      <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                        {selectedMessage.message}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer Actions */}
+                <div className="p-4 border-t border-gray-300 bg-gray-50/50 flex-shrink-0">
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        if (selectedMessage.is_read) {
+                          markAsUnread(selectedMessage.id);
+                          setSelectedMessage({
+                            ...selectedMessage,
+                            is_read: false,
+                          });
+                        } else {
+                          markAsRead(selectedMessage.id);
+                          setSelectedMessage({
+                            ...selectedMessage,
+                            is_read: true,
+                          });
+                        }
+                      }}
+                      className={`flex-1 py-3 px-4 rounded-xl font-medium transition-colors border flex items-center justify-center gap-2 ${
+                        selectedMessage.is_read
+                          ? "text-gray-700 bg-gray-100 hover:bg-gray-200 border-gray-200"
+                          : "text-green-700 bg-green-100 hover:bg-green-200 border-green-200"
+                      }`}
+                    >
+                      {selectedMessage.is_read ? (
+                        <>
+                          <Mail size={18} /> Mark Unread
+                        </>
+                      ) : (
+                        <>
+                          <MailOpen size={18} /> Mark Read
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setDeleteTarget({
+                          type: "message",
+                          id: selectedMessage.id,
+                          title: `Message from ${selectedMessage.name}`,
+                        });
+                        setShowDeleteModal(true);
+                      }}
+                      className="py-3 px-4 rounded-xl font-medium text-white bg-red-600 hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Trash2 size={18} /> Delete
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             {/* CREATE/EDIT MODALS */}
             {(modals.createUpcoming ||
               modals.createPrevious ||
@@ -1530,12 +2559,13 @@ const AdminDashboard = () => {
                 animate="visible"
                 exit="exit"
                 className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-gray-200"
+                onClick={(e) => e.stopPropagation()}
                 style={{
                   touchAction: "pan-y",
                   overscrollBehavior: "contain",
                 }}
               >
-                {/* ✅ Modal Header - No scroll */}
+                {/* Modal Header */}
                 <div
                   className="p-6 border-b border-gray-300 flex justify-between items-center bg-gray-50/50 flex-shrink-0"
                   style={{ touchAction: "none" }}
@@ -1565,7 +2595,7 @@ const AdminDashboard = () => {
                   </button>
                 </div>
 
-                {/* ✅ Modal Content - Allow scroll ONLY here */}
+                {/* Modal Content */}
                 <div
                   className="p-6 overflow-y-auto modal-scrollable flex-1"
                   style={{
@@ -1831,7 +2861,7 @@ const AdminDashboard = () => {
               </motion.div>
             )}
 
-            {/* ✅ PREVIEW MODAL */}
+            {/* PREVIEW MODAL */}
             {modals.preview && previewEvent && (
               <motion.div
                 variants={modalVariants}
@@ -1839,11 +2869,11 @@ const AdminDashboard = () => {
                 animate="visible"
                 exit="exit"
                 className="bg-white w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-gray-200"
+                onClick={(e) => e.stopPropagation()}
                 style={{
                   touchAction: "pan-y",
                   overscrollBehavior: "contain",
                 }}
-                onClick={(e) => e.stopPropagation()}
               >
                 <div
                   className="relative h-64 w-full bg-gray-100 border-b border-gray-200 flex-shrink-0"
@@ -1912,8 +2942,9 @@ const AdminDashboard = () => {
                             Fee
                           </p>
                           <p className="font-semibold">
-                            {("fee" in previewEvent && previewEvent.fee) ||
-                              "Free"}
+                            {"fee" in previewEvent && previewEvent.fee
+                              ? previewEvent.fee
+                              : "Free"}
                           </p>
                         </div>
                         <div>
@@ -1921,9 +2952,9 @@ const AdminDashboard = () => {
                             Guests
                           </p>
                           <p className="font-semibold">
-                            {("guests" in previewEvent &&
-                              previewEvent.guests) ||
-                              "Open"}
+                            {"guests" in previewEvent && previewEvent.guests
+                              ? previewEvent.guests
+                              : "Open"}
                           </p>
                         </div>
                       </div>
@@ -1937,7 +2968,7 @@ const AdminDashboard = () => {
               </motion.div>
             )}
 
-            {/* ✅ DELETE MODAL */}
+            {/* DELETE MODAL */}
             {showDeleteModal && deleteTarget && (
               <motion.div
                 variants={modalVariants}
@@ -1945,27 +2976,32 @@ const AdminDashboard = () => {
                 animate="visible"
                 exit="exit"
                 className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 border border-gray-200"
+                onClick={(e) => e.stopPropagation()}
                 style={{
                   touchAction: "none",
                   overscrollBehavior: "none",
                 }}
-                onClick={(e) => e.stopPropagation()}
               >
                 <div className="text-center">
                   <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center text-red-500 mx-auto mb-4 border border-red-100">
                     <AlertTriangle size={28} />
                   </div>
                   <h3 className="text-xl font-bold mb-2 text-gray-900">
-                    Delete Item?
+                    Delete{" "}
+                    {deleteTarget.type === "message" ? "Message" : "Item"}?
                   </h3>
                   <p className="text-gray-500 text-sm mb-8 leading-relaxed">
-                    Are you sure you want to delete this item? This action
-                    cannot be undone.
+                    Are you sure you want to delete this{" "}
+                    {deleteTarget.type === "message" ? "message" : "item"}? This
+                    action cannot be undone.
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <button
-                    onClick={() => setShowDeleteModal(false)}
+                    onClick={() => {
+                      setShowDeleteModal(false);
+                      setDeleteTarget(null);
+                    }}
                     className="py-3 rounded-xl font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors border border-gray-200"
                   >
                     Cancel
@@ -1985,7 +3021,75 @@ const AdminDashboard = () => {
               </motion.div>
             )}
 
-            {/* ✅ LOGOUT MODAL */}
+            {/* DELETE ALL MODAL */}
+            {showDeleteAllModal && (
+              <motion.div
+                variants={modalVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 border border-gray-200"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  touchAction: "none",
+                  overscrollBehavior: "none",
+                }}
+              >
+                <div className="text-center">
+                  <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center text-red-500 mx-auto mb-4 border border-red-100">
+                    <AlertTriangle size={28} />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 text-gray-900">
+                    Delete ALL Messages?
+                  </h3>
+                  <p className="text-gray-500 text-sm mb-4 leading-relaxed">
+                    This will permanently delete{" "}
+                    <span className="font-bold text-red-600">
+                      ALL {contactMessages.length} messages
+                    </span>
+                    . This action cannot be undone.
+                  </p>
+                  <p className="text-gray-600 text-sm mb-4 font-medium">
+                    Type{" "}
+                    <span className="font-bold text-red-600">DELETE ALL</span>{" "}
+                    to confirm:
+                  </p>
+                  <input
+                    type="text"
+                    value={deleteAllConfirmText}
+                    onChange={(e) => setDeleteAllConfirmText(e.target.value)}
+                    placeholder="DELETE ALL"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-red-500 outline-none text-center text-sm font-bold uppercase tracking-wide mb-6"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={() => {
+                      setShowDeleteAllModal(false);
+                      setDeleteAllConfirmText("");
+                    }}
+                    className="py-3 rounded-xl font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors border border-gray-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={deleteAllMessages}
+                    disabled={
+                      isLoading || deleteAllConfirmText !== "DELETE ALL"
+                    }
+                    className="py-3 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 transition-colors shadow-lg shadow-red-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isLoading ? (
+                      <Loader2 size={18} className="animate-spin" />
+                    ) : (
+                      "Delete All"
+                    )}
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* LOGOUT MODAL */}
             {showLogoutModal && (
               <motion.div
                 variants={modalVariants}
@@ -1993,11 +3097,11 @@ const AdminDashboard = () => {
                 animate="visible"
                 exit="exit"
                 className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 border border-gray-200"
+                onClick={(e) => e.stopPropagation()}
                 style={{
                   touchAction: "none",
                   overscrollBehavior: "none",
                 }}
-                onClick={(e) => e.stopPropagation()}
               >
                 <h3 className="text-xl font-bold mb-2">Sign Out</h3>
                 <p className="text-gray-500 text-sm mb-8">
@@ -2010,7 +3114,7 @@ const AdminDashboard = () => {
                   >
                     Cancel
                   </button>
-                  
+
                   <button
                     onClick={() => {
                       setShowLogoutModal(false);

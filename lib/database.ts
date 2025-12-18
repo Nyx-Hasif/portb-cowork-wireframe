@@ -418,3 +418,135 @@ export async function deleteGalleryImage(id: number, imageUrl?: string) {
 
     return true
 }
+
+// ========================================
+// 📬 CONTACT MESSAGES - CRUD
+// ========================================
+
+// Type definition for Contact Message
+export interface ContactMessage {
+    id: number
+    name: string
+    email: string
+    phone?: string
+    company?: string
+    space_type?: string
+    message: string
+    is_read: boolean
+    created_at: string
+    updated_at?: string
+}
+
+// GET all contact messages (for admin)
+export async function getContactMessages() {
+    const { data, error } = await supabase
+        .from('contact_messages')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching contact messages:', error)
+        return []
+    }
+
+    return data as ContactMessage[]
+}
+
+// GET unread messages count (for badge notification)
+export async function getUnreadMessagesCount(): Promise<number> {
+    const { count, error } = await supabase
+        .from('contact_messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_read', false)
+
+    if (error) {
+        console.error('Error fetching unread count:', error)
+        return 0
+    }
+
+    return count || 0
+}
+
+// CREATE new contact message (from contact form)
+export async function createContactMessage(messageData: {
+    name: string
+    email: string
+    phone?: string
+    company?: string
+    space_type?: string
+    message: string
+}) {
+    const { data, error } = await supabase
+        .from('contact_messages')
+        .insert([{ ...messageData, is_read: false }])
+        .select()
+
+    if (error) {
+        console.error('Error creating contact message:', error)
+        throw error
+    }
+
+    return data[0] as ContactMessage
+}
+
+// UPDATE - Mark message as read
+export async function markMessageAsRead(id: number) {
+    const { data, error } = await supabase
+        .from('contact_messages')
+        .update({ is_read: true, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+
+    if (error) {
+        console.error('Error marking message as read:', error)
+        throw error
+    }
+
+    return data[0] as ContactMessage
+}
+
+// UPDATE - Mark message as unread
+export async function markMessageAsUnread(id: number) {
+    const { data, error } = await supabase
+        .from('contact_messages')
+        .update({ is_read: false, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+
+    if (error) {
+        console.error('Error marking message as unread:', error)
+        throw error
+    }
+
+    return data[0] as ContactMessage
+}
+
+// DELETE contact message
+export async function deleteContactMessage(id: number) {
+    const { error } = await supabase
+        .from('contact_messages')
+        .delete()
+        .eq('id', id)
+
+    if (error) {
+        console.error('Error deleting contact message:', error)
+        throw error
+    }
+
+    return true
+}
+
+// DELETE multiple messages
+export async function deleteMultipleMessages(ids: number[]) {
+    const { error } = await supabase
+        .from('contact_messages')
+        .delete()
+        .in('id', ids)
+
+    if (error) {
+        console.error('Error deleting messages:', error)
+        throw error
+    }
+
+    return true
+}

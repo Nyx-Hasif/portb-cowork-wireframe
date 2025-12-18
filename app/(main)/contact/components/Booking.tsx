@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { motion, Variants, Easing } from "framer-motion";
+import toast from "react-hot-toast";
+import { Loader2, CheckCircle, Send } from "lucide-react";
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -17,6 +19,8 @@ const fadeUp: Variants = {
 
 const Booking = () => {
   const [selectedValue, setSelectedValue] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -35,8 +39,20 @@ const Booking = () => {
     });
   };
 
-  // ✅ Handle form submission
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  // ✅ Reset form
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      company: "",
+      message: "",
+    });
+    setSelectedValue("");
+  };
+
+  // ✅ Handle form submission via API
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Validate all required fields
@@ -48,23 +64,65 @@ const Booking = () => {
       !selectedValue ||
       !formData.message.trim()
     ) {
-      alert("Sila isi semua input form, tq");
+      toast.error("Sila isi semua ruangan yang diperlukan");
       return;
     }
 
-    // If validation passes
-    console.log("Form submitted:", { ...formData, space: selectedValue });
-    alert("Terima kasih! Kami akan hubungi anda dalam masa 24 jam.");
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error("Sila masukkan email yang sah");
+      return;
+    }
 
-    // Reset form
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      company: "",
-      message: "",
-    });
-    setSelectedValue("");
+    setIsSubmitting(true);
+
+    try {
+      // ✅ Submit via API route
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          company: formData.company.trim(),
+          space_type: selectedValue,
+          message: formData.message.trim(),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to send message");
+      }
+
+      // Success!
+      setIsSuccess(true);
+      toast.success(
+        "Mesej berjaya dihantar! Kami akan hubungi anda dalam masa 24 jam.",
+        {
+          duration: 5000,
+          icon: "🎉",
+        }
+      );
+
+      // Reset form
+      resetForm();
+
+      // Reset success state after 3 seconds
+      setTimeout(() => {
+        setIsSuccess(false);
+      }, 3000);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error("Gagal menghantar mesej. Sila cuba lagi.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -80,7 +138,7 @@ const Booking = () => {
           initial="hidden"
           whileInView="visible"
           variants={fadeUp}
-          onSubmit={handleSubmit} // ✅ Add submit handler
+          onSubmit={handleSubmit}
           className="bg-white border border-gray-200 rounded-2xl p-10 space-y-8 shadow-md hover:shadow-lg transition-shadow duration-300"
         >
           <motion.header variants={fadeUp} custom={0} className="space-y-2">
@@ -91,6 +149,18 @@ const Booking = () => {
               Fill out the form below. We will respond within 24 hours.
             </p>
           </motion.header>
+
+          {/* ✅ Success Message */}
+          {isSuccess && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700"
+            >
+              <CheckCircle size={20} />
+              <span className="font-medium">Mesej berjaya dihantar!</span>
+            </motion.div>
+          )}
 
           {/* Inputs */}
           <motion.div
@@ -129,8 +199,7 @@ const Booking = () => {
                   htmlFor={f.id}
                   className="block font-medium text-sm mb-2"
                 >
-                  {f.label} <span className="text-red-500">*</span>{" "}
-                  {/* ✅ Required indicator */}
+                  {f.label} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type={f.type}
@@ -138,8 +207,9 @@ const Booking = () => {
                   placeholder={f.placeholder}
                   value={formData[f.id as keyof typeof formData]}
                   onChange={handleInputChange}
-                  required // ✅ HTML5 validation
-                  className="w-full rounded-md border border-gray-300 py-2.5 px-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-transparent bg-white"
+                  disabled={isSubmitting}
+                  required
+                  className="w-full rounded-md border border-gray-300 py-2.5 px-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-transparent bg-white disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
                 />
               </motion.div>
             ))}
@@ -148,29 +218,30 @@ const Booking = () => {
           {/* Select */}
           <motion.div variants={fadeUp} custom={3}>
             <label htmlFor="type" className="block font-medium text-sm mb-2">
-              Choose a Space <span className="text-red-500">*</span>{" "}
-              {/* ✅ Required indicator */}
+              Choose a Space <span className="text-red-500">*</span>
             </label>
             <select
               id="type"
               value={selectedValue}
               onChange={(e) => setSelectedValue(e.target.value)}
-              required // ✅ HTML5 validation
-              className="w-full rounded-md border border-gray-300 py-2.5 px-3 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-transparent"
+              disabled={isSubmitting}
+              required
+              className="w-full rounded-md border border-gray-300 py-2.5 px-3 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
             >
               <option value="">Select an option</option>
               <option value="meeting-room">Meeting Room</option>
               <option value="fixed-desk">Fixed Desk</option>
               <option value="common-room">Common Room</option>
+              <option value="green-area">Green Area</option>
               <option value="event-space">Event Space</option>
+              <option value="other">Other</option>
             </select>
           </motion.div>
 
           {/* Message */}
           <motion.div variants={fadeUp} custom={4}>
             <label htmlFor="message" className="block font-medium text-sm mb-2">
-              Message <span className="text-red-500">*</span>{" "}
-              {/* ✅ Required indicator */}
+              Message <span className="text-red-500">*</span>
             </label>
             <textarea
               id="message"
@@ -178,8 +249,9 @@ const Booking = () => {
               placeholder="Write your message here..."
               value={formData.message}
               onChange={handleInputChange}
-              required // ✅ HTML5 validation
-              className="w-full rounded-md border border-gray-300 py-3 px-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-transparent bg-white resize-none"
+              disabled={isSubmitting}
+              required
+              className="w-full rounded-md border border-gray-300 py-3 px-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:border-transparent bg-white resize-none disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
             ></textarea>
           </motion.div>
 
@@ -194,9 +266,20 @@ const Booking = () => {
             </p>
             <button
               type="submit"
-              className="bg-gray-900 text-white px-8 py-2.5 rounded-md font-medium hover:bg-gray-700 w-full md:w-auto shadow-sm hover:shadow-md cursor-pointer active:scale-95 transition-all duration-200"
+              disabled={isSubmitting}
+              className="bg-gray-900 text-white px-8 py-2.5 rounded-md font-medium hover:bg-gray-700 w-full md:w-auto shadow-sm hover:shadow-md cursor-pointer active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 flex items-center justify-center gap-2"
             >
-              Send Message
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Menghantar...
+                </>
+              ) : (
+                <>
+                  <Send size={18} />
+                  Send Message
+                </>
+              )}
             </button>
           </motion.div>
         </motion.form>
