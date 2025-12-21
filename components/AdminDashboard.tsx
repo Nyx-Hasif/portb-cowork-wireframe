@@ -1466,7 +1466,8 @@ const AdminDashboard = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* CHANGE: 2x2 Grid instead of 3 columns */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Upcoming Column */}
                   <div className="bg-white rounded-2xl shadow-sm border border-gray-300 overflow-hidden h-fit">
                     <div className="p-5 border-b border-gray-300 flex justify-between items-center bg-gray-50/50">
@@ -1567,6 +1568,47 @@ const AdminDashboard = () => {
                       {previousEvents.length === 0 && (
                         <p className="p-8 text-center text-sm text-gray-400">
                           No previous events
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 🆕 GALLERY COLUMN - NEW! */}
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-300 overflow-hidden h-fit">
+                    <div className="p-5 border-b border-gray-300 flex justify-between items-center bg-gray-50/50">
+                      <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                        <ImageIcon size={16} className="text-gray-500" />{" "}
+                        Gallery
+                      </h3>
+                      <button
+                        onClick={() => setActiveSection("gallery")}
+                        className="text-xs font-semibold text-gray-600 hover:text-black hover:underline transition-colors"
+                      >
+                        View All
+                      </button>
+                    </div>
+                    <div className="p-4">
+                      {galleryImages.length > 0 ? (
+                        <div className="grid grid-cols-3 gap-2">
+                          {galleryImages.slice(0, 6).map((img) => (
+                            <div
+                              key={img.id}
+                              onClick={() => setActiveSection("gallery")}
+                              className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative border border-gray-300 cursor-pointer hover:ring-2 hover:ring-black transition-all group"
+                            >
+                              <Image
+                                src={img.image_url}
+                                alt={img.alt_text || "Gallery"}
+                                fill
+                                className="object-cover group-hover:scale-110 transition-transform"
+                              />
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all" />
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="p-8 text-center text-sm text-gray-400">
+                          No gallery images
                         </p>
                       )}
                     </div>
@@ -3054,10 +3096,14 @@ const AdminDashboard = () => {
                     <span className="font-bold text-red-600">DELETE ALL</span>{" "}
                     to confirm:
                   </p>
+
+                  {/* 🔧 FIX: Remove .trim() from onChange - only uppercase */}
                   <input
                     type="text"
                     value={deleteAllConfirmText}
-                    onChange={(e) => setDeleteAllConfirmText(e.target.value)}
+                    onChange={(e) =>
+                      setDeleteAllConfirmText(e.target.value.toUpperCase())
+                    }
                     placeholder="DELETE ALL"
                     className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-red-500 outline-none text-center text-sm font-bold uppercase tracking-wide mb-6"
                   />
@@ -3075,7 +3121,7 @@ const AdminDashboard = () => {
                   <button
                     onClick={deleteAllMessages}
                     disabled={
-                      isLoading || deleteAllConfirmText !== "DELETE ALL"
+                      isLoading || deleteAllConfirmText.trim() !== "DELETE ALL"
                     }
                     className="py-3 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 transition-colors shadow-lg shadow-red-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
