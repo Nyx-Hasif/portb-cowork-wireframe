@@ -17,6 +17,7 @@ import {
   Search,
   AlertTriangle,
   CheckCircle2,
+  MessageCircle,
   User,
   ChevronRight,
   LucideIcon,
@@ -25,7 +26,7 @@ import {
   Copy,
   Clock3,
   Building2,
-  Phone,
+  Phone, // 🆕 ADDED THIS
   Star,
   Check,
 } from "lucide-react";
@@ -139,6 +140,34 @@ const modalVariants = {
 const AdminDashboard = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const router = useRouter();
+
+  // 🆕 WHATSAPP REPLY FUNCTION
+  const openWhatsAppReply = (phone: string, name: string) => {
+    if (!phone) {
+      toast.error("No phone number available");
+      return;
+    }
+
+    const cleanPhone = phone.replace(/[\s\-\(\)]/g, "");
+    let whatsappNumber = cleanPhone;
+    if (!cleanPhone.startsWith("+")) {
+      if (cleanPhone.startsWith("0")) {
+        whatsappNumber = "+6" + cleanPhone;
+      } else {
+        whatsappNumber = "+60" + cleanPhone;
+      }
+    }
+
+    const message = `Hi ${name}, thank you for your message through Port B. How can we help you?`;
+    const whatsappURL = `https://wa.me/${whatsappNumber.replace(
+      /\+/g,
+      ""
+    )}?text=${encodeURIComponent(message)}`;
+
+    window.open(whatsappURL, "_blank");
+    toggleModal("messageDetail", false);
+    toast.success("Opening WhatsApp...", { icon: "📱" });
+  };
 
   useEffect(() => {
     if (!authLoading && !user) router.push("/login");
@@ -1990,7 +2019,7 @@ const AdminDashboard = () => {
               </motion.div>
             )}
 
-            {/* INBOX SECTION */}
+            {/* 🔧 FIXED INBOX SECTION */}
             {activeSection === "inbox" && (
               <motion.div
                 key="inbox"
@@ -2116,7 +2145,7 @@ const AdminDashboard = () => {
                   )}
                 </div>
 
-                {/* Messages List */}
+                {/* 🔧 FIXED Messages List */}
                 {isDataLoading ? (
                   <div className="grid gap-3">
                     {[1, 2, 3].map((i) => (
@@ -2138,181 +2167,146 @@ const AdminDashboard = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className={`bg-white p-4 rounded-2xl border-2 hover:shadow-md transition-all cursor-pointer group ${
+                        className={`bg-white rounded-2xl border-2 hover:shadow-md transition-all overflow-hidden relative ${
                           message.is_read
                             ? "border-green-300 bg-green-50/30"
                             : "border-red-300 bg-red-50/50"
                         }`}
                       >
-                        <div className="flex flex-col sm:flex-row gap-4">
-                          {/* Checkbox (Select Mode) */}
-                          {isSelectMode && (
-                            <div
-                              className="flex items-start pt-1"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <button
-                                onClick={() =>
-                                  toggleMessageSelection(message.id)
-                                }
-                                className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all ${
-                                  selectedMessageIds.includes(message.id)
-                                    ? "bg-black border-black text-white"
-                                    : "bg-white border-gray-300 hover:border-gray-400"
-                                }`}
-                              >
-                                {selectedMessageIds.includes(message.id) && (
-                                  <Check size={14} />
-                                )}
-                              </button>
-                            </div>
-                          )}
-
-                          {/* Star Button */}
-                          <div
-                            className="flex items-start pt-1"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <button
-                              onClick={() =>
-                                toggleStar(message.id, message.is_starred)
-                              }
-                              className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-                            >
-                              <Star
-                                size={20}
-                                className={
-                                  message.is_starred
-                                    ? "text-yellow-500 fill-yellow-500"
-                                    : "text-gray-300 hover:text-yellow-500"
-                                }
-                              />
-                            </button>
-                          </div>
-
-                          {/* Avatar */}
-                          <div
-                            onClick={() => openMessageDetail(message)}
-                            className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${
-                              message.is_read
-                                ? "bg-green-100 border-green-400"
-                                : "bg-red-100 border-red-400"
-                            }`}
-                          >
-                            {message.is_read ? (
-                              <MailOpen size={20} className="text-green-600" />
-                            ) : (
-                              <Mail size={20} className="text-red-600" />
-                            )}
-                          </div>
-
-                          {/* Content */}
-                          <div
-                            className="flex-1 min-w-0"
-                            onClick={() => openMessageDetail(message)}
-                          >
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-1">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <h3
-                                  className={`text-base truncate ${
-                                    message.is_read
-                                      ? "font-medium text-gray-700"
-                                      : "font-bold text-gray-900"
-                                  }`}
-                                >
-                                  {message.name}
-                                </h3>
-                                {!message.is_read && (
-                                  <span className="px-2 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded uppercase animate-pulse">
-                                    NEW
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                              <span className="text-sm text-gray-500 truncate">
-                                {message.email}
-                              </span>
-                              <button
+                        <div
+                          className="p-4 cursor-pointer active:bg-gray-50 transition-colors flex flex-col sm:flex-row gap-4"
+                          onClick={() => openMessageDetail(message)}
+                        >
+                          {/* 1. LEFT SIDE: Checkbox, Star, Avatar */}
+                          <div className="flex items-start gap-3 pt-1 flex-shrink-0">
+                            {/* Checkbox (Select Mode) */}
+                            {isSelectMode && (
+                              <div
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  copyToClipboard(message.email, "Email");
+                                  toggleMessageSelection(message.id);
                                 }}
-                                className="p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
-                                title="Copy email"
                               >
-                                <Copy size={14} className="text-gray-400" />
+                                <button
+                                  className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all ${
+                                    selectedMessageIds.includes(message.id)
+                                      ? "bg-black border-black text-white"
+                                      : "bg-white border-gray-300 hover:border-gray-400"
+                                  }`}
+                                >
+                                  {selectedMessageIds.includes(message.id) && (
+                                    <Check size={14} />
+                                  )}
+                                </button>
+                              </div>
+                            )}
+
+                            {/* Star Button */}
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleStar(message.id, message.is_starred);
+                              }}
+                            >
+                              <button className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
+                                <Star
+                                  size={20}
+                                  className={
+                                    message.is_starred
+                                      ? "text-yellow-500 fill-yellow-500"
+                                      : "text-gray-300 hover:text-yellow-500"
+                                  }
+                                />
                               </button>
-                              {message.phone && (
-                                <>
-                                  <span className="text-gray-300">|</span>
-                                  <span className="text-sm text-gray-500">
-                                    {message.phone}
-                                  </span>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      copyToClipboard(message.phone!, "Phone");
-                                    }}
-                                    className="p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
-                                    title="Copy phone"
-                                  >
-                                    <Copy size={14} className="text-gray-400" />
-                                  </button>
-                                </>
-                              )}
                             </div>
 
+                            {/* Avatar */}
+                            <div
+                              className={`w-12 h-12 rounded-full flex items-center justify-center border-2 ${
+                                message.is_read
+                                  ? "bg-green-100 border-green-400"
+                                  : "bg-red-100 border-red-400"
+                              }`}
+                            >
+                              {message.is_read ? (
+                                <MailOpen
+                                  size={20}
+                                  className="text-green-600"
+                                />
+                              ) : (
+                                <Mail size={20} className="text-red-600" />
+                              )}
+                            </div>
+                          </div>
+
+                          {/* 2. MIDDLE: Content Info */}
+                          <div className="flex-1 min-w-0 pr-0 sm:pr-4">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <h3
+                                className={`text-base truncate ${
+                                  message.is_read
+                                    ? "font-medium text-gray-700"
+                                    : "font-bold text-gray-900"
+                                }`}
+                              >
+                                {message.name}
+                              </h3>
+                              {!message.is_read && (
+                                <span className="px-2 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded uppercase animate-pulse">
+                                  NEW
+                                </span>
+                              )}
+                              <span className="text-xs text-gray-400 flex items-center gap-1 ml-auto sm:ml-2">
+                                <Clock3 size={12} />
+                                {formatRelativeTime(message.created_at) ||
+                                  formatFullDate(message.created_at)}
+                              </span>
+                            </div>
+
+                            <p className="text-sm text-gray-500 truncate mb-1">
+                              {message.email}
+                            </p>
                             <p className="text-sm text-gray-600 line-clamp-2 mb-2">
                               {message.message}
                             </p>
 
-                            {/* Date & Tags */}
-                            <div className="flex items-center gap-3 flex-wrap">
-                              <span className="text-xs text-gray-400 flex items-center gap-1">
-                                <Clock3 size={12} />
-                                {formatFullDate(message.created_at)}
-                                {formatRelativeTime(message.created_at) && (
-                                  <span className="text-gray-300">
-                                    ({formatRelativeTime(message.created_at)})
-                                  </span>
-                                )}
-                              </span>
+                            {/* Tags */}
+                            <div className="flex items-center gap-2 flex-wrap">
                               {message.space_type && (
                                 <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-xs font-medium border border-gray-200">
                                   {formatSpaceType(message.space_type)}
                                 </span>
                               )}
-                              {message.company && (
-                                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-xs font-medium border border-gray-200 flex items-center gap-1">
-                                  <Building2 size={10} />
-                                  {message.company}
+                              {message.phone && (
+                                <span className="px-2 py-1 bg-green-50 text-green-700 rounded-md text-xs font-medium border border-green-100 flex items-center gap-1">
+                                  <Phone size={10} /> WhatsApp Available
                                 </span>
                               )}
                             </div>
                           </div>
 
-                          {/* Actions */}
+                          {/* 3. RIGHT SIDE (Desktop) / BOTTOM (Mobile): Actions */}
+                          {/* "Hujung Kanan" implementation */}
                           <div
-                            className="flex sm:flex-col gap-2 flex-shrink-0"
+                            className="flex flex-row sm:flex-col gap-2 items-center sm:justify-center border-t sm:border-t-0 sm:border-l border-gray-200 pt-3 sm:pt-0 sm:pl-4 mt-2 sm:mt-0"
                             onClick={(e) => e.stopPropagation()}
                           >
+                            {/* Mark Read/Unread Toggle */}
                             <button
                               onClick={() =>
                                 message.is_read
                                   ? markAsUnread(message.id)
                                   : markAsRead(message.id)
                               }
-                              className={`p-2.5 rounded-xl transition-colors border ${
+                              className={`p-2.5 rounded-xl transition-colors border flex-1 sm:flex-none w-full sm:w-auto flex justify-center ${
                                 message.is_read
-                                  ? "text-gray-600 bg-gray-50 hover:bg-gray-100 border-gray-300"
+                                  ? "text-gray-500 bg-gray-100 hover:bg-gray-200 border-gray-200"
                                   : "text-green-600 bg-green-50 hover:bg-green-100 border-green-200"
                               }`}
                               title={
                                 message.is_read
-                                  ? "Mark as unread"
-                                  : "Mark as read"
+                                  ? "Mark as Unread"
+                                  : "Mark as Read"
                               }
                             >
                               {message.is_read ? (
@@ -2321,6 +2315,31 @@ const AdminDashboard = () => {
                                 <MailOpen size={18} />
                               )}
                             </button>
+
+                            {/* Reply Button (Simple Chat Icon) */}
+                            <button
+                              onClick={() => {
+                                if (message.phone) {
+                                  openWhatsAppReply(
+                                    message.phone,
+                                    message.name
+                                  );
+                                } else {
+                                  toast.error("No phone number");
+                                }
+                              }}
+                              disabled={!message.phone}
+                              className={`p-2.5 rounded-xl transition-colors border flex-1 sm:flex-none w-full sm:w-auto flex justify-center ${
+                                message.phone
+                                  ? "text-green-700 bg-green-50 hover:bg-green-100 border-green-200" // Hijau lembut & simple
+                                  : "text-gray-300 bg-gray-50 border-gray-200 cursor-not-allowed"
+                              }`}
+                              title="Reply Message"
+                            >
+                              <MessageCircle size={18} />
+                            </button>
+
+                            {/* Delete Button (Added back per request) */}
                             <button
                               onClick={() => {
                                 setDeleteTarget({
@@ -2330,8 +2349,8 @@ const AdminDashboard = () => {
                                 });
                                 setShowDeleteModal(true);
                               }}
-                              className="p-2.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors border border-red-200"
-                              title="Delete message"
+                              className="p-2.5 rounded-xl transition-colors border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 flex-1 sm:flex-none w-full sm:w-auto flex justify-center"
+                              title="Delete Message"
                             >
                               <Trash2 size={18} />
                             </button>
@@ -2378,7 +2397,7 @@ const AdminDashboard = () => {
               overscrollBehavior: "none",
             }}
           >
-            {/* MESSAGE DETAIL MODAL */}
+            {/* 🔧 FIXED MESSAGE DETAIL MODAL */}
             {modals.messageDetail && selectedMessage && (
               <motion.div
                 variants={modalVariants}
@@ -2535,7 +2554,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                {/* Footer Actions */}
+                {/* 🔧 FIXED Footer Actions - REPLACE DELETE WITH WHATSAPP */}
                 <div className="p-4 border-t border-gray-300 bg-gray-50/50 flex-shrink-0">
                   <div className="flex gap-3">
                     <button
@@ -2570,18 +2589,28 @@ const AdminDashboard = () => {
                         </>
                       )}
                     </button>
+
+                    {/* 🆕 REPLY BUTTON - REPLACE DELETE BUTTON */}
                     <button
                       onClick={() => {
-                        setDeleteTarget({
-                          type: "message",
-                          id: selectedMessage.id,
-                          title: `Message from ${selectedMessage.name}`,
-                        });
-                        setShowDeleteModal(true);
+                        if (selectedMessage.phone) {
+                          openWhatsAppReply(
+                            selectedMessage.phone,
+                            selectedMessage.name
+                          );
+                        } else {
+                          toast.error("No phone number to reply to");
+                        }
                       }}
-                      className="py-3 px-4 rounded-xl font-medium text-white bg-red-600 hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                      disabled={!selectedMessage.phone}
+                      className={`py-3 px-4 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${
+                        selectedMessage.phone
+                          ? "text-white bg-green-600 hover:bg-green-700 border-green-600"
+                          : "text-gray-400 bg-gray-100 border-gray-200 cursor-not-allowed"
+                      }`}
                     >
-                      <Trash2 size={18} /> Delete
+                      <Phone size={18} />
+                      {selectedMessage.phone ? "Reply WhatsApp" : "No Phone"}
                     </button>
                   </div>
                 </div>
@@ -3017,7 +3046,7 @@ const AdminDashboard = () => {
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-                className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 border border-gray-200"
+                className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 border border-gray-200"
                 onClick={(e) => e.stopPropagation()}
                 style={{
                   touchAction: "none",
@@ -3029,13 +3058,10 @@ const AdminDashboard = () => {
                     <AlertTriangle size={28} />
                   </div>
                   <h3 className="text-xl font-bold mb-2 text-gray-900">
-                    Delete{" "}
-                    {deleteTarget.type === "message" ? "Message" : "Item"}?
+                    Delete {deleteTarget.title}?
                   </h3>
                   <p className="text-gray-500 text-sm mb-8 leading-relaxed">
-                    Are you sure you want to delete this{" "}
-                    {deleteTarget.type === "message" ? "message" : "item"}? This
-                    action cannot be undone.
+                    This will permanently delete this item and cannot be undone.
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -3051,7 +3077,7 @@ const AdminDashboard = () => {
                   <button
                     onClick={confirmDelete}
                     disabled={isLoading}
-                    className="py-3 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 transition-colors shadow-lg shadow-red-100 disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="py-3 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 transition-colors shadow-lg shadow-red-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {isLoading ? (
                       <Loader2 size={18} className="animate-spin" />
@@ -3097,7 +3123,6 @@ const AdminDashboard = () => {
                     to confirm:
                   </p>
 
-                  {/* 🔧 FIX: Remove .trim() from onChange - only uppercase */}
                   <input
                     type="text"
                     value={deleteAllConfirmText}
