@@ -1,27 +1,17 @@
-// app/api/contact/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// ========================================
-// SUPABASE CLIENT (Server-side)
-// ========================================
-
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-// Use service role key for server-side operations
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // ========================================
-// POST - Create new contact message
+// POST - Create new contact message (PUBLIC - safe)
 // ========================================
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-
-        // Validate required fields
         const { name, email, phone, company, space_type, message } = body;
 
         if (!name || !email || !message) {
@@ -31,7 +21,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             return NextResponse.json(
@@ -40,7 +29,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Insert into database
         const { data, error } = await supabase
             .from("contact_messages")
             .insert([
@@ -80,42 +68,12 @@ export async function POST(request: NextRequest) {
 }
 
 // ========================================
-// GET - Fetch all contact messages (Admin)
+// GET - Fetch all messages (BLOCKED - use Server Action instead)
 // ========================================
 
 export async function GET() {
-    try {
-        const { data, error } = await supabase
-            .from("contact_messages")
-            .select("*")
-            .order("created_at", { ascending: false });
-
-        if (error) {
-            console.error("Supabase error:", error);
-            return NextResponse.json(
-                { error: "Failed to fetch messages" },
-                { status: 500 }
-            );
-        }
-
-        // Get unread count
-        const unreadCount = data?.filter((msg) => !msg.is_read).length || 0;
-
-        return NextResponse.json(
-            {
-                success: true,
-                data,
-                unreadCount,
-                total: data?.length || 0
-            },
-            { status: 200 }
-        );
-
-    } catch (error) {
-        console.error("API error:", error);
-        return NextResponse.json(
-            { error: "Internal server error" },
-            { status: 500 }
-        );
-    }
+    return NextResponse.json(
+        { error: "Use admin dashboard instead" },
+        { status: 403 }
+    );
 }

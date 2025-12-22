@@ -30,6 +30,16 @@ import {
   Star,
   Check,
 } from "lucide-react";
+import {
+  getAdminMessages,
+  markMessageAsRead,
+  markMessageAsUnread,
+  toggleMessageStar,
+  deleteContactMessage,
+  deleteContactMessages,
+  deleteAllContactMessages,
+  type ContactMessage,
+} from "@/app/actions/contact";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
@@ -91,19 +101,6 @@ interface GalleryImage {
   updated_at?: string;
 }
 
-interface ContactMessage {
-  id: number;
-  name: string;
-  email: string;
-  phone?: string;
-  company?: string;
-  space_type?: string;
-  message: string;
-  is_read: boolean;
-  is_starred: boolean;
-  created_at: string;
-  updated_at?: string;
-}
 
 type AnyItem = UpcomingEvent | PreviousEvent | GalleryImage;
 type SectionType = "overview" | "upcoming" | "previous" | "gallery" | "inbox";
@@ -265,24 +262,22 @@ const AdminDashboard = () => {
   // INBOX FUNCTIONS
   // ==========================================
 
-  const fetchMessages = useCallback(async () => {
-    try {
-      const response = await fetch("/api/contact");
-      const result = await response.json();
+const fetchMessages = useCallback(async () => {
+  try {
+    const result = await getAdminMessages();
 
-      if (result.success) {
-        setContactMessages(result.data);
-        setUnreadCount(
-          result.data.filter((m: ContactMessage) => !m.is_read).length
-        );
-        setStarredCount(
-          result.data.filter((m: ContactMessage) => m.is_starred).length
-        );
-      }
-    } catch (error) {
-      console.error("Error fetching messages:", error);
+    if (result.success) {
+      setContactMessages(result.data);
+      setUnreadCount(result.unreadCount);
+      setStarredCount(result.starredCount);
+    } else {
+      toast.error(result.error || "Failed to fetch messages");
     }
-  }, []);
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    toast.error("Failed to fetch messages");
+  }
+}, []);
 
   // Supabase Realtime Subscription
   useEffect(() => {
@@ -337,105 +332,100 @@ const AdminDashboard = () => {
     };
   }, [user]);
 
-  const markAsRead = async (id: number) => {
-    try {
-      const response = await fetch(`/api/contact/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is_read: true }),
-      });
+ const markAsRead = async (id: number) => {
+   try {
+     const result = await markMessageAsRead(id);
 
-      if (response.ok) {
-        setContactMessages((prev) =>
-          prev.map((msg) => (msg.id === id ? { ...msg, is_read: true } : msg))
-        );
-        setUnreadCount((prev) => Math.max(0, prev - 1));
-      }
-    } catch (error) {
-      console.error("Error marking as read:", error);
+     if (result.success) {
+       setContactMessages((prev) =>
+         prev.map((msg) => (msg.id === id ? { ...msg, is_read: true } : msg))
+       );
+       setUnreadCount((prev) => Math.max(0, prev - 1));
+     } else {
+       toast.error(result.error || "Failed to mark as read");
+     }
+   } catch (error) {
+     console.error("Error marking as read:", error);
+     toast.error("Failed to mark as read");
+   }
+ };
+
+const markAsUnread = async (id: number) => {
+  try {
+    const result = await markMessageAsUnread(id);
+
+    if (result.success) {
+      setContactMessages((prev) =>
+        prev.map((msg) => (msg.id === id ? { ...msg, is_read: false } : msg))
+      );
+      setUnreadCount((prev) => prev + 1);
+    } else {
+      toast.error(result.error || "Failed to mark as unread");
     }
-  };
+  } catch (error) {
+    console.error("Error marking as unread:", error);
+    toast.error("Failed to mark as unread");
+  }
+};
 
-  const markAsUnread = async (id: number) => {
-    try {
-      const response = await fetch(`/api/contact/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is_read: false }),
+const toggleStar = async (id: number, currentStarred: boolean) => {
+  try {
+    const result = await toggleMessageStar(id, currentStarred);
+
+    if (result.success) {
+      setContactMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === id ? { ...msg, is_starred: !currentStarred } : msg
+        )
+      );
+      setStarredCount((prev) =>
+        currentStarred ? Math.max(0, prev - 1) : prev + 1
+      );
+      toast.success(currentStarred ? "Star removed" : "Message starred!", {
+        icon: currentStarred ? "☆" : "⭐",
       });
-
-      if (response.ok) {
-        setContactMessages((prev) =>
-          prev.map((msg) => (msg.id === id ? { ...msg, is_read: false } : msg))
-        );
-        setUnreadCount((prev) => prev + 1);
-      }
-    } catch (error) {
-      console.error("Error marking as unread:", error);
+    } else {
+      toast.error(result.error || "Failed to toggle star");
     }
-  };
+  } catch (error) {
+    console.error("Error toggling star:", error);
+    toast.error("Failed to toggle star");
+  }
+};
 
-  const toggleStar = async (id: number, currentStarred: boolean) => {
-    try {
-      const response = await fetch(`/api/contact/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is_starred: !currentStarred }),
-      });
+ const deleteMessage = async (id: number) => {
+   setIsLoading(true);
+   const tid = toast.loading("Deleting message...");
 
-      if (response.ok) {
-        setContactMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === id ? { ...msg, is_starred: !currentStarred } : msg
-          )
-        );
-        setStarredCount((prev) =>
-          currentStarred ? Math.max(0, prev - 1) : prev + 1
-        );
-        toast.success(currentStarred ? "Star removed" : "Message starred!", {
-          icon: currentStarred ? "☆" : "⭐",
-        });
-      }
-    } catch (error) {
-      console.error("Error toggling star:", error);
-    }
-  };
+   try {
+     const result = await deleteContactMessage(id);
 
-  const deleteMessage = async (id: number) => {
-    setIsLoading(true);
-    const tid = toast.loading("Deleting message...");
+     if (result.success) {
+       const deletedMsg = contactMessages.find((m) => m.id === id);
+       setContactMessages((prev) => prev.filter((msg) => msg.id !== id));
 
-    try {
-      const response = await fetch(`/api/contact/${id}`, {
-        method: "DELETE",
-      });
+       if (deletedMsg && !deletedMsg.is_read) {
+         setUnreadCount((prev) => Math.max(0, prev - 1));
+       }
+       if (deletedMsg && deletedMsg.is_starred) {
+         setStarredCount((prev) => Math.max(0, prev - 1));
+       }
 
-      if (response.ok) {
-        const deletedMsg = contactMessages.find((m) => m.id === id);
-        setContactMessages((prev) => prev.filter((msg) => msg.id !== id));
-
-        if (deletedMsg && !deletedMsg.is_read) {
-          setUnreadCount((prev) => Math.max(0, prev - 1));
-        }
-        if (deletedMsg && deletedMsg.is_starred) {
-          setStarredCount((prev) => Math.max(0, prev - 1));
-        }
-
-        setShowDeleteModal(false);
-        setDeleteTarget(null);
-        toggleModal("messageDetail", false);
-        setSelectedMessage(null);
-        toast.success("Message deleted!", { id: tid });
-      } else {
-        toast.error("Failed to delete message", { id: tid });
-      }
-    } catch (error) {
-      console.error("Error deleting message:", error);
-      toast.error("Failed to delete message", { id: tid });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+       setShowDeleteModal(false);
+       setDeleteTarget(null);
+       toggleModal("messageDetail", false);
+       setSelectedMessage(null);
+       toast.success("Message deleted!", { id: tid });
+     } else {
+       toast.error(result.error || "Failed to delete message", { id: tid });
+     }
+   } catch (error) {
+     console.error("Error deleting message:", error);
+     toast.error("Failed to delete message", { id: tid });
+   } finally {
+     setIsLoading(false);
+   }
+ };
 
   const deleteSelectedMessages = async () => {
     if (selectedMessageIds.length === 0) return;
@@ -446,13 +436,9 @@ const AdminDashboard = () => {
     );
 
     try {
-      const response = await fetch("/api/contact/bulk", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: selectedMessageIds }),
-      });
+      const result = await deleteContactMessages(selectedMessageIds);
 
-      if (response.ok) {
+      if (result.success) {
         const deletedMessages = contactMessages.filter((m) =>
           selectedMessageIds.includes(m.id)
         );
@@ -472,7 +458,7 @@ const AdminDashboard = () => {
           id: tid,
         });
       } else {
-        toast.error("Failed to delete messages", { id: tid });
+        toast.error(result.error || "Failed to delete messages", { id: tid });
       }
     } catch (error) {
       console.error("Error deleting messages:", error);
@@ -482,38 +468,34 @@ const AdminDashboard = () => {
     }
   };
 
-  const deleteAllMessages = async () => {
-    if (deleteAllConfirmText !== "DELETE ALL") return;
+const deleteAllMessages = async () => {
+  if (deleteAllConfirmText !== "DELETE ALL") return;
 
-    setIsLoading(true);
-    const tid = toast.loading("Deleting all messages...");
+  setIsLoading(true);
+  const tid = toast.loading("Deleting all messages...");
 
-    try {
-      const response = await fetch("/api/contact/bulk", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deleteAll: true }),
-      });
+  try {
+    const result = await deleteAllContactMessages();
 
-      if (response.ok) {
-        setContactMessages([]);
-        setUnreadCount(0);
-        setStarredCount(0);
-        setSelectedMessageIds([]);
-        setIsSelectMode(false);
-        setShowDeleteAllModal(false);
-        setDeleteAllConfirmText("");
-        toast.success("All messages deleted!", { id: tid });
-      } else {
-        toast.error("Failed to delete all messages", { id: tid });
-      }
-    } catch (error) {
-      console.error("Error deleting all messages:", error);
-      toast.error("Failed to delete all messages", { id: tid });
-    } finally {
-      setIsLoading(false);
+    if (result.success) {
+      setContactMessages([]);
+      setUnreadCount(0);
+      setStarredCount(0);
+      setSelectedMessageIds([]);
+      setIsSelectMode(false);
+      setShowDeleteAllModal(false);
+      setDeleteAllConfirmText("");
+      toast.success("All messages deleted!", { id: tid });
+    } else {
+      toast.error(result.error || "Failed to delete all messages", { id: tid });
     }
-  };
+  } catch (error) {
+    console.error("Error deleting all messages:", error);
+    toast.error("Failed to delete all messages", { id: tid });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const copyToClipboard = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
