@@ -1,10 +1,11 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { Send, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 import { assets } from "@/assets/asset";
 import { FaFacebook, FaInstagram, FaTiktok } from "react-icons/fa";
 import React from "react";
+import SubscribeForm from "@/components/admin/subscribers/SubscribeForm"; // ✅ Import
 
 const Footer = () => {
   return (
@@ -12,15 +13,11 @@ const Footer = () => {
       {/* Gradient Wave */}
       <div className="gradient-wave h-2 md:h-3 w-full" />
 
-      {/* 🔥 REDUCED PADDING: py-14 → py-8 md:py-10 */}
       <div className="w-full max-w-[1300px] mx-auto px-6 md:px-10 lg:px-16 py-8 md:py-10">
         {/* ---- Top Grid ---- */}
-        {/* 🔥 REDUCED GAP: gap-10 md:gap-12 → gap-6 md:gap-8 */}
-        {/* 🔥 REDUCED BOTTOM PADDING: pb-10 → pb-6 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 pb-6 border-b border-gray-700">
           {/* Logo & tagline */}
           <div>
-            {/* 🔥 SMALLER LOGO: w-40 sm:w-48 → w-28 sm:w-32 */}
             <Image
               src={assets.portb_logo}
               alt="PortB logo"
@@ -68,36 +65,13 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Newsletter */}
+          {/* ✅ Newsletter - REPLACE with SubscribeForm Component */}
           <div>
-            <h3 className="text-xl font-semibold text-white mb-4">
-              Stay Updated
-            </h3>
-            <p className="text-gray-400 text-base mb-3">
-              Subscribe for events & latest updates.
-            </p>
-            {/* Email input */}
-            <form
-              onSubmit={(e) => e.preventDefault()}
-              className="flex w-full overflow-hidden rounded-lg border border-gray-600 focus-within:ring-2 focus-within:ring-emerald-500"
-            >
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 bg-transparent px-4 py-3 text-sm text-gray-200 placeholder-gray-500 focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="bg-emerald-500 hover:bg-emerald-600 px-4 flex items-center justify-center transition-colors cursor-pointer"
-              >
-                <Send size={18} className="text-white" />
-              </button>
-            </form>
+            <SubscribeForm />
           </div>
         </div>
 
         {/* ---- Bottom Section ---- */}
-        {/* 🔥 REDUCED TOP PADDING: pt-8 → pt-5 */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-5 pt-5">
           {/* Copyright */}
           <p className="text-sm text-gray-500 text-center md:text-left">

@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   MessageCircle,
   User,
+  Users,
   ChevronRight,
   LucideIcon,
   Mail,
@@ -26,9 +27,11 @@ import {
   Copy,
   Clock3,
   Building2,
-  Phone, // 🆕 ADDED THIS
+  Phone,
   Star,
   Check,
+  Download,
+  RefreshCw,
 } from "lucide-react";
 import {
   getAdminMessages,
@@ -36,10 +39,18 @@ import {
   markMessageAsUnread,
   toggleMessageStar,
   deleteContactMessage,
-  deleteContactMessages,
   deleteAllContactMessages,
   type ContactMessage,
 } from "@/app/actions/contact";
+import {
+  getSubscribers,
+  deleteSubscriber,
+  deleteSubscribers,
+  deleteAllSubscribers,
+  markAllSubscribersAsRead,
+  exportSubscribers,
+  type Subscriber,
+} from "@/app/actions/subscriber";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
@@ -63,7 +74,7 @@ import {
 } from "@/lib/database";
 
 // ==========================================
-// TYPE DEFINITIONS
+// TYPES
 // ==========================================
 interface UpcomingEvent {
   id: number;
@@ -79,7 +90,6 @@ interface UpcomingEvent {
   created_at?: string;
   updated_at?: string;
 }
-
 interface PreviousEvent {
   id: number;
   title: string;
@@ -91,7 +101,6 @@ interface PreviousEvent {
   created_at?: string;
   updated_at?: string;
 }
-
 interface GalleryImage {
   id: number;
   image_url: string;
@@ -100,12 +109,15 @@ interface GalleryImage {
   created_at?: string;
   updated_at?: string;
 }
-
-
 type AnyItem = UpcomingEvent | PreviousEvent | GalleryImage;
-type SectionType = "overview" | "upcoming" | "previous" | "gallery" | "inbox";
+type SectionType =
+  | "overview"
+  | "upcoming"
+  | "previous"
+  | "gallery"
+  | "inbox"
+  | "subscribers";
 type InboxFilter = "all" | "unread" | "starred";
-
 interface StatCardProps {
   icon: LucideIcon;
   label: string;
@@ -113,18 +125,16 @@ interface StatCardProps {
 }
 
 // ==========================================
-// ANIMATION VARIANTS
+// ANIMATIONS
 // ==========================================
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
 };
-
 const itemVariants = {
   hidden: { y: 10, opacity: 0 },
   visible: { y: 0, opacity: 1 },
 };
-
 const modalVariants = {
   hidden: { opacity: 0, scale: 0.98 },
   visible: { opacity: 1, scale: 1, transition: { duration: 0.2 } },
@@ -138,30 +148,25 @@ const AdminDashboard = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const router = useRouter();
 
-  // 🆕 WHATSAPP REPLY FUNCTION
   const openWhatsAppReply = (phone: string, name: string) => {
     if (!phone) {
-      toast.error("No phone number available");
+      toast.error("No phone number");
       return;
     }
-
     const cleanPhone = phone.replace(/[\s\-\(\)]/g, "");
     let whatsappNumber = cleanPhone;
     if (!cleanPhone.startsWith("+")) {
-      if (cleanPhone.startsWith("0")) {
-        whatsappNumber = "+6" + cleanPhone;
-      } else {
-        whatsappNumber = "+60" + cleanPhone;
-      }
+      if (cleanPhone.startsWith("0")) whatsappNumber = "+6" + cleanPhone;
+      else whatsappNumber = "+60" + cleanPhone;
     }
-
     const message = `Hi ${name}, thank you for your message through Port B. How can we help you?`;
-    const whatsappURL = `https://wa.me/${whatsappNumber.replace(
-      /\+/g,
-      ""
-    )}?text=${encodeURIComponent(message)}`;
-
-    window.open(whatsappURL, "_blank");
+    window.open(
+      `https://wa.me/${whatsappNumber.replace(
+        /\+/g,
+        ""
+      )}?text=${encodeURIComponent(message)}`,
+      "_blank"
+    );
     toggleModal("messageDetail", false);
     toast.success("Opening WhatsApp...", { icon: "📱" });
   };
@@ -170,19 +175,15 @@ const AdminDashboard = () => {
     if (!authLoading && !user) router.push("/login");
   }, [user, authLoading, router]);
 
-  // State
+  // STATE
   const [activeSection, setActiveSection] = useState<SectionType>("overview");
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  // Search & Filter
   const [upcomingSearch, setUpcomingSearch] = useState("");
   const [previousSearch, setPreviousSearch] = useState("");
   const [galleryFilter, setGalleryFilter] = useState("all");
   const [inboxSearch, setInboxSearch] = useState("");
   const [inboxFilter, setInboxFilter] = useState<InboxFilter>("all");
-
-  // Modals & Data
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
   const [deleteAllConfirmText, setDeleteAllConfirmText] = useState("");
@@ -192,8 +193,6 @@ const AdminDashboard = () => {
     title: string;
     imageUrl?: string;
   } | null>(null);
-
-  // Create/Edit Modals
   const [modals, setModals] = useState({
     createUpcoming: false,
     createPrevious: false,
@@ -204,12 +203,9 @@ const AdminDashboard = () => {
     preview: false,
     messageDetail: false,
   });
-
   const [editingEvent, setEditingEvent] = useState<AnyItem | null>(null);
   const [previewEvent, setPreviewEvent] = useState<AnyItem | null>(null);
-  const [previewType, setPreviewType] = useState<SectionType | null>(null);
 
-  // Data
   const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([]);
   const [previousEvents, setPreviousEvents] = useState<PreviousEvent[]>([]);
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
@@ -222,18 +218,21 @@ const AdminDashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDataLoading, setIsDataLoading] = useState(true);
 
-  // Multi-select for inbox
-  const [selectedMessageIds, setSelectedMessageIds] = useState<number[]>([]);
-  const [isSelectMode, setIsSelectMode] = useState(false);
 
-  // Refresh key
+  // SUBSCRIBERS STATE (ISOLATED)
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [isSubscribersLoading, setIsSubscribersLoading] = useState(false);
+  const [subscriberUnreadCount, setSubscriberUnreadCount] = useState(0);
+  const [selectedSubscriberIds, setSelectedSubscriberIds] = useState<number[]>(
+    []
+  );
+  const [isSubscriberSelectMode, setIsSubscriberSelectMode] = useState(false);
+  const [subscriberSearch, setSubscriberSearch] = useState("");
+  const [subscriberFilter, setSubscriberFilter] = useState<"all" | "new" | "read">("all");
+
   const [refreshKey, setRefreshKey] = useState(0);
-
-  // File Uploads
   const [files, setFiles] = useState<{ [key: string]: File | null }>({});
   const [previews, setPreviews] = useState<{ [key: string]: string }>({});
-
-  // Forms
   const [forms, setForms] = useState({
     upcoming: {
       title: "",
@@ -248,7 +247,6 @@ const AdminDashboard = () => {
     previous: { title: "", description: "", category: "", icon_name: "" },
     gallery: { year: "", alt_text: "" },
   });
-
   const fileRefs = {
     upcoming: useRef<HTMLInputElement>(null),
     previous: useRef<HTMLInputElement>(null),
@@ -259,265 +257,101 @@ const AdminDashboard = () => {
   };
 
   // ==========================================
-  // INBOX FUNCTIONS
+  // TIMEZONE HELPERS (MALAYSIA UTC+8) - FIXED
   // ==========================================
 
-const fetchMessages = useCallback(async () => {
-  try {
-    const result = await getAdminMessages();
-
-    if (result.success) {
-      setContactMessages(result.data);
-      setUnreadCount(result.unreadCount);
-      setStarredCount(result.starredCount);
-    } else {
-      toast.error(result.error || "Failed to fetch messages");
-    }
-  } catch (error) {
-    console.error("Error fetching messages:", error);
-    toast.error("Failed to fetch messages");
-  }
-}, []);
-
-  // Supabase Realtime Subscription
-  useEffect(() => {
-    if (!user) return;
-
-    const channel = supabase
-      .channel("contact_messages_changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "contact_messages",
-        },
-        (payload) => {
-          if (payload.eventType === "INSERT") {
-            const newMessage = payload.new as ContactMessage;
-            setContactMessages((prev) => [newMessage, ...prev]);
-            setUnreadCount((prev) => prev + 1);
-            toast.success(`New message from ${newMessage.name}!`, {
-              icon: "📬",
-              duration: 5000,
-            });
-          } else if (payload.eventType === "UPDATE") {
-            const updatedMessage = payload.new as ContactMessage;
-            setContactMessages((prev) =>
-              prev.map((msg) =>
-                msg.id === updatedMessage.id ? updatedMessage : msg
-              )
-            );
-            // Recalculate counts
-            setContactMessages((prev) => {
-              setUnreadCount(prev.filter((m) => !m.is_read).length);
-              setStarredCount(prev.filter((m) => m.is_starred).length);
-              return prev;
-            });
-          } else if (payload.eventType === "DELETE") {
-            const deletedId = payload.old.id;
-            setContactMessages((prev) => {
-              const newMessages = prev.filter((msg) => msg.id !== deletedId);
-              setUnreadCount(newMessages.filter((m) => !m.is_read).length);
-              setStarredCount(newMessages.filter((m) => m.is_starred).length);
-              return newMessages;
-            });
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user]);
-
- const markAsRead = async (id: number) => {
-   try {
-     const result = await markMessageAsRead(id);
-
-     if (result.success) {
-       setContactMessages((prev) =>
-         prev.map((msg) => (msg.id === id ? { ...msg, is_read: true } : msg))
-       );
-       setUnreadCount((prev) => Math.max(0, prev - 1));
-     } else {
-       toast.error(result.error || "Failed to mark as read");
-     }
-   } catch (error) {
-     console.error("Error marking as read:", error);
-     toast.error("Failed to mark as read");
-   }
- };
-
-const markAsUnread = async (id: number) => {
-  try {
-    const result = await markMessageAsUnread(id);
-
-    if (result.success) {
-      setContactMessages((prev) =>
-        prev.map((msg) => (msg.id === id ? { ...msg, is_read: false } : msg))
-      );
-      setUnreadCount((prev) => prev + 1);
-    } else {
-      toast.error(result.error || "Failed to mark as unread");
-    }
-  } catch (error) {
-    console.error("Error marking as unread:", error);
-    toast.error("Failed to mark as unread");
-  }
-};
-
-const toggleStar = async (id: number, currentStarred: boolean) => {
-  try {
-    const result = await toggleMessageStar(id, currentStarred);
-
-    if (result.success) {
-      setContactMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === id ? { ...msg, is_starred: !currentStarred } : msg
-        )
-      );
-      setStarredCount((prev) =>
-        currentStarred ? Math.max(0, prev - 1) : prev + 1
-      );
-      toast.success(currentStarred ? "Star removed" : "Message starred!", {
-        icon: currentStarred ? "☆" : "⭐",
-      });
-    } else {
-      toast.error(result.error || "Failed to toggle star");
-    }
-  } catch (error) {
-    console.error("Error toggling star:", error);
-    toast.error("Failed to toggle star");
-  }
-};
-
- const deleteMessage = async (id: number) => {
-   setIsLoading(true);
-   const tid = toast.loading("Deleting message...");
-
-   try {
-     const result = await deleteContactMessage(id);
-
-     if (result.success) {
-       const deletedMsg = contactMessages.find((m) => m.id === id);
-       setContactMessages((prev) => prev.filter((msg) => msg.id !== id));
-
-       if (deletedMsg && !deletedMsg.is_read) {
-         setUnreadCount((prev) => Math.max(0, prev - 1));
-       }
-       if (deletedMsg && deletedMsg.is_starred) {
-         setStarredCount((prev) => Math.max(0, prev - 1));
-       }
-
-       setShowDeleteModal(false);
-       setDeleteTarget(null);
-       toggleModal("messageDetail", false);
-       setSelectedMessage(null);
-       toast.success("Message deleted!", { id: tid });
-     } else {
-       toast.error(result.error || "Failed to delete message", { id: tid });
-     }
-   } catch (error) {
-     console.error("Error deleting message:", error);
-     toast.error("Failed to delete message", { id: tid });
-   } finally {
-     setIsLoading(false);
-   }
- };
-
-  const deleteSelectedMessages = async () => {
-    if (selectedMessageIds.length === 0) return;
-
-    setIsLoading(true);
-    const tid = toast.loading(
-      `Deleting ${selectedMessageIds.length} messages...`
-    );
+  const toMalaysiaDate = (dateString: string) => {
+    if (!dateString) return null;
 
     try {
-      const result = await deleteContactMessages(selectedMessageIds);
+      // Clean and normalize the date string
+      const cleanDate = dateString
+        .replace(/\+\d{2}:\d{2}$/, "") // Remove +00:00, +08:00, etc
+        .replace(/Z$/, "") // Remove Z
+        .replace(" ", "T") // Space to T
+        .split(".")[0]; // Remove milliseconds
 
-      if (result.success) {
-        const deletedMessages = contactMessages.filter((m) =>
-          selectedMessageIds.includes(m.id)
-        );
-        const unreadDeleted = deletedMessages.filter((m) => !m.is_read).length;
-        const starredDeleted = deletedMessages.filter(
-          (m) => m.is_starred
-        ).length;
+      // Parse components manually to avoid timezone issues
+      const match = cleanDate.match(
+        /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/
+      );
 
-        setContactMessages((prev) =>
-          prev.filter((msg) => !selectedMessageIds.includes(msg.id))
-        );
-        setUnreadCount((prev) => Math.max(0, prev - unreadDeleted));
-        setStarredCount((prev) => Math.max(0, prev - starredDeleted));
-        setSelectedMessageIds([]);
-        setIsSelectMode(false);
-        toast.success(`${selectedMessageIds.length} messages deleted!`, {
-          id: tid,
-        });
-      } else {
-        toast.error(result.error || "Failed to delete messages", { id: tid });
+      if (!match) {
+        console.error("Cannot parse date:", dateString);
+        return null;
       }
+
+      const [, year, month, day, hour, minute, second] = match;
+
+      // Create UTC date (month is 0-indexed)
+      const utcMs = Date.UTC(
+        parseInt(year),
+        parseInt(month) - 1,
+        parseInt(day),
+        parseInt(hour),
+        parseInt(minute),
+        parseInt(second)
+      );
+
+      // Add 8 hours for Malaysia timezone
+      const malaysiaMs = utcMs + 8 * 60 * 60 * 1000;
+
+      return new Date(malaysiaMs);
     } catch (error) {
-      console.error("Error deleting messages:", error);
-      toast.error("Failed to delete messages", { id: tid });
-    } finally {
-      setIsLoading(false);
+      console.error("Error parsing date:", dateString, error);
+      return null;
     }
   };
 
-const deleteAllMessages = async () => {
-  if (deleteAllConfirmText !== "DELETE ALL") return;
-
-  setIsLoading(true);
-  const tid = toast.loading("Deleting all messages...");
-
-  try {
-    const result = await deleteAllContactMessages();
-
-    if (result.success) {
-      setContactMessages([]);
-      setUnreadCount(0);
-      setStarredCount(0);
-      setSelectedMessageIds([]);
-      setIsSelectMode(false);
-      setShowDeleteAllModal(false);
-      setDeleteAllConfirmText("");
-      toast.success("All messages deleted!", { id: tid });
-    } else {
-      toast.error(result.error || "Failed to delete all messages", { id: tid });
-    }
-  } catch (error) {
-    console.error("Error deleting all messages:", error);
-    toast.error("Failed to delete all messages", { id: tid });
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-  const copyToClipboard = (text: string, type: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success(`${type} copied!`, { icon: "📋" });
-  };
+ 
 
   const formatFullDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-MY", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
+    const malaysiaDate = toMalaysiaDate(dateString);
+    if (!malaysiaDate) return "-";
+
+    const day = malaysiaDate.getUTCDate();
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    const month = monthNames[malaysiaDate.getUTCMonth()];
+    const year = malaysiaDate.getUTCFullYear();
+    let hour = malaysiaDate.getUTCHours();
+    const minute = String(malaysiaDate.getUTCMinutes()).padStart(2, "0");
+    const ampm = hour >= 12 ? "PM" : "AM";
+
+    hour = hour % 12 || 12;
+
+    return `${day} ${month} ${year}, ${hour}:${minute} ${ampm}`;
   };
 
   const formatRelativeTime = (dateString: string) => {
-    const date = new Date(dateString);
+    const malaysiaDate = toMalaysiaDate(dateString);
+    if (!malaysiaDate) return "";
+
+    // Get current Malaysia time
     const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
+    const nowUtc = Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate(),
+      now.getUTCHours(),
+      now.getUTCMinutes(),
+      now.getUTCSeconds()
+    );
+    const nowMalaysia = nowUtc + 8 * 60 * 60 * 1000;
+
+    const diffMs = nowMalaysia - malaysiaDate.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
@@ -527,7 +361,6 @@ const deleteAllMessages = async () => {
     if (diffHours < 24)
       return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
     if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
-
     return "";
   };
 
@@ -539,30 +372,165 @@ const deleteAllMessages = async () => {
       .join(" ");
   };
 
+  const copyToClipboard = (text: string, type: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${type} copied!`, { icon: "📋" });
+  };
+
+  // FETCH MESSAGES
+  const fetchMessages = useCallback(async () => {
+    try {
+      const result = await getAdminMessages();
+      if (result.success) {
+        setContactMessages(result.data);
+        setUnreadCount(result.unreadCount);
+        setStarredCount(result.starredCount);
+      }
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  }, []);
+
+  // FETCH SUBSCRIBERS (ISOLATED)
+  const refreshSubscribers = useCallback(async () => {
+    setIsSubscribersLoading(true);
+    try {
+      const result = await getSubscribers();
+      if (result.success) {
+        setSubscribers(result.data);
+        setSubscriberUnreadCount(result.unreadCount);
+      }
+    } catch (error) {
+      console.error("Error fetching subscribers:", error);
+    } finally {
+      setIsSubscribersLoading(false);
+    }
+  }, []);
+
+  // REALTIME
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel("updates")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "contact_messages" },
+        () => fetchMessages()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "subscribers" },
+        () => refreshSubscribers()
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, fetchMessages, refreshSubscribers]);
+
+  // WINDOW FOCUS (FIX FOR TAB SWITCH)
+  // useEffect(() => {
+  //   const handleFocus = () => {
+  //     if (user) {
+  //       console.log("Tab focused - refreshing data");
+  //       fetchMessages();
+  //       refreshSubscribers();
+  //     }
+  //   };
+  //   window.addEventListener("focus", handleFocus);
+  //   return () => window.removeEventListener("focus", handleFocus);
+  // }, [user, fetchMessages, refreshSubscribers]);
+
+  // LOAD DATA
+  const loadData = useCallback(async () => {
+    setIsDataLoading(true);
+    try {
+      const [up, prev, gal] = await Promise.all([
+        getUpcomingEvents(),
+        getPreviousEvents(),
+        getGalleryImages(),
+      ]);
+      setUpcomingEvents(up);
+      setPreviousEvents(prev);
+      setGalleryImages(gal);
+      await fetchMessages();
+      await refreshSubscribers();
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to load data");
+    } finally {
+      setIsDataLoading(false);
+    }
+  }, [fetchMessages, refreshSubscribers]);
+
+  useEffect(() => {
+    if (user) loadData();
+  }, [user, loadData, refreshKey]);
+
+  // SCROLL LOCK EFFECTS
+  useEffect(() => {
+    if (isSidebarOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
+      return () => {
+        const scrollY = document.body.style.top;
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        window.scrollTo(0, parseInt(scrollY || "0") * -1);
+      };
+    }
+  }, [isSidebarOpen]);
+
+  useEffect(() => {
+    const anyModalOpen =
+      Object.values(modals).some((v) => v) ||
+      showDeleteModal ||
+      showDeleteAllModal ||
+      showLogoutModal;
+    if (anyModalOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
+      return () => {
+        const scrollY = document.body.style.top;
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        window.scrollTo(0, parseInt(scrollY || "0") * -1);
+      };
+    }
+  }, [modals, showDeleteModal, showDeleteAllModal, showLogoutModal]);
+
+  // HELPERS
+  const toggleModal = (name: keyof typeof modals, value: boolean) => {
+    setModals((prev) => ({ ...prev, [name]: value }));
+    if (!value) {
+      if (name === "createUpcoming") {
+        clearImage("upcoming");
+        resetUpcomingForm();
+      } else if (name === "createPrevious") {
+        clearImage("previous");
+        resetPreviousForm();
+      } else if (name === "createGallery") {
+        clearImage("gallery");
+        resetGalleryForm();
+      } else if (name === "messageDetail") setSelectedMessage(null);
+    }
+  };
+
   const openMessageDetail = (message: ContactMessage) => {
     setSelectedMessage(message);
     toggleModal("messageDetail", true);
-
-    if (!message.is_read) {
-      markAsRead(message.id);
-    }
+    if (!message.is_read) markAsRead(message.id);
   };
 
-  const toggleMessageSelection = (id: number) => {
-    setSelectedMessageIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
-  };
 
-  const selectAllMessages = () => {
-    if (selectedMessageIds.length === filteredMessages.length) {
-      setSelectedMessageIds([]);
-    } else {
-      setSelectedMessageIds(filteredMessages.map((m) => m.id));
-    }
-  };
 
-  // Filter messages
+
   const filteredMessages = contactMessages
     .filter((msg) => {
       if (inboxFilter === "unread") return !msg.is_read;
@@ -576,222 +544,176 @@ const deleteAllMessages = async () => {
         msg.message.toLowerCase().includes(inboxSearch.toLowerCase())
     );
 
-  // ==========================================
-  // SIDEBAR SCROLL LOCK
-  // ==========================================
-  useEffect(() => {
-    if (isSidebarOpen) {
-      const scrollY = window.scrollY;
-
-      document.documentElement.style.overflow = "hidden";
-      document.documentElement.style.position = "fixed";
-      document.documentElement.style.width = "100%";
-      document.documentElement.style.height = "100%";
-
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.left = "0";
-      document.body.style.right = "0";
-      document.body.style.width = "100%";
-      document.body.style.overflow = "hidden";
-      document.body.style.overscrollBehavior = "none";
-
-      const preventScroll = (e: TouchEvent) => {
-        const target = e.target as Element;
-        const isScrollable = target.closest(".allow-scroll");
-
-        if (!isScrollable) {
-          e.preventDefault();
-        }
-      };
-
-      const preventGesture = (e: Event) => {
-        e.preventDefault();
-      };
-
-      document.addEventListener("touchmove", preventScroll, { passive: false });
-      document.addEventListener("gesturestart", preventGesture, {
-        passive: false,
-      });
-
-      return () => {
-        const scrollY = document.body.style.top;
-
-        document.documentElement.style.overflow = "";
-        document.documentElement.style.position = "";
-        document.documentElement.style.width = "";
-        document.documentElement.style.height = "";
-
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.left = "";
-        document.body.style.right = "";
-        document.body.style.width = "";
-        document.body.style.overflow = "";
-        document.body.style.overscrollBehavior = "";
-
-        window.scrollTo(0, parseInt(scrollY || "0") * -1);
-
-        document.removeEventListener("touchmove", preventScroll);
-        document.removeEventListener("gesturestart", preventGesture);
-      };
-    }
-  }, [isSidebarOpen]);
-
-  // ==========================================
-  // MODAL SCROLL LOCK
-  // ==========================================
-  useEffect(() => {
-    const anyModalOpen =
-      Object.values(modals).some((v) => v) ||
-      showDeleteModal ||
-      showDeleteAllModal ||
-      showLogoutModal;
-
-    if (anyModalOpen) {
-      const scrollY = window.scrollY;
-
-      document.documentElement.style.overflow = "hidden";
-      document.documentElement.style.position = "fixed";
-      document.documentElement.style.width = "100%";
-      document.documentElement.style.height = "100%";
-
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.left = "0";
-      document.body.style.right = "0";
-      document.body.style.width = "100%";
-      document.body.style.overflow = "hidden";
-      document.body.style.overscrollBehavior = "none";
-
-      const preventScroll = (e: TouchEvent) => {
-        const target = e.target as Element;
-        const isModalContent = target.closest(".modal-scrollable");
-
-        if (!isModalContent) {
-          e.preventDefault();
-        }
-      };
-
-      const preventGesture = (e: Event) => {
-        e.preventDefault();
-      };
-
-      document.addEventListener("touchmove", preventScroll, { passive: false });
-      document.addEventListener("gesturestart", preventGesture, {
-        passive: false,
-      });
-
-      return () => {
-        const scrollY = document.body.style.top;
-
-        document.documentElement.style.overflow = "";
-        document.documentElement.style.position = "";
-        document.documentElement.style.width = "";
-        document.documentElement.style.height = "";
-
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.left = "";
-        document.body.style.right = "";
-        document.body.style.width = "";
-        document.body.style.overflow = "";
-        document.body.style.overscrollBehavior = "";
-
-        window.scrollTo(0, parseInt(scrollY || "0") * -1);
-
-        document.removeEventListener("touchmove", preventScroll);
-        document.removeEventListener("gesturestart", preventGesture);
-      };
-    }
-  }, [modals, showDeleteModal, showDeleteAllModal, showLogoutModal]);
-
-  // ==========================================
-  // HELPERS & HANDLERS
-  // ==========================================
-  const toggleModal = (name: keyof typeof modals, value: boolean) => {
-    setModals((prev) => ({ ...prev, [name]: value }));
-
-    if (!value) {
-      if (name === "createUpcoming") {
-        clearImage("upcoming");
-        resetUpcomingForm();
-      } else if (name === "createPrevious") {
-        clearImage("previous");
-        resetPreviousForm();
-      } else if (name === "createGallery") {
-        clearImage("gallery");
-        resetGalleryForm();
-      } else if (name === "editUpcoming") {
-        clearImage("editUpcoming");
-      } else if (name === "editPrevious") {
-        clearImage("editPrevious");
-      } else if (name === "editGallery") {
-        clearImage("editGallery");
-      } else if (name === "messageDetail") {
-        setSelectedMessage(null);
-      }
-    }
-
-    if (value) {
-      if (name === "createUpcoming") {
-        resetUpcomingForm();
-        clearImage("upcoming");
-      } else if (name === "createPrevious") {
-        resetPreviousForm();
-        clearImage("previous");
-      } else if (name === "createGallery") {
-        resetGalleryForm();
-        clearImage("gallery");
-      }
-    }
-  };
-
-  const loadData = useCallback(async () => {
-    setIsDataLoading(true);
-    try {
-      const [up, prev, gal] = await Promise.all([
-        getUpcomingEvents(),
-        getPreviousEvents(),
-        getGalleryImages(),
-      ]);
-      setUpcomingEvents(up);
-      setPreviousEvents(prev);
-      setGalleryImages(gal);
-
-      await fetchMessages();
-    } catch (e) {
-      console.error(e);
-      toast.error("Failed to load data");
-    } finally {
-      setIsDataLoading(false);
-    }
-  }, [fetchMessages]);
-
-  useEffect(() => {
-    if (user) loadData();
-  }, [user, loadData, refreshKey]);
-
-  // Filtering
   const filteredUpcoming = upcomingEvents.filter((e) =>
     e.title.toLowerCase().includes(upcomingSearch.toLowerCase())
   );
+
   const filteredPrevious = previousEvents.filter((e) =>
     e.title.toLowerCase().includes(previousSearch.toLowerCase())
   );
+
   const galleryYears = [...new Set(galleryImages.map((i) => i.year))].sort(
     (a, b) => b.localeCompare(a)
   );
+
   const filteredGallery =
     galleryFilter === "all"
       ? galleryImages
       : galleryImages.filter((i) => i.year === galleryFilter);
 
-  // File Handler
+ const filteredSubscribers = subscribers
+   .filter((sub) => {
+     // Filter by status
+     if (subscriberFilter === "new") return !sub.is_read;
+     if (subscriberFilter === "read") return sub.is_read;
+     return true; // "all"
+   })
+   .filter((sub) =>
+     // Filter by search
+     sub.email.toLowerCase().includes(subscriberSearch.toLowerCase())
+   );
+
+  // MESSAGE ACTIONS
+  const markAsRead = async (id: number) => {
+    try {
+      const result = await markMessageAsRead(id);
+      if (result.success) {
+        setContactMessages((prev) =>
+          prev.map((msg) => (msg.id === id ? { ...msg, is_read: true } : msg))
+        );
+        setUnreadCount((prev) => Math.max(0, prev - 1));
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const markAsUnread = async (id: number) => {
+    try {
+      const result = await markMessageAsUnread(id);
+      if (result.success) {
+        setContactMessages((prev) =>
+          prev.map((msg) => (msg.id === id ? { ...msg, is_read: false } : msg))
+        );
+        setUnreadCount((prev) => prev + 1);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const toggleStar = async (id: number, currentStarred: boolean) => {
+    try {
+      const result = await toggleMessageStar(id, currentStarred);
+      if (result.success) {
+        setContactMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === id ? { ...msg, is_starred: !currentStarred } : msg
+          )
+        );
+        setStarredCount((prev) =>
+          currentStarred ? Math.max(0, prev - 1) : prev + 1
+        );
+        toast.success(currentStarred ? "Star removed" : "Message starred!", {
+          icon: currentStarred ? "☆" : "⭐",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const deleteMessage = async (id: number) => {
+    setIsLoading(true);
+    const tid = toast.loading("Deleting...");
+    try {
+      const result = await deleteContactMessage(id);
+      if (result.success) {
+        setContactMessages((prev) => prev.filter((msg) => msg.id !== id));
+        setShowDeleteModal(false);
+        setDeleteTarget(null);
+        toggleModal("messageDetail", false);
+        toast.success("Message deleted!", { id: tid });
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed", { id: tid });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteAllMessages = async () => {
+    if (deleteAllConfirmText !== "DELETE ALL") return;
+    setIsLoading(true);
+    const tid = toast.loading("Deleting all...");
+    try {
+      const result = await deleteAllContactMessages();
+      if (result.success) {
+        setContactMessages([]);
+        setUnreadCount(0);
+        setStarredCount(0);
+     
+ 
+        setShowDeleteAllModal(false);
+        setDeleteAllConfirmText("");
+        toast.success("All messages deleted!", { id: tid });
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // SUBSCRIBER ACTIONS
+  const handleSubscriberAction = async (action: string, id?: number) => {
+    if (action === "delete" && id) {
+      if (!confirm("Delete subscriber?")) return;
+      await deleteSubscriber(id);
+      toast.success("Deleted");
+      refreshSubscribers();
+    }
+    if (action === "deleteSelected") {
+      if (!confirm(`Delete ${selectedSubscriberIds.length} subscribers?`))
+        return;
+      await deleteSubscribers(selectedSubscriberIds);
+      toast.success("Deleted selected");
+      setSelectedSubscriberIds([]);
+      setIsSubscriberSelectMode(false);
+      refreshSubscribers();
+    }
+    if (action === "deleteAll") {
+      if (!confirm("DELETE ALL?")) return;
+      await deleteAllSubscribers();
+      toast.success("All deleted");
+      refreshSubscribers();
+    }
+    if (action === "markRead") {
+      await markAllSubscribersAsRead();
+      toast.success("Marked as read");
+      refreshSubscribers();
+    }
+    if (action === "export") {
+      const res = await exportSubscribers();
+      if (res.success && res.data) {
+        const url = window.URL.createObjectURL(
+          new Blob([res.data], { type: "text/csv" })
+        );
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `subs_${Date.now()}.csv`;
+        a.click();
+        toast.success("Exported!");
+      }
+    }
+  };
+
+  // FILE HANDLERS
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>, key: string) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) return toast.error("Max 5MB allowed");
+    if (file.size > 5 * 1024 * 1024) return toast.error("Max 5MB");
     setFiles((prev) => ({ ...prev, [key]: file }));
     const reader = new FileReader();
     reader.onloadend = () =>
@@ -799,28 +721,13 @@ const deleteAllMessages = async () => {
     reader.readAsDataURL(file);
   };
 
-  // Clear Image Handler
   const clearImage = (key: string) => {
     setFiles((prev) => ({ ...prev, [key]: null }));
     setPreviews((prev) => ({ ...prev, [key]: "" }));
-
-    // Reset file input
-    if (key === "upcoming" && fileRefs.upcoming.current) {
-      fileRefs.upcoming.current.value = "";
-    } else if (key === "previous" && fileRefs.previous.current) {
-      fileRefs.previous.current.value = "";
-    } else if (key === "gallery" && fileRefs.gallery.current) {
-      fileRefs.gallery.current.value = "";
-    } else if (key === "editUpcoming" && fileRefs.editUpcoming.current) {
-      fileRefs.editUpcoming.current.value = "";
-    } else if (key === "editPrevious" && fileRefs.editPrevious.current) {
-      fileRefs.editPrevious.current.value = "";
-    } else if (key === "editGallery" && fileRefs.editGallery.current) {
-      fileRefs.editGallery.current.value = "";
-    }
+    if (fileRefs[key as keyof typeof fileRefs]?.current)
+      fileRefs[key as keyof typeof fileRefs].current!.value = "";
   };
 
-  // Reset form helpers
   const resetUpcomingForm = () => {
     setForms((prev) => ({
       ...prev,
@@ -848,35 +755,28 @@ const deleteAllMessages = async () => {
     setForms((prev) => ({ ...prev, gallery: { year: "", alt_text: "" } }));
   };
 
-  // CRUD Functions
+  // CRUD FUNCTIONS
   const createUpcoming = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    const tid = toast.loading("Creating event...");
-
+    const tid = toast.loading("Creating...");
     try {
       const url = files.upcoming
         ? await uploadImage(files.upcoming, "upcoming")
         : undefined;
-
       const newEvent = await createUpcomingEvent({
         ...forms.upcoming,
         image_url: url,
       });
-
-      if (newEvent) {
-        setUpcomingEvents((prev) => [newEvent, ...prev]);
-      } else {
-        setRefreshKey((prev) => prev + 1);
-      }
-
+      if (newEvent) setUpcomingEvents((prev) => [newEvent, ...prev]);
+      else setRefreshKey((prev) => prev + 1);
       resetUpcomingForm();
       clearImage("upcoming");
       toggleModal("createUpcoming", false);
-      toast.success("Event created successfully!", { id: tid });
+      toast.success("Created!", { id: tid });
     } catch (error) {
       console.error(error);
-      toast.error("Failed to create event", { id: tid });
+      toast.error("Failed", { id: tid });
     } finally {
       setIsLoading(false);
     }
@@ -885,31 +785,24 @@ const deleteAllMessages = async () => {
   const createPrevious = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    const tid = toast.loading("Creating event...");
-
+    const tid = toast.loading("Creating...");
     try {
       const url = files.previous
         ? await uploadImage(files.previous, "previous")
         : undefined;
-
       const newEvent = await createPreviousEvent({
         ...forms.previous,
         image_url: url,
       });
-
-      if (newEvent) {
-        setPreviousEvents((prev) => [newEvent, ...prev]);
-      } else {
-        setRefreshKey((prev) => prev + 1);
-      }
-
+      if (newEvent) setPreviousEvents((prev) => [newEvent, ...prev]);
+      else setRefreshKey((prev) => prev + 1);
       resetPreviousForm();
       clearImage("previous");
       toggleModal("createPrevious", false);
-      toast.success("Event created successfully!", { id: tid });
+      toast.success("Created!", { id: tid });
     } catch (error) {
       console.error(error);
-      toast.error("Failed to create event", { id: tid });
+      toast.error("Failed", { id: tid });
     } finally {
       setIsLoading(false);
     }
@@ -918,30 +811,23 @@ const deleteAllMessages = async () => {
   const createGallery = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!files.gallery) return toast.error("Image required");
-
     setIsLoading(true);
-    const tid = toast.loading("Uploading image...");
-
+    const tid = toast.loading("Uploading...");
     try {
       const url = await uploadImage(files.gallery!, "gallery");
       const newImage = await createGalleryImage({
         image_url: url,
         ...forms.gallery,
       });
-
-      if (newImage) {
-        setGalleryImages((prev) => [newImage, ...prev]);
-      } else {
-        setRefreshKey((prev) => prev + 1);
-      }
-
+      if (newImage) setGalleryImages((prev) => [newImage, ...prev]);
+      else setRefreshKey((prev) => prev + 1);
       resetGalleryForm();
       clearImage("gallery");
       toggleModal("createGallery", false);
-      toast.success("Image uploaded successfully!", { id: tid });
+      toast.success("Uploaded!", { id: tid });
     } catch (error) {
       console.error(error);
-      toast.error("Failed to upload image", { id: tid });
+      toast.error("Failed", { id: tid });
     } finally {
       setIsLoading(false);
     }
@@ -949,15 +835,12 @@ const deleteAllMessages = async () => {
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
-
     if (deleteTarget.type === "message") {
       await deleteMessage(deleteTarget.id);
       return;
     }
-
     setIsLoading(true);
     const tid = toast.loading("Deleting...");
-
     try {
       if (deleteTarget.type === "upcoming") {
         await dbDeleteUpcomingEvent(deleteTarget.id, deleteTarget.imageUrl);
@@ -975,13 +858,12 @@ const deleteAllMessages = async () => {
           prev.filter((e) => e.id !== deleteTarget.id)
         );
       }
-
       setShowDeleteModal(false);
       setDeleteTarget(null);
-      toast.success("Deleted successfully!", { id: tid });
+      toast.success("Deleted!", { id: tid });
     } catch (error) {
       console.error(error);
-      toast.error("Failed to delete", { id: tid });
+      toast.error("Failed", { id: tid });
     } finally {
       setIsLoading(false);
     }
@@ -998,8 +880,7 @@ const deleteAllMessages = async () => {
         : type === "previous"
         ? "editPrevious"
         : "editGallery";
-
-    if (type === "upcoming" && "fee" in item) {
+    if (type === "upcoming" && "fee" in item)
       setForms((prev) => ({
         ...prev,
         upcoming: {
@@ -1013,7 +894,7 @@ const deleteAllMessages = async () => {
           is_featured: item.is_featured || false,
         },
       }));
-    } else if (type === "previous" && "icon_name" in item) {
+    else if (type === "previous" && "icon_name" in item)
       setForms((prev) => ({
         ...prev,
         previous: {
@@ -1023,16 +904,11 @@ const deleteAllMessages = async () => {
           icon_name: item.icon_name || "",
         },
       }));
-    } else if (type === "gallery" && "year" in item) {
+    else if (type === "gallery" && "year" in item)
       setForms((prev) => ({
         ...prev,
-        gallery: {
-          year: item.year,
-          alt_text: item.alt_text || "",
-        },
+        gallery: { year: item.year, alt_text: item.alt_text || "" },
       }));
-    }
-
     setPreviews((prev) => ({ ...prev, [key]: item.image_url || "" }));
     toggleModal(key, true);
   };
@@ -1043,10 +919,8 @@ const deleteAllMessages = async () => {
   ) => {
     e.preventDefault();
     if (!editingEvent) return;
-
     setIsLoading(true);
     const tid = toast.loading("Updating...");
-
     try {
       let url = editingEvent.image_url;
       const fileKey =
@@ -1055,17 +929,12 @@ const deleteAllMessages = async () => {
           : type === "previous"
           ? "editPrevious"
           : "editGallery";
-
-      if (files[fileKey]) {
-        url = await uploadImage(files[fileKey]!, type);
-      }
-
+      if (files[fileKey]) url = await uploadImage(files[fileKey]!, type);
       if (type === "upcoming" && "title" in editingEvent) {
         await updateUpcomingEvent(editingEvent.id, {
           ...forms.upcoming,
           image_url: url,
         });
-
         setUpcomingEvents((prev) =>
           prev.map((e) =>
             e.id === editingEvent.id
@@ -1078,7 +947,6 @@ const deleteAllMessages = async () => {
           ...forms.previous,
           image_url: url,
         });
-
         setPreviousEvents((prev) =>
           prev.map((e) =>
             e.id === editingEvent.id
@@ -1091,7 +959,6 @@ const deleteAllMessages = async () => {
           ...forms.gallery,
           image_url: url,
         });
-
         setGalleryImages((prev) =>
           prev.map((e) =>
             e.id === editingEvent.id
@@ -1100,23 +967,19 @@ const deleteAllMessages = async () => {
           )
         );
       }
-
       clearImage(fileKey);
       toggleModal(fileKey, false);
       setEditingEvent(null);
-      toast.success("Updated successfully!", { id: tid });
+      toast.success("Updated!", { id: tid });
     } catch (error) {
       console.error(error);
-      toast.error("Failed to update", { id: tid });
+      toast.error("Failed", { id: tid });
     } finally {
       setIsLoading(false);
     }
   };
 
-  // ==========================================
   // UI COMPONENTS
-  // ==========================================
-
   const SkeletonCard = () => (
     <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-300 animate-pulse flex gap-4 h-28">
       <div className="w-24 bg-gray-200 rounded-lg h-full"></div>
@@ -1173,7 +1036,6 @@ const deleteAllMessages = async () => {
       if (modals.editGallery) return "editGallery";
       return "";
     };
-
     const getFileRef = () => {
       if (modals.createUpcoming) return fileRefs.upcoming;
       if (modals.createPrevious) return fileRefs.previous;
@@ -1183,10 +1045,8 @@ const deleteAllMessages = async () => {
       if (modals.editGallery) return fileRefs.editGallery;
       return null;
     };
-
     const previewKey = getPreviewKey();
     const hasPreview = previews[previewKey];
-
     return (
       <div className="relative group">
         <div
@@ -1228,7 +1088,6 @@ const deleteAllMessages = async () => {
             </>
           )}
         </div>
-
         <input
           type="file"
           ref={fileRefs.upcoming}
@@ -1275,20 +1134,14 @@ const deleteAllMessages = async () => {
     );
   };
 
-  // ==========================================
   // RENDER
-  // ==========================================
-  if (authLoading) {
+  if (authLoading)
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-gray-50">
         <Loader2 className="animate-spin text-gray-900 w-8 h-8" />
       </div>
     );
-  }
-
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-gray-100 flex font-sans text-gray-900 overflow-x-hidden">
@@ -1297,11 +1150,7 @@ const deleteAllMessages = async () => {
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
-          style={{
-            touchAction: "none",
-            overscrollBehavior: "none",
-            WebkitOverflowScrolling: "auto",
-          }}
+          style={{ touchAction: "none" }}
         />
       )}
 
@@ -1310,28 +1159,14 @@ const deleteAllMessages = async () => {
         className={`fixed lg:static inset-y-0 left-0 w-72 bg-white border-r border-gray-300 z-50 transform transition-transform duration-300 flex flex-col ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
-        style={{
-          touchAction: "none",
-          overscrollBehavior: "none",
-          WebkitOverflowScrolling: "auto",
-        }}
       >
-        <div
-          className="h-20 flex items-center px-8 border-b border-gray-300 flex-shrink-0"
-          style={{ touchAction: "none" }}
-        >
+        <div className="h-20 flex items-center px-8 border-b border-gray-300 flex-shrink-0">
           <h1 className="text-xl font-bold tracking-tight">
             Port B <span className="text-gray-400 font-normal">Admin</span>
           </h1>
         </div>
 
-        <nav
-          className="flex-1 px-4 py-6 space-y-1 flex-shrink-0 min-h-0"
-          style={{
-            touchAction: "none",
-            overscrollBehavior: "none",
-          }}
-        >
+        <nav className="flex-1 px-4 py-6 space-y-1 flex-shrink-0 min-h-0">
           <div className="mb-4 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
             Main Menu
           </div>
@@ -1341,19 +1176,26 @@ const deleteAllMessages = async () => {
             { id: "previous", icon: Clock, label: "Previous Events" },
             { id: "gallery", icon: ImageIcon, label: "Photo Gallery" },
             { id: "inbox", icon: Mail, label: "Inbox", badge: unreadCount },
+            {
+              id: "subscribers",
+              icon: Users,
+              label: "Subscribers",
+              badge: subscriberUnreadCount,
+            },
           ].map((item) => (
             <button
               key={item.id}
               onClick={() => {
                 setActiveSection(item.id as SectionType);
                 setIsSidebarOpen(false);
-                if (item.id === "gallery") {
-                  setGalleryFilter("all");
-                }
+                if (item.id === "gallery") setGalleryFilter("all");
                 if (item.id === "inbox") {
                   setInboxFilter("all");
-                  setIsSelectMode(false);
-                  setSelectedMessageIds([]);
+                }
+                if (item.id === "subscribers") {
+                  setIsSubscriberSelectMode(false);
+                  setSelectedSubscriberIds([]);
+                  refreshSubscribers();
                 }
               }}
               className={`group w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 border ${
@@ -1395,10 +1237,7 @@ const deleteAllMessages = async () => {
           ))}
         </nav>
 
-        <div
-          className="p-4 border-t border-gray-300 bg-gray-50/50 flex-shrink-0"
-          style={{ touchAction: "none" }}
-        >
+        <div className="p-4 border-t border-gray-300 bg-gray-50/50 flex-shrink-0">
           <div className="bg-white border border-gray-300 p-3 rounded-xl flex items-center gap-3 mb-3 shadow-sm">
             <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 border border-gray-300">
               <User size={16} />
@@ -1420,10 +1259,7 @@ const deleteAllMessages = async () => {
       {/* MAIN CONTENT */}
       <main
         className="flex-1 h-screen overflow-y-auto overflow-x-hidden bg-gray-100"
-        style={{
-          overscrollBehavior: "contain",
-          WebkitOverflowScrolling: "touch",
-        }}
+        style={{ overscrollBehavior: "contain" }}
       >
         <div className="lg:hidden h-16 bg-white sticky top-0 z-40 border-b border-gray-300 px-4 flex items-center justify-between shadow-sm">
           <h1 className="font-bold text-lg">Dashboard</h1>
@@ -1445,16 +1281,18 @@ const deleteAllMessages = async () => {
                 initial="hidden"
                 animate="visible"
               >
+                {/* Header */}
                 <div className="mb-8">
                   <h2 className="text-3xl font-bold text-gray-900">
                     Dashboard Overview
                   </h2>
                   <p className="text-gray-500 mt-1">
-                    Welcome back, here is your content summary.
+                    Welcome back! Here is your content summary.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+                {/* Stats Cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
                   <StatCard
                     icon={Calendar}
                     label="Upcoming"
@@ -1475,233 +1313,399 @@ const deleteAllMessages = async () => {
                     label="Messages"
                     value={contactMessages.length}
                   />
+                  <StatCard
+                    icon={Users}
+                    label="Subscribers"
+                    value={subscribers.length}
+                  />
                 </div>
 
-                {/* CHANGE: 2x2 Grid instead of 3 columns */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* Upcoming Column */}
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-300 overflow-hidden h-fit">
-                    <div className="p-5 border-b border-gray-300 flex justify-between items-center bg-gray-50/50">
-                      <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                        <Calendar size={16} className="text-gray-500" />{" "}
-                        Upcoming
-                      </h3>
-                      <button
-                        onClick={() => setActiveSection("upcoming")}
-                        className="text-xs font-semibold text-gray-600 hover:text-black hover:underline transition-colors"
-                      >
-                        View All
-                      </button>
-                    </div>
-                    <div className="divide-y divide-gray-200">
-                      {upcomingEvents.slice(0, 3).map((e) => (
-                        <div
-                          key={e.id}
-                          className="p-4 flex gap-4 hover:bg-gray-50 transition-colors group"
-                        >
-                          <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative border border-gray-300">
-                            {e.image_url ? (
-                              <Image
-                                src={e.image_url}
-                                alt=""
-                                fill
-                                className="object-cover"
-                              />
-                            ) : (
-                              <Calendar
-                                className="m-auto mt-3 text-gray-300"
-                                size={20}
-                              />
-                            )}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-bold text-gray-900 truncate group-hover:text-black">
-                              {e.title}
-                            </p>
-                            <p className="text-xs text-gray-500 mt-0.5">
-                              {e.date}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                      {upcomingEvents.length === 0 && (
-                        <p className="p-8 text-center text-sm text-gray-400">
-                          No upcoming events
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Previous Column */}
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-300 overflow-hidden h-fit">
-                    <div className="p-5 border-b border-gray-300 flex justify-between items-center bg-gray-50/50">
-                      <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                        <Clock size={16} className="text-gray-500" /> Previous
-                      </h3>
-                      <button
-                        onClick={() => setActiveSection("previous")}
-                        className="text-xs font-semibold text-gray-600 hover:text-black hover:underline transition-colors"
-                      >
-                        View All
-                      </button>
-                    </div>
-                    <div className="divide-y divide-gray-200">
-                      {previousEvents.slice(0, 3).map((e) => (
-                        <div
-                          key={e.id}
-                          className="p-4 flex gap-4 hover:bg-gray-50 transition-colors group"
-                        >
-                          <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative border border-gray-300">
-                            {e.image_url ? (
-                              <Image
-                                src={e.image_url}
-                                alt=""
-                                fill
-                                className="object-cover"
-                              />
-                            ) : (
-                              <Clock
-                                className="m-auto mt-3 text-gray-300"
-                                size={20}
-                              />
-                            )}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-bold text-gray-900 truncate group-hover:text-black">
-                              {e.title}
-                            </p>
-                            <p className="text-xs text-gray-500 mt-0.5">
-                              {e.category}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                      {previousEvents.length === 0 && (
-                        <p className="p-8 text-center text-sm text-gray-400">
-                          No previous events
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* 🆕 GALLERY COLUMN - NEW! */}
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-300 overflow-hidden h-fit">
-                    <div className="p-5 border-b border-gray-300 flex justify-between items-center bg-gray-50/50">
-                      <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                        <ImageIcon size={16} className="text-gray-500" />{" "}
-                        Gallery
-                      </h3>
-                      <button
-                        onClick={() => setActiveSection("gallery")}
-                        className="text-xs font-semibold text-gray-600 hover:text-black hover:underline transition-colors"
-                      >
-                        View All
-                      </button>
-                    </div>
-                    <div className="p-4">
-                      {galleryImages.length > 0 ? (
-                        <div className="grid grid-cols-3 gap-2">
-                          {galleryImages.slice(0, 6).map((img) => (
-                            <div
-                              key={img.id}
-                              onClick={() => setActiveSection("gallery")}
-                              className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative border border-gray-300 cursor-pointer hover:ring-2 hover:ring-black transition-all group"
-                            >
-                              <Image
-                                src={img.image_url}
-                                alt={img.alt_text || "Gallery"}
-                                fill
-                                className="object-cover group-hover:scale-110 transition-transform"
-                              />
-                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all" />
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="p-8 text-center text-sm text-gray-400">
-                          No gallery images
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Messages Column */}
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-300 overflow-hidden h-fit">
-                    <div className="p-5 border-b border-gray-300 flex justify-between items-center bg-gray-50/50">
-                      <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                        <Mail size={16} className="text-gray-500" /> Messages
+                {/* Main Content Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                  {/* Recent Messages */}
+                  <motion.div
+                    variants={itemVariants}
+                    className="bg-white rounded-2xl border border-gray-300 overflow-hidden"
+                  >
+                    <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                      <div className="flex items-center gap-2">
+                        <Mail size={18} className="text-gray-600" />
+                        <h3 className="font-bold text-gray-900">
+                          Recent Messages
+                        </h3>
                         {unreadCount > 0 && (
-                          <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-red-500 text-white">
-                            {unreadCount}
+                          <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">
+                            {unreadCount} new
                           </span>
                         )}
-                      </h3>
+                      </div>
                       <button
                         onClick={() => setActiveSection("inbox")}
-                        className="text-xs font-semibold text-gray-600 hover:text-black hover:underline transition-colors"
+                        className="text-sm text-gray-500 hover:text-black flex items-center gap-1 transition-colors"
                       >
-                        View All
+                        View All <ChevronRight size={14} />
                       </button>
                     </div>
-                    <div className="divide-y divide-gray-200">
-                      {contactMessages.slice(0, 3).map((msg) => (
-                        <div
-                          key={msg.id}
-                          onClick={() => openMessageDetail(msg)}
-                          className={`p-4 flex gap-4 hover:bg-gray-50 transition-colors group cursor-pointer ${
-                            !msg.is_read ? "bg-red-50/50" : ""
-                          }`}
-                        >
+                    <div className="divide-y divide-gray-100">
+                      {contactMessages.length === 0 ? (
+                        <div className="p-8 text-center text-gray-400">
+                          <Mail
+                            size={32}
+                            className="mx-auto mb-2 text-gray-300"
+                          />
+                          <p className="text-sm">No messages yet</p>
+                        </div>
+                      ) : (
+                        contactMessages.slice(0, 4).map((msg) => (
                           <div
-                            className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${
-                              msg.is_read
-                                ? "bg-green-50 border-green-300"
-                                : "bg-red-50 border-red-300"
+                            key={msg.id}
+                            onClick={() => openMessageDetail(msg)}
+                            className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors flex items-start gap-3 ${
+                              !msg.is_read ? "bg-red-50/50" : ""
                             }`}
                           >
-                            {msg.is_read ? (
-                              <MailOpen size={18} className="text-green-500" />
-                            ) : (
-                              <Mail size={18} className="text-red-500" />
-                            )}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2">
-                              <p
-                                className={`text-sm truncate ${
-                                  msg.is_read
-                                    ? "font-medium text-gray-600"
-                                    : "font-bold text-gray-900"
-                                }`}
-                              >
-                                {msg.name}
-                              </p>
-                              {msg.is_starred && (
-                                <Star
-                                  size={14}
-                                  className="text-yellow-500 fill-yellow-500 flex-shrink-0"
-                                />
-                              )}
-                              {!msg.is_read && (
-                                <span className="px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded uppercase">
-                                  New
-                                </span>
+                            <div
+                              className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                msg.is_read ? "bg-gray-100" : "bg-red-100"
+                              }`}
+                            >
+                              {msg.is_read ? (
+                                <MailOpen size={16} className="text-gray-500" />
+                              ) : (
+                                <Mail size={16} className="text-red-500" />
                               )}
                             </div>
-                            <p className="text-xs text-gray-500 mt-0.5 truncate">
-                              {msg.message}
-                            </p>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p
+                                  className={`text-sm truncate ${
+                                    !msg.is_read ? "font-bold" : "font-medium"
+                                  }`}
+                                >
+                                  {msg.name}
+                                </p>
+                                {msg.is_starred && (
+                                  <Star
+                                    size={12}
+                                    className="text-yellow-500 fill-yellow-500"
+                                  />
+                                )}
+                                {!msg.is_read && (
+                                  <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-500 truncate">
+                                {msg.message}
+                              </p>
+                              <p className="text-xs text-gray-400 mt-1">
+                                {formatRelativeTime(msg.created_at) ||
+                                  formatFullDate(msg.created_at)}
+                              </p>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </motion.div>
+
+                  {/* Latest Subscribers */}
+                  {/* Latest Subscribers */}
+                  <motion.div
+                    variants={itemVariants}
+                    className="bg-white rounded-2xl border border-gray-300 overflow-hidden"
+                  >
+                    <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                      <div className="flex items-center gap-2">
+                        <Users size={18} className="text-gray-600" />
+                        <h3 className="font-bold text-gray-900">
+                          Latest Subscribers
+                        </h3>
+                        {subscriberUnreadCount > 0 && (
+                          <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">
+                            {subscriberUnreadCount} new
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => setActiveSection("subscribers")}
+                        className="text-sm text-gray-500 hover:text-black flex items-center gap-1 transition-colors"
+                      >
+                        View All <ChevronRight size={14} />
+                      </button>
+                    </div>
+                    <div className="divide-y divide-gray-100">
+                      {subscribers.length === 0 ? (
+                        <div className="p-8 text-center text-gray-400">
+                          <Users
+                            size={32}
+                            className="mx-auto mb-2 text-gray-300"
+                          />
+                          <p className="text-sm">No subscribers yet</p>
+                        </div>
+                      ) : (
+                        subscribers.slice(0, 5).map((sub) => (
+                          <div
+                            key={sub.id}
+                            className={`p-4 hover:bg-gray-50 transition-colors flex items-center gap-3 ${
+                              !sub.is_read ? "bg-red-50/50" : ""
+                            }`}
+                          >
+                            <div
+                              className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
+                                sub.is_read
+                                  ? "bg-green-100 border-green-400"
+                                  : "bg-red-100 border-red-400"
+                              }`}
+                            >
+                              {sub.is_read ? (
+                                <MailOpen
+                                  size={16}
+                                  className="text-green-500"
+                                />
+                              ) : (
+                                <Mail size={16} className="text-red-500" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p
+                                  className={`text-sm truncate ${
+                                    !sub.is_read ? "font-bold" : ""
+                                  }`}
+                                >
+                                  {sub.email}
+                                </p>
+                                {!sub.is_read && (
+                                  <span className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0"></span>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-400">
+                                {formatFullDate(sub.created_at)}
+                                {formatRelativeTime(sub.created_at) && (
+                                  <span className="ml-1">
+                                    ({formatRelativeTime(sub.created_at)})
+                                  </span>
+                                )}
+                              </p>
+                            </div>
+                            {!sub.is_read && (
+                              <span className="px-2 py-1 bg-red-100 text-red-600 text-xs font-bold rounded-full flex-shrink-0">
+                                New
+                              </span>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Upcoming Events */}
+                <motion.div
+                  variants={itemVariants}
+                  className="bg-white rounded-2xl border border-gray-300 overflow-hidden mb-6"
+                >
+                  <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                    <div className="flex items-center gap-2">
+                      <Calendar size={18} className="text-gray-600" />
+                      <h3 className="font-bold text-gray-900">
+                        Upcoming Events
+                      </h3>
+                      <span className="px-2 py-0.5 bg-black text-white text-xs font-bold rounded-full">
+                        {upcomingEvents.length}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => setActiveSection("upcoming")}
+                      className="text-sm text-gray-500 hover:text-black flex items-center gap-1 transition-colors"
+                    >
+                      Manage <ChevronRight size={14} />
+                    </button>
+                  </div>
+                  {upcomingEvents.length === 0 ? (
+                    <div className="p-8 text-center text-gray-400">
+                      <Calendar
+                        size={32}
+                        className="mx-auto mb-2 text-gray-300"
+                      />
+                      <p className="text-sm">No upcoming events</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+                      {upcomingEvents.slice(0, 3).map((event) => (
+                        <div
+                          key={event.id}
+                          className="group border border-gray-200 rounded-xl overflow-hidden hover:border-gray-400 hover:shadow-md transition-all cursor-pointer"
+                          onClick={() => {
+                            setPreviewEvent(event);
+
+                            toggleModal("preview", true);
+                          }}
+                        >
+                          <div className="relative h-32 bg-gray-100">
+                            {event.image_url ? (
+                              <Image
+                                src={event.image_url}
+                                alt=""
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform"
+                              />
+                            ) : (
+                              <div className="h-full flex items-center justify-center text-gray-300">
+                                <ImageIcon size={24} />
+                              </div>
+                            )}
+                            {event.is_featured && (
+                              <span className="absolute top-2 left-2 px-2 py-0.5 bg-black text-white text-[10px] uppercase font-bold rounded">
+                                Featured
+                              </span>
+                            )}
+                          </div>
+                          <div className="p-3">
+                            <h4 className="font-bold text-sm truncate">
+                              {event.title}
+                            </h4>
+                            <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                              <Calendar size={12} />
+                              <span>{event.date || "TBA"}</span>
+                            </div>
+                            <span className="text-xs text-gray-400">
+                              {event.category}
+                            </span>
                           </div>
                         </div>
                       ))}
-                      {contactMessages.length === 0 && (
-                        <p className="p-8 text-center text-sm text-gray-400">
-                          No messages
-                        </p>
-                      )}
                     </div>
+                  )}
+                </motion.div>
+
+                {/* Previous Events */}
+                <motion.div
+                  variants={itemVariants}
+                  className="bg-white rounded-2xl border border-gray-300 overflow-hidden mb-6"
+                >
+                  <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                    <div className="flex items-center gap-2">
+                      <Clock size={18} className="text-gray-600" />
+                      <h3 className="font-bold text-gray-900">
+                        Previous Events
+                      </h3>
+                      <span className="px-2 py-0.5 bg-gray-200 text-gray-700 text-xs font-bold rounded-full">
+                        {previousEvents.length}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => setActiveSection("previous")}
+                      className="text-sm text-gray-500 hover:text-black flex items-center gap-1 transition-colors"
+                    >
+                      Manage <ChevronRight size={14} />
+                    </button>
                   </div>
-                </div>
+                  {previousEvents.length === 0 ? (
+                    <div className="p-8 text-center text-gray-400">
+                      <Clock size={32} className="mx-auto mb-2 text-gray-300" />
+                      <p className="text-sm">No previous events</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4">
+                      {previousEvents.slice(0, 4).map((event) => (
+                        <div
+                          key={event.id}
+                          className="group border border-gray-200 rounded-xl overflow-hidden hover:border-gray-400 hover:shadow-md transition-all cursor-pointer"
+                          onClick={() => {
+                            setPreviewEvent(event);
+
+                            toggleModal("preview", true);
+                          }}
+                        >
+                          <div className="relative h-24 bg-gray-100">
+                            {event.image_url ? (
+                              <Image
+                                src={event.image_url}
+                                alt=""
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform"
+                              />
+                            ) : (
+                              <div className="h-full flex items-center justify-center text-gray-300">
+                                <ImageIcon size={20} />
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-3">
+                            <h4 className="font-bold text-sm truncate">
+                              {event.title}
+                            </h4>
+                            <span className="text-xs text-gray-400">
+                              {event.category}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+
+                {/* Gallery Preview */}
+                <motion.div
+                  variants={itemVariants}
+                  className="bg-white rounded-2xl border border-gray-300 overflow-hidden"
+                >
+                  <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                    <div className="flex items-center gap-2">
+                      <ImageIcon size={18} className="text-gray-600" />
+                      <h3 className="font-bold text-gray-900">Photo Gallery</h3>
+                      <span className="px-2 py-0.5 bg-gray-200 text-gray-700 text-xs font-bold rounded-full">
+                        {galleryImages.length}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => setActiveSection("gallery")}
+                      className="text-sm text-gray-500 hover:text-black flex items-center gap-1 transition-colors"
+                    >
+                      View All <ChevronRight size={14} />
+                    </button>
+                  </div>
+                  {galleryImages.length === 0 ? (
+                    <div className="p-8 text-center text-gray-400">
+                      <ImageIcon
+                        size={32}
+                        className="mx-auto mb-2 text-gray-300"
+                      />
+                      <p className="text-sm">No gallery images</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2 p-4">
+                      {galleryImages.slice(0, 6).map((img) => (
+                        <div
+                          key={img.id}
+                          className="group relative aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer"
+                          onClick={() => {
+                            setPreviewEvent(img);
+
+                            toggleModal("preview", true);
+                          }}
+                        >
+                          <Image
+                            src={img.image_url}
+                            alt={img.alt_text || ""}
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-300"
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                            <Eye
+                              size={20}
+                              className="text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                            />
+                          </div>
+                          <span className="absolute bottom-1 right-1 px-1.5 py-0.5 bg-black/70 text-white text-[10px] font-bold rounded">
+                            {img.year}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
               </motion.div>
             )}
 
@@ -1726,7 +1730,6 @@ const deleteAllMessages = async () => {
                     )
                   }
                 />
-
                 <div className="relative mb-6">
                   <Search
                     className="absolute left-3 top-3 text-gray-400"
@@ -1748,7 +1751,6 @@ const deleteAllMessages = async () => {
                     className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-1 focus:ring-black focus:border-black outline-none transition-all shadow-sm"
                   />
                 </div>
-
                 {isDataLoading ? (
                   <div className="grid gap-3">
                     {[1, 2, 3].map((i) => (
@@ -1773,7 +1775,7 @@ const deleteAllMessages = async () => {
                         <div
                           onClick={() => {
                             setPreviewEvent(event);
-                            setPreviewType(activeSection);
+
                             toggleModal("preview", true);
                           }}
                           className="w-full sm:w-24 h-40 sm:h-24 sm:min-w-[96px] sm:max-w-[96px] bg-gray-100 rounded-xl relative overflow-hidden cursor-pointer flex-shrink-0 border border-gray-300"
@@ -1791,7 +1793,6 @@ const deleteAllMessages = async () => {
                             </div>
                           )}
                         </div>
-
                         <div className="flex-1 min-w-0 w-full overflow-hidden">
                           <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate">
@@ -1803,7 +1804,6 @@ const deleteAllMessages = async () => {
                               </span>
                             )}
                           </div>
-
                           {activeSection === "upcoming" && "date" in event ? (
                             <div className="flex flex-col gap-1.5 text-sm">
                               <div className="flex items-center gap-2 text-gray-600">
@@ -1818,50 +1818,21 @@ const deleteAllMessages = async () => {
                                     ` • ${event.time}`}
                                 </span>
                               </div>
-
-                              {"fee" in event &&
-                                (event.fee || event.guests) && (
-                                  <div className="flex items-center gap-2 flex-wrap">
-                                    {event.fee && (
-                                      <span className="px-2 py-1 bg-green-50 text-green-700 rounded-md text-xs font-bold border border-green-200 whitespace-nowrap">
-                                        💰 {event.fee}
-                                      </span>
-                                    )}
-                                    {event.guests && (
-                                      <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-bold border border-blue-200 whitespace-nowrap">
-                                        👥 {event.guests}
-                                      </span>
-                                    )}
-                                  </div>
-                                )}
-
                               <span className="text-gray-500 text-xs truncate">
                                 {event.category}
                               </span>
-
-                              {event.description && (
-                                <p className="text-gray-400 line-clamp-2 text-xs mt-1">
-                                  {event.description}
-                                </p>
-                              )}
                             </div>
                           ) : (
                             <div className="flex flex-col gap-1 text-sm text-gray-500">
                               <span className="truncate">{event.category}</span>
-                              {event.description && (
-                                <span className="text-gray-400 line-clamp-1 text-xs">
-                                  {event.description}
-                                </span>
-                              )}
                             </div>
                           )}
                         </div>
-
                         <div className="flex gap-2 w-full sm:w-auto justify-end flex-shrink-0">
                           <button
                             onClick={() => {
                               setPreviewEvent(event);
-                              setPreviewType(activeSection);
+
                               toggleModal("preview", true);
                             }}
                             className="p-2.5 text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors border border-gray-300"
@@ -1921,7 +1892,6 @@ const deleteAllMessages = async () => {
                   title="Gallery"
                   onAdd={() => toggleModal("createGallery", true)}
                 />
-
                 <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
                   <button
                     onClick={() => setGalleryFilter("all")}
@@ -1947,7 +1917,6 @@ const deleteAllMessages = async () => {
                     </button>
                   ))}
                 </div>
-
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5">
                   {filteredGallery.map((img) => (
                     <motion.div
@@ -2001,7 +1970,7 @@ const deleteAllMessages = async () => {
               </motion.div>
             )}
 
-            {/* 🔧 FIXED INBOX SECTION */}
+            {/* INBOX SECTION */}
             {activeSection === "inbox" && (
               <motion.div
                 key="inbox"
@@ -2010,8 +1979,6 @@ const deleteAllMessages = async () => {
                 animate="visible"
               >
                 <SectionHeader title="Message Inbox" showAddButton={false} />
-
-                {/* Filter Tabs */}
                 <div className="flex flex-wrap gap-2 mb-4">
                   {[
                     { id: "all", label: "All", count: contactMessages.length },
@@ -2055,8 +2022,6 @@ const deleteAllMessages = async () => {
                     </button>
                   ))}
                 </div>
-
-                {/* Search */}
                 <div className="relative mb-4">
                   <Search
                     className="absolute left-3 top-3 text-gray-400"
@@ -2070,64 +2035,6 @@ const deleteAllMessages = async () => {
                     className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-1 focus:ring-black focus:border-black outline-none transition-all shadow-sm"
                   />
                 </div>
-
-                {/* Toolbar */}
-                <div className="flex flex-wrap items-center gap-3 mb-4 p-3 bg-white rounded-xl border border-gray-300">
-                  <button
-                    onClick={() => {
-                      setIsSelectMode(!isSelectMode);
-                      if (isSelectMode) {
-                        setSelectedMessageIds([]);
-                      }
-                    }}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all border flex items-center gap-2 ${
-                      isSelectMode
-                        ? "bg-black text-white border-black"
-                        : "bg-gray-50 border-gray-300 text-gray-600 hover:border-gray-400"
-                    }`}
-                  >
-                    <Check size={16} />
-                    {isSelectMode ? "Cancel" : "Select"}
-                  </button>
-
-                  {isSelectMode && (
-                    <>
-                      <button
-                        onClick={selectAllMessages}
-                        className="px-3 py-2 rounded-lg text-sm font-medium bg-gray-50 border border-gray-300 text-gray-600 hover:border-gray-400 transition-all flex items-center gap-2"
-                      >
-                        {selectedMessageIds.length === filteredMessages.length
-                          ? "Deselect All"
-                          : "Select All"}
-                      </button>
-
-                      {selectedMessageIds.length > 0 && (
-                        <button
-                          onClick={deleteSelectedMessages}
-                          disabled={isLoading}
-                          className="px-3 py-2 rounded-lg text-sm font-medium bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 transition-all flex items-center gap-2"
-                        >
-                          <Trash2 size={16} />
-                          Delete ({selectedMessageIds.length})
-                        </button>
-                      )}
-                    </>
-                  )}
-
-                  <div className="flex-1" />
-
-                  {contactMessages.length > 0 && (
-                    <button
-                      onClick={() => setShowDeleteAllModal(true)}
-                      className="px-3 py-2 rounded-lg text-sm font-medium bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 transition-all flex items-center gap-2"
-                    >
-                      <AlertTriangle size={16} />
-                      Delete All
-                    </button>
-                  )}
-                </div>
-
-                {/* 🔧 FIXED Messages List */}
                 {isDataLoading ? (
                   <div className="grid gap-3">
                     {[1, 2, 3].map((i) => (
@@ -2159,31 +2066,7 @@ const deleteAllMessages = async () => {
                           className="p-4 cursor-pointer active:bg-gray-50 transition-colors flex flex-col sm:flex-row gap-4"
                           onClick={() => openMessageDetail(message)}
                         >
-                          {/* 1. LEFT SIDE: Checkbox, Star, Avatar */}
                           <div className="flex items-start gap-3 pt-1 flex-shrink-0">
-                            {/* Checkbox (Select Mode) */}
-                            {isSelectMode && (
-                              <div
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleMessageSelection(message.id);
-                                }}
-                              >
-                                <button
-                                  className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all ${
-                                    selectedMessageIds.includes(message.id)
-                                      ? "bg-black border-black text-white"
-                                      : "bg-white border-gray-300 hover:border-gray-400"
-                                  }`}
-                                >
-                                  {selectedMessageIds.includes(message.id) && (
-                                    <Check size={14} />
-                                  )}
-                                </button>
-                              </div>
-                            )}
-
-                            {/* Star Button */}
                             <div
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -2201,8 +2084,6 @@ const deleteAllMessages = async () => {
                                 />
                               </button>
                             </div>
-
-                            {/* Avatar */}
                             <div
                               className={`w-12 h-12 rounded-full flex items-center justify-center border-2 ${
                                 message.is_read
@@ -2220,8 +2101,6 @@ const deleteAllMessages = async () => {
                               )}
                             </div>
                           </div>
-
-                          {/* 2. MIDDLE: Content Info */}
                           <div className="flex-1 min-w-0 pr-0 sm:pr-4">
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
                               <h3
@@ -2244,36 +2123,17 @@ const deleteAllMessages = async () => {
                                   formatFullDate(message.created_at)}
                               </span>
                             </div>
-
                             <p className="text-sm text-gray-500 truncate mb-1">
                               {message.email}
                             </p>
                             <p className="text-sm text-gray-600 line-clamp-2 mb-2">
                               {message.message}
                             </p>
-
-                            {/* Tags */}
-                            <div className="flex items-center gap-2 flex-wrap">
-                              {message.space_type && (
-                                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-xs font-medium border border-gray-200">
-                                  {formatSpaceType(message.space_type)}
-                                </span>
-                              )}
-                              {message.phone && (
-                                <span className="px-2 py-1 bg-green-50 text-green-700 rounded-md text-xs font-medium border border-green-100 flex items-center gap-1">
-                                  <Phone size={10} /> WhatsApp Available
-                                </span>
-                              )}
-                            </div>
                           </div>
-
-                          {/* 3. RIGHT SIDE (Desktop) / BOTTOM (Mobile): Actions */}
-                          {/* "Hujung Kanan" implementation */}
                           <div
                             className="flex flex-row sm:flex-col gap-2 items-center sm:justify-center border-t sm:border-t-0 sm:border-l border-gray-200 pt-3 sm:pt-0 sm:pl-4 mt-2 sm:mt-0"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            {/* Mark Read/Unread Toggle */}
                             <button
                               onClick={() =>
                                 message.is_read
@@ -2297,31 +2157,25 @@ const deleteAllMessages = async () => {
                                 <MailOpen size={18} />
                               )}
                             </button>
-
-                            {/* Reply Button (Simple Chat Icon) */}
                             <button
                               onClick={() => {
-                                if (message.phone) {
+                                if (message.phone)
                                   openWhatsAppReply(
                                     message.phone,
                                     message.name
                                   );
-                                } else {
-                                  toast.error("No phone number");
-                                }
+                                else toast.error("No phone number");
                               }}
                               disabled={!message.phone}
                               className={`p-2.5 rounded-xl transition-colors border flex-1 sm:flex-none w-full sm:w-auto flex justify-center ${
                                 message.phone
-                                  ? "text-green-700 bg-green-50 hover:bg-green-100 border-green-200" // Hijau lembut & simple
+                                  ? "text-green-700 bg-green-50 hover:bg-green-100 border-green-200"
                                   : "text-gray-300 bg-gray-50 border-gray-200 cursor-not-allowed"
                               }`}
                               title="Reply Message"
                             >
                               <MessageCircle size={18} />
                             </button>
-
-                            {/* Delete Button (Added back per request) */}
                             <button
                               onClick={() => {
                                 setDeleteTarget({
@@ -2344,6 +2198,303 @@ const deleteAllMessages = async () => {
                 )}
               </motion.div>
             )}
+
+                      {/* SUBSCRIBERS SECTION */}
+            {activeSection === "subscribers" && (
+              <motion.div
+                key="subscribers"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                <SectionHeader title="Subscribers" showAddButton={false} />
+                
+                {/* Filter Tabs - Now Working! */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {[
+                    { id: "all", label: "All", count: subscribers.length },
+                    { 
+                      id: "new", 
+                      label: "New", 
+                      count: subscribers.filter(s => !s.is_read).length 
+                    },
+                    { 
+                      id: "read", 
+                      label: "Read", 
+                      count: subscribers.filter(s => s.is_read).length 
+                    },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setSubscriberFilter(tab.id as "all" | "new" | "read")}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all border flex items-center gap-2 ${
+                        subscriberFilter === tab.id
+                          ? "bg-black text-white border-black"
+                          : "bg-white border-gray-300 text-gray-600 hover:border-gray-400"
+                      }`}
+                    >
+                      {tab.label}
+                      <span
+                        className={`px-1.5 py-0.5 text-xs rounded-full ${
+                          subscriberFilter === tab.id
+                            ? "bg-white/20 text-white"
+                            : tab.id === "new"
+                            ? "bg-red-100 text-red-600"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        {tab.count}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Search & Actions Bar */}
+                <div className="flex flex-wrap gap-3 mb-4">
+                  <div className="relative flex-1 min-w-[200px]">
+                    <Search
+                      className="absolute left-3 top-3 text-gray-400"
+                      size={18}
+                    />
+                    <input
+                      value={subscriberSearch}
+                      onChange={(e) => setSubscriberSearch(e.target.value)}
+                      placeholder="Search email..."
+                      className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-1 focus:ring-black focus:border-black outline-none transition-all shadow-sm"
+                    />
+                  </div>
+                  <button
+                    onClick={refreshSubscribers}
+                    disabled={isSubscribersLoading}
+                    className="px-4 py-2.5 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors"
+                  >
+                    <RefreshCw
+                      size={16}
+                      className={isSubscribersLoading ? "animate-spin" : ""}
+                    />
+                    Refresh
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsSubscriberSelectMode(!isSubscriberSelectMode);
+                      if (isSubscriberSelectMode) setSelectedSubscriberIds([]);
+                    }}
+                    className={`px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors flex items-center gap-2 ${
+                      isSubscriberSelectMode
+                        ? "bg-black text-white border-black"
+                        : "bg-white border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    <Check size={16} />
+                    {isSubscriberSelectMode ? "Cancel" : "Select"}
+                  </button>
+                </div>
+
+                {/* Action Buttons Row */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {isSubscriberSelectMode && selectedSubscriberIds.length > 0 && (
+                    <button
+                      onClick={() => handleSubscriberAction("deleteSelected")}
+                      className="px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium flex gap-2 items-center hover:bg-red-100 transition-colors"
+                    >
+                      <Trash2 size={16} /> Delete ({selectedSubscriberIds.length})
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleSubscriberAction("markRead")}
+                    className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-xl text-sm font-medium flex items-center gap-2 hover:bg-green-100 transition-colors"
+                  >
+                    <CheckCircle2 size={16} /> Mark All Read
+                  </button>
+                  <button
+                    onClick={() => handleSubscriberAction("export")}
+                    className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-xl text-sm font-medium flex gap-2 items-center hover:bg-gray-50 transition-colors"
+                  >
+                    <Download size={16} /> Export CSV
+                  </button>
+                  {subscribers.length > 0 && (
+                    <button
+                      onClick={() => handleSubscriberAction("deleteAll")}
+                      className="px-4 py-2 bg-white text-red-600 border border-red-200 rounded-xl text-sm font-medium flex items-center gap-2 hover:bg-red-50 transition-colors"
+                    >
+                      <AlertTriangle size={16} /> Delete All
+                    </button>
+                  )}
+                </div>
+
+                {/* Stats Bar */}
+                <div className="flex gap-4 mb-6 flex-wrap">
+                  <div className="px-4 py-2 bg-white rounded-xl border border-gray-300 text-sm flex items-center gap-2">
+                    <Users size={16} className="text-gray-400" />
+                    Total: <span className="font-bold">{subscribers.length}</span>
+                  </div>
+                  <div className="px-4 py-2 bg-red-50 rounded-xl border border-red-200 text-sm text-red-700 flex items-center gap-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                    New: <span className="font-bold">{subscribers.filter(s => !s.is_read).length}</span>
+                  </div>
+                  <div className="px-4 py-2 bg-green-50 rounded-xl border border-green-200 text-sm text-green-700 flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    Read: <span className="font-bold">{subscribers.filter(s => s.is_read).length}</span>
+                  </div>
+                </div>
+
+                {/* Subscriber Cards - Same style as Inbox */}
+                {isSubscribersLoading && subscribers.length === 0 ? (
+                  <div className="grid gap-3">
+                    {[1, 2, 3].map((i) => (
+                      <SkeletonCard key={i} />
+                    ))}
+                  </div>
+                ) : filteredSubscribers.length === 0 ? (
+                  <div className="text-center py-16 text-gray-400 text-sm bg-white rounded-2xl border border-gray-300 border-dashed">
+                    <Users size={48} className="mx-auto mb-4 text-gray-300" />
+                    <p>No subscribers found</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {filteredSubscribers.map((sub) => (
+                      <motion.div
+                        key={sub.id}
+                        variants={itemVariants}
+                        layout
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className={`bg-white rounded-2xl border-2 hover:shadow-md transition-all overflow-hidden ${
+                          sub.is_read
+                            ? "border-green-300 bg-green-50/30"
+                            : "border-red-300 bg-red-50/50"
+                        }`}
+                      >
+                        <div className="p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                          {/* Checkbox + Avatar */}
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            {isSubscriberSelectMode && (
+                              <input
+                                type="checkbox"
+                                checked={selectedSubscriberIds.includes(sub.id)}
+                                onChange={() => {
+                                  setSelectedSubscriberIds((prev) =>
+                                    prev.includes(sub.id)
+                                      ? prev.filter((id) => id !== sub.id)
+                                      : [...prev, sub.id]
+                                  );
+                                }}
+                                className="w-5 h-5 rounded border-gray-300"
+                              />
+                            )}
+                            <div
+                              className={`w-12 h-12 rounded-full flex items-center justify-center border-2 ${
+                                sub.is_read
+                                  ? "bg-green-100 border-green-400"
+                                  : "bg-red-100 border-red-400"
+                              }`}
+                            >
+                              {sub.is_read ? (
+                                <MailOpen size={20} className="text-green-600" />
+                              ) : (
+                                <Mail size={20} className="text-red-600" />
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Email & Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <h3
+                                className={`text-base truncate ${
+                                  sub.is_read
+                                    ? "font-medium text-gray-700"
+                                    : "font-bold text-gray-900"
+                                }`}
+                              >
+                                {sub.email}
+                              </h3>
+                              {!sub.is_read && (
+                                <span className="px-2 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded uppercase animate-pulse">
+                                  NEW
+                                </span>
+                              )}
+                            </div>
+                            {/* ✅ FIXED: Show full date + relative time */}
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                              <Clock3 size={14} className="text-gray-400" />
+                              <span>
+                                {formatFullDate(sub.created_at)}
+                                {formatRelativeTime(sub.created_at) && (
+                                  <span className="text-gray-400 ml-1">
+                                    ({formatRelativeTime(sub.created_at)})
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex gap-2 w-full sm:w-auto justify-end flex-shrink-0">
+                            <button
+                              onClick={() => copyToClipboard(sub.email, "Email")}
+                              className="p-2.5 text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors border border-gray-300"
+                              title="Copy Email"
+                            >
+                              <Copy size={18} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                window.location.href = `mailto:${sub.email}`;
+                              }}
+                              className={`p-2.5 rounded-xl transition-colors border ${
+                                sub.is_read
+                                  ? "text-gray-500 bg-gray-50 hover:bg-gray-100 border-gray-300"
+                                  : "text-green-600 bg-green-50 hover:bg-green-100 border-green-200"
+                              }`}
+                              title="Send Email"
+                            >
+                              <Mail size={18} />
+                            </button>
+                            <button
+                              onClick={() => handleSubscriberAction("delete", sub.id)}
+                              className="p-2.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors border border-red-200"
+                              title="Delete"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Select All Bar (when in select mode) */}
+                {isSubscriberSelectMode && filteredSubscribers.length > 0 && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded-xl border border-gray-300 flex items-center justify-between">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={
+                          selectedSubscriberIds.length === filteredSubscribers.length &&
+                          filteredSubscribers.length > 0
+                        }
+                        onChange={() => {
+                          if (selectedSubscriberIds.length === filteredSubscribers.length)
+                            setSelectedSubscriberIds([]);
+                          else
+                            setSelectedSubscriberIds(filteredSubscribers.map((s) => s.id));
+                        }}
+                        className="w-5 h-5 rounded border-gray-300"
+                      />
+                      <span className="text-sm font-medium text-gray-700">
+                        Select All ({filteredSubscribers.length})
+                      </span>
+                    </label>
+                    <span className="text-sm text-gray-500">
+                      {selectedSubscriberIds.length} selected
+                    </span>
+                  </div>
+                )}
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
       </main>
@@ -2355,9 +2506,10 @@ const deleteAllMessages = async () => {
           showDeleteAllModal ||
           showLogoutModal) && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            variants={modalVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             onClick={() => {
               setModals({
@@ -2374,24 +2526,16 @@ const deleteAllMessages = async () => {
               setShowDeleteAllModal(false);
               setShowLogoutModal(false);
             }}
-            style={{
-              touchAction: "none",
-              overscrollBehavior: "none",
-            }}
           >
-            {/* 🔧 FIXED MESSAGE DETAIL MODAL */}
+            {/* MESSAGE DETAIL MODAL */}
             {modals.messageDetail && selectedMessage && (
               <motion.div
                 variants={modalVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
                 className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-gray-200"
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* Header */}
                 <div
-                  className={`p-6 border-b-2 flex justify-between items-start flex-shrink-0 ${
+                  className={`p-6 border-b-2 flex justify-between items-start ${
                     selectedMessage.is_read
                       ? "bg-green-50 border-green-200"
                       : "bg-red-50 border-red-200"
@@ -2454,9 +2598,7 @@ const deleteAllMessages = async () => {
                   </button>
                 </div>
 
-                {/* Content */}
                 <div className="p-6 overflow-y-auto modal-scrollable flex-1 space-y-4">
-                  {/* Contact Info */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                       <Mail size={18} className="text-gray-400" />
@@ -2523,7 +2665,6 @@ const deleteAllMessages = async () => {
                     )}
                   </div>
 
-                  {/* Message */}
                   <div className="mt-4">
                     <p className="text-xs text-gray-500 uppercase font-bold mb-2">
                       Message
@@ -2536,7 +2677,6 @@ const deleteAllMessages = async () => {
                   </div>
                 </div>
 
-                {/* 🔧 FIXED Footer Actions - REPLACE DELETE WITH WHATSAPP */}
                 <div className="p-4 border-t border-gray-300 bg-gray-50/50 flex-shrink-0">
                   <div className="flex gap-3">
                     <button
@@ -2572,7 +2712,6 @@ const deleteAllMessages = async () => {
                       )}
                     </button>
 
-                    {/* 🆕 REPLY BUTTON - REPLACE DELETE BUTTON */}
                     <button
                       onClick={() => {
                         if (selectedMessage.phone) {
@@ -2599,7 +2738,7 @@ const deleteAllMessages = async () => {
               </motion.div>
             )}
 
-            {/* CREATE/EDIT MODALS */}
+            {/* CREATE/EDIT MODAL (Events & Gallery) */}
             {(modals.createUpcoming ||
               modals.createPrevious ||
               modals.createGallery ||
@@ -2608,21 +2747,10 @@ const deleteAllMessages = async () => {
               modals.editGallery) && (
               <motion.div
                 variants={modalVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
                 className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-gray-200"
                 onClick={(e) => e.stopPropagation()}
-                style={{
-                  touchAction: "pan-y",
-                  overscrollBehavior: "contain",
-                }}
               >
-                {/* Modal Header */}
-                <div
-                  className="p-6 border-b border-gray-300 flex justify-between items-center bg-gray-50/50 flex-shrink-0"
-                  style={{ touchAction: "none" }}
-                >
+                <div className="p-6 border-b border-gray-300 flex justify-between items-center bg-gray-50/50">
                   <h3 className="font-bold text-xl">
                     {modals.createUpcoming ||
                     modals.createPrevious ||
@@ -2648,14 +2776,7 @@ const deleteAllMessages = async () => {
                   </button>
                 </div>
 
-                {/* Modal Content */}
-                <div
-                  className="p-6 overflow-y-auto modal-scrollable flex-1"
-                  style={{
-                    overscrollBehavior: "contain",
-                    WebkitOverflowScrolling: "touch",
-                  }}
-                >
+                <div className="p-6 overflow-y-auto modal-scrollable flex-1">
                   <form
                     onSubmit={(e) => {
                       if (modals.createUpcoming) createUpcoming(e);
@@ -2669,12 +2790,13 @@ const deleteAllMessages = async () => {
                   >
                     <ImageUploadArea />
 
+                    {/* Upcoming Form */}
                     {(modals.createUpcoming || modals.editUpcoming) && (
                       <>
                         <input
                           required
                           placeholder="Title"
-                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 focus:border-black outline-none text-sm font-medium"
+                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 outline-none text-sm"
                           value={forms.upcoming.title}
                           onChange={(e) =>
                             setForms((prev) => ({
@@ -2689,7 +2811,7 @@ const deleteAllMessages = async () => {
                         <input
                           required
                           placeholder="Category"
-                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 focus:border-black outline-none text-sm font-medium"
+                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 outline-none text-sm"
                           value={forms.upcoming.category}
                           onChange={(e) =>
                             setForms((prev) => ({
@@ -2701,12 +2823,26 @@ const deleteAllMessages = async () => {
                             }))
                           }
                         />
-
+                        <textarea
+                          placeholder="Description"
+                          rows={4}
+                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 outline-none text-sm resize-none"
+                          value={forms.upcoming.description}
+                          onChange={(e) =>
+                            setForms((prev) => ({
+                              ...prev,
+                              upcoming: {
+                                ...prev.upcoming,
+                                description: e.target.value,
+                              },
+                            }))
+                          }
+                        />
                         <div className="grid grid-cols-2 gap-4">
                           <input
                             type="date"
-                            min={new Date().toISOString().split("T")[0]}
-                            className="w-full px-4 py-3.5 rounded-xl border border-gray-300 focus:border-black outline-none text-sm font-medium"
+                            placeholder="Date"
+                            className="w-full px-4 py-3.5 rounded-xl border border-gray-300 outline-none text-sm"
                             value={forms.upcoming.date}
                             onChange={(e) =>
                               setForms((prev) => ({
@@ -2720,7 +2856,8 @@ const deleteAllMessages = async () => {
                           />
                           <input
                             type="time"
-                            className="w-full px-4 py-3.5 rounded-xl border border-gray-300 focus:border-black outline-none text-sm font-medium"
+                            placeholder="Time"
+                            className="w-full px-4 py-3.5 rounded-xl border border-gray-300 outline-none text-sm"
                             value={forms.upcoming.time}
                             onChange={(e) =>
                               setForms((prev) => ({
@@ -2733,90 +2870,63 @@ const deleteAllMessages = async () => {
                             }
                           />
                         </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <input
-                            placeholder="Fee (e.g., Free, RM 50)"
-                            className="w-full px-4 py-3.5 rounded-xl border border-gray-300 focus:border-black outline-none text-sm font-medium"
-                            value={forms.upcoming.fee}
-                            onChange={(e) =>
-                              setForms((prev) => ({
-                                ...prev,
-                                upcoming: {
-                                  ...prev.upcoming,
-                                  fee: e.target.value,
-                                },
-                              }))
-                            }
-                          />
-                          <input
-                            placeholder="Guests (e.g., Open to All)"
-                            className="w-full px-4 py-3.5 rounded-xl border border-gray-300 focus:border-black outline-none text-sm font-medium"
-                            value={forms.upcoming.guests}
-                            onChange={(e) =>
-                              setForms((prev) => ({
-                                ...prev,
-                                upcoming: {
-                                  ...prev.upcoming,
-                                  guests: e.target.value,
-                                },
-                              }))
-                            }
-                          />
-                        </div>
-
-                        <textarea
-                          placeholder="Description"
-                          rows={3}
-                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 focus:border-black outline-none text-sm font-medium"
-                          value={forms.upcoming.description}
+                        <input
+                          placeholder="Fee (e.g. RM50 or Free)"
+                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 outline-none text-sm"
+                          value={forms.upcoming.fee}
                           onChange={(e) =>
                             setForms((prev) => ({
                               ...prev,
                               upcoming: {
                                 ...prev.upcoming,
-                                description: e.target.value,
+                                fee: e.target.value,
                               },
                             }))
                           }
                         />
-
-                        <div
-                          className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-300 cursor-pointer hover:bg-gray-100 transition-colors"
-                          onClick={() =>
+                        <input
+                          placeholder="Guests (optional)"
+                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 outline-none text-sm"
+                          value={forms.upcoming.guests}
+                          onChange={(e) =>
                             setForms((prev) => ({
                               ...prev,
                               upcoming: {
                                 ...prev.upcoming,
-                                is_featured: !prev.upcoming.is_featured,
+                                guests: e.target.value,
                               },
                             }))
                           }
-                        >
-                          <div
-                            className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
-                              forms.upcoming.is_featured
-                                ? "bg-black border-black"
-                                : "bg-white border-gray-400"
-                            }`}
-                          >
-                            {forms.upcoming.is_featured && (
-                              <CheckCircle2 size={14} className="text-white" />
-                            )}
-                          </div>
-                          <span className="text-sm font-bold text-gray-700">
-                            Highlight as Featured
+                        />
+                        <label className="flex items-center gap-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="w-5 h-5 rounded border-gray-300"
+                            checked={forms.upcoming.is_featured}
+                            onChange={(e) =>
+                              setForms((prev) => ({
+                                ...prev,
+                                upcoming: {
+                                  ...prev.upcoming,
+                                  is_featured: e.target.checked,
+                                },
+                              }))
+                            }
+                          />
+                          <span className="text-sm font-medium">
+                            Featured Event
                           </span>
-                        </div>
+                        </label>
                       </>
                     )}
 
+                    {/* Previous Form */}
                     {(modals.createPrevious || modals.editPrevious) && (
                       <>
                         <input
                           required
                           placeholder="Title"
-                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 focus:border-black outline-none text-sm font-medium"
+                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 outline-none text-sm"
                           value={forms.previous.title}
                           onChange={(e) =>
                             setForms((prev) => ({
@@ -2831,7 +2941,7 @@ const deleteAllMessages = async () => {
                         <input
                           required
                           placeholder="Category"
-                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 focus:border-black outline-none text-sm font-medium"
+                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 outline-none text-sm"
                           value={forms.previous.category}
                           onChange={(e) =>
                             setForms((prev) => ({
@@ -2845,8 +2955,8 @@ const deleteAllMessages = async () => {
                         />
                         <textarea
                           placeholder="Description"
-                          rows={3}
-                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 focus:border-black outline-none text-sm font-medium"
+                          rows={4}
+                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 outline-none text-sm resize-none"
                           value={forms.previous.description}
                           onChange={(e) =>
                             setForms((prev) => ({
@@ -2858,15 +2968,30 @@ const deleteAllMessages = async () => {
                             }))
                           }
                         />
+                        <input
+                          placeholder="Icon Name (optional)"
+                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 outline-none text-sm"
+                          value={forms.previous.icon_name}
+                          onChange={(e) =>
+                            setForms((prev) => ({
+                              ...prev,
+                              previous: {
+                                ...prev.previous,
+                                icon_name: e.target.value,
+                              },
+                            }))
+                          }
+                        />
                       </>
                     )}
 
+                    {/* Gallery Form */}
                     {(modals.createGallery || modals.editGallery) && (
                       <>
                         <input
                           required
-                          placeholder="Year"
-                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 focus:border-black outline-none text-sm font-medium"
+                          placeholder="Year (e.g. 2024)"
+                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 outline-none text-sm"
                           value={forms.gallery.year}
                           onChange={(e) =>
                             setForms((prev) => ({
@@ -2879,8 +3004,8 @@ const deleteAllMessages = async () => {
                           }
                         />
                         <input
-                          placeholder="Alt Text"
-                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 focus:border-black outline-none text-sm font-medium"
+                          placeholder="Alt Text / Description"
+                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 outline-none text-sm"
                           value={forms.gallery.alt_text}
                           onChange={(e) =>
                             setForms((prev) => ({
@@ -2898,7 +3023,7 @@ const deleteAllMessages = async () => {
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full bg-black text-white py-3.5 rounded-xl font-bold hover:bg-gray-800 transition-colors flex justify-center items-center gap-2 shadow-lg shadow-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full bg-black text-white py-3.5 rounded-xl font-bold hover:bg-gray-800 transition-colors flex justify-center items-center gap-2 disabled:opacity-50"
                     >
                       {isLoading ? (
                         <>
@@ -2918,20 +3043,10 @@ const deleteAllMessages = async () => {
             {modals.preview && previewEvent && (
               <motion.div
                 variants={modalVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
                 className="bg-white w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-gray-200"
                 onClick={(e) => e.stopPropagation()}
-                style={{
-                  touchAction: "pan-y",
-                  overscrollBehavior: "contain",
-                }}
               >
-                <div
-                  className="relative h-64 w-full bg-gray-100 border-b border-gray-200 flex-shrink-0"
-                  style={{ touchAction: "none" }}
-                >
+                <div className="relative h-64 w-full bg-gray-100 border-b border-gray-200">
                   {previewEvent.image_url ? (
                     <Image
                       src={previewEvent.image_url}
@@ -2951,67 +3066,12 @@ const deleteAllMessages = async () => {
                     <X size={20} />
                   </button>
                 </div>
-                <div
-                  className="p-8 overflow-y-auto modal-scrollable flex-1"
-                  style={{
-                    overscrollBehavior: "contain",
-                    WebkitOverflowScrolling: "touch",
-                  }}
-                >
+                <div className="p-8 overflow-y-auto modal-scrollable flex-1">
                   <h2 className="text-3xl font-bold text-gray-900 mb-2">
                     {"title" in previewEvent
                       ? previewEvent.title
                       : `Image ${previewEvent.year}`}
                   </h2>
-
-                  {"category" in previewEvent && (
-                    <span className="inline-block px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs uppercase font-bold tracking-wide mb-6 border border-gray-200">
-                      {previewEvent.category}
-                    </span>
-                  )}
-
-                  {previewType === "upcoming" &&
-                    "date" in previewEvent &&
-                    "time" in previewEvent && (
-                      <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                        <div>
-                          <p className="text-xs text-gray-500 uppercase font-bold">
-                            Date
-                          </p>
-                          <p className="font-semibold">
-                            {previewEvent.date || "TBA"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 uppercase font-bold">
-                            Time
-                          </p>
-                          <p className="font-semibold">
-                            {previewEvent.time || "TBA"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 uppercase font-bold">
-                            Fee
-                          </p>
-                          <p className="font-semibold">
-                            {"fee" in previewEvent && previewEvent.fee
-                              ? previewEvent.fee
-                              : "Free"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 uppercase font-bold">
-                            Guests
-                          </p>
-                          <p className="font-semibold">
-                            {"guests" in previewEvent && previewEvent.guests
-                              ? previewEvent.guests
-                              : "Open"}
-                          </p>
-                        </div>
-                      </div>
-                    )}
                   {"description" in previewEvent && (
                     <p className="text-gray-600 text-base leading-relaxed whitespace-pre-wrap">
                       {previewEvent.description || "No description provided."}
@@ -3025,15 +3085,8 @@ const deleteAllMessages = async () => {
             {showDeleteModal && deleteTarget && (
               <motion.div
                 variants={modalVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
                 className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 border border-gray-200"
                 onClick={(e) => e.stopPropagation()}
-                style={{
-                  touchAction: "none",
-                  overscrollBehavior: "none",
-                }}
               >
                 <div className="text-center">
                   <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center text-red-500 mx-auto mb-4 border border-red-100">
@@ -3043,7 +3096,7 @@ const deleteAllMessages = async () => {
                     Delete {deleteTarget.title}?
                   </h3>
                   <p className="text-gray-500 text-sm mb-8 leading-relaxed">
-                    This will permanently delete this item and cannot be undone.
+                    This action cannot be undone.
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -3052,14 +3105,14 @@ const deleteAllMessages = async () => {
                       setShowDeleteModal(false);
                       setDeleteTarget(null);
                     }}
-                    className="py-3 rounded-xl font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors border border-gray-200"
+                    className="py-3 rounded-xl font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={confirmDelete}
                     disabled={isLoading}
-                    className="py-3 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 transition-colors shadow-lg shadow-red-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="py-3 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {isLoading ? (
                       <Loader2 size={18} className="animate-spin" />
@@ -3071,19 +3124,12 @@ const deleteAllMessages = async () => {
               </motion.div>
             )}
 
-            {/* DELETE ALL MODAL */}
+            {/* DELETE ALL MESSAGES MODAL */}
             {showDeleteAllModal && (
               <motion.div
                 variants={modalVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
                 className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 border border-gray-200"
                 onClick={(e) => e.stopPropagation()}
-                style={{
-                  touchAction: "none",
-                  overscrollBehavior: "none",
-                }}
               >
                 <div className="text-center">
                   <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center text-red-500 mx-auto mb-4 border border-red-100">
@@ -3093,18 +3139,10 @@ const deleteAllMessages = async () => {
                     Delete ALL Messages?
                   </h3>
                   <p className="text-gray-500 text-sm mb-4 leading-relaxed">
-                    This will permanently delete{" "}
-                    <span className="font-bold text-red-600">
-                      ALL {contactMessages.length} messages
-                    </span>
-                    . This action cannot be undone.
-                  </p>
-                  <p className="text-gray-600 text-sm mb-4 font-medium">
                     Type{" "}
                     <span className="font-bold text-red-600">DELETE ALL</span>{" "}
-                    to confirm:
+                    to confirm.
                   </p>
-
                   <input
                     type="text"
                     value={deleteAllConfirmText}
@@ -3121,7 +3159,7 @@ const deleteAllMessages = async () => {
                       setShowDeleteAllModal(false);
                       setDeleteAllConfirmText("");
                     }}
-                    className="py-3 rounded-xl font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors border border-gray-200"
+                    className="py-3 rounded-xl font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200"
                   >
                     Cancel
                   </button>
@@ -3130,7 +3168,7 @@ const deleteAllMessages = async () => {
                     disabled={
                       isLoading || deleteAllConfirmText.trim() !== "DELETE ALL"
                     }
-                    className="py-3 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 transition-colors shadow-lg shadow-red-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="py-3 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {isLoading ? (
                       <Loader2 size={18} className="animate-spin" />
@@ -3146,34 +3184,26 @@ const deleteAllMessages = async () => {
             {showLogoutModal && (
               <motion.div
                 variants={modalVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
                 className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 border border-gray-200"
                 onClick={(e) => e.stopPropagation()}
-                style={{
-                  touchAction: "none",
-                  overscrollBehavior: "none",
-                }}
               >
                 <h3 className="text-xl font-bold mb-2">Sign Out</h3>
                 <p className="text-gray-500 text-sm mb-8">
-                  Are you sure you want to log out of the dashboard?
+                  Are you sure you want to log out?
                 </p>
                 <div className="flex justify-end gap-4">
                   <button
                     onClick={() => setShowLogoutModal(false)}
-                    className="px-6 py-3 rounded-xl font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors border border-gray-200"
+                    className="px-6 py-3 rounded-xl font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200"
                   >
                     Cancel
                   </button>
-
                   <button
                     onClick={() => {
                       setShowLogoutModal(false);
                       signOut();
                     }}
-                    className="px-6 py-3 rounded-xl font-bold text-white bg-black hover:bg-gray-800 transition-colors shadow-lg"
+                    className="px-6 py-3 rounded-xl font-bold text-white bg-black hover:bg-gray-800"
                   >
                     Log Out
                   </button>
@@ -3188,3 +3218,4 @@ const deleteAllMessages = async () => {
 };
 
 export default AdminDashboard;
+
