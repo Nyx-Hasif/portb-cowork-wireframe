@@ -184,6 +184,8 @@ const AdminDashboard = () => {
   const [galleryFilter, setGalleryFilter] = useState("all");
   const [inboxSearch, setInboxSearch] = useState("");
   const [inboxFilter, setInboxFilter] = useState<InboxFilter>("all");
+  const [isInboxSelectMode, setIsInboxSelectMode] = useState(false);
+  const [selectedMessageIds, setSelectedMessageIds] = useState<number[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
   const [deleteAllConfirmText, setDeleteAllConfirmText] = useState("");
@@ -218,7 +220,6 @@ const AdminDashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDataLoading, setIsDataLoading] = useState(true);
 
-
   // SUBSCRIBERS STATE (ISOLATED)
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [isSubscribersLoading, setIsSubscribersLoading] = useState(false);
@@ -228,7 +229,13 @@ const AdminDashboard = () => {
   );
   const [isSubscriberSelectMode, setIsSubscriberSelectMode] = useState(false);
   const [subscriberSearch, setSubscriberSearch] = useState("");
-  const [subscriberFilter, setSubscriberFilter] = useState<"all" | "new" | "read">("all");
+  const [subscriberFilter, setSubscriberFilter] = useState<
+    "all" | "new" | "read"
+  >("all");
+  const [showDeleteAllSubscribersModal, setShowDeleteAllSubscribersModal] =
+    useState(false);
+  const [deleteAllSubscribersConfirmText, setDeleteAllSubscribersConfirmText] =
+    useState("");
 
   const [refreshKey, setRefreshKey] = useState(0);
   const [files, setFiles] = useState<{ [key: string]: File | null }>({});
@@ -302,8 +309,6 @@ const AdminDashboard = () => {
       return null;
     }
   };
-
- 
 
   const formatFullDate = (dateString: string) => {
     const malaysiaDate = toMalaysiaDate(dateString);
@@ -484,11 +489,14 @@ const AdminDashboard = () => {
     }
   }, [isSidebarOpen]);
 
+  // Cari useEffect yang ada anyModalOpen dan UPDATE:
+
   useEffect(() => {
     const anyModalOpen =
       Object.values(modals).some((v) => v) ||
       showDeleteModal ||
       showDeleteAllModal ||
+      showDeleteAllSubscribersModal || // ✅ TAMBAH INI
       showLogoutModal;
     if (anyModalOpen) {
       const scrollY = window.scrollY;
@@ -503,7 +511,13 @@ const AdminDashboard = () => {
         window.scrollTo(0, parseInt(scrollY || "0") * -1);
       };
     }
-  }, [modals, showDeleteModal, showDeleteAllModal, showLogoutModal]);
+  }, [
+    modals,
+    showDeleteModal,
+    showDeleteAllModal,
+    showDeleteAllSubscribersModal,
+    showLogoutModal,
+  ]);
 
   // HELPERS
   const toggleModal = (name: keyof typeof modals, value: boolean) => {
@@ -527,9 +541,6 @@ const AdminDashboard = () => {
     toggleModal("messageDetail", true);
     if (!message.is_read) markAsRead(message.id);
   };
-
-
-
 
   const filteredMessages = contactMessages
     .filter((msg) => {
@@ -561,17 +572,17 @@ const AdminDashboard = () => {
       ? galleryImages
       : galleryImages.filter((i) => i.year === galleryFilter);
 
- const filteredSubscribers = subscribers
-   .filter((sub) => {
-     // Filter by status
-     if (subscriberFilter === "new") return !sub.is_read;
-     if (subscriberFilter === "read") return sub.is_read;
-     return true; // "all"
-   })
-   .filter((sub) =>
-     // Filter by search
-     sub.email.toLowerCase().includes(subscriberSearch.toLowerCase())
-   );
+  const filteredSubscribers = subscribers
+    .filter((sub) => {
+      // Filter by status
+      if (subscriberFilter === "new") return !sub.is_read;
+      if (subscriberFilter === "read") return sub.is_read;
+      return true; // "all"
+    })
+    .filter((sub) =>
+      // Filter by search
+      sub.email.toLowerCase().includes(subscriberSearch.toLowerCase())
+    );
 
   // MESSAGE ACTIONS
   const markAsRead = async (id: number) => {
@@ -653,8 +664,7 @@ const AdminDashboard = () => {
         setContactMessages([]);
         setUnreadCount(0);
         setStarredCount(0);
-     
- 
+
         setShowDeleteAllModal(false);
         setDeleteAllConfirmText("");
         toast.success("All messages deleted!", { id: tid });
@@ -666,7 +676,38 @@ const AdminDashboard = () => {
     }
   };
 
+  // deleteSelectedMessages
+  const deleteSelectedMessages = async () => {
+    if (selectedMessageIds.length === 0) return;
+    setIsLoading(true);
+    const tid = toast.loading(
+      `Deleting ${selectedMessageIds.length} messages...`
+    );
+    try {
+      // Delete one by one
+      for (const id of selectedMessageIds) {
+        await deleteContactMessage(id);
+      }
+      setContactMessages((prev) =>
+        prev.filter((msg) => !selectedMessageIds.includes(msg.id))
+      );
+      setSelectedMessageIds([]);
+      setIsInboxSelectMode(false);
+      toast.success(`${selectedMessageIds.length} messages deleted!`, {
+        id: tid,
+      });
+      // Refresh counts
+      await fetchMessages();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete some messages", { id: tid });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // SUBSCRIBER ACTIONS
+
   const handleSubscriberAction = async (action: string, id?: number) => {
     if (action === "delete" && id) {
       if (!confirm("Delete subscriber?")) return;
@@ -683,11 +724,10 @@ const AdminDashboard = () => {
       setIsSubscriberSelectMode(false);
       refreshSubscribers();
     }
+    // ✅ TUKAR BAHAGIAN INI - Show modal instead of confirm()
     if (action === "deleteAll") {
-      if (!confirm("DELETE ALL?")) return;
-      await deleteAllSubscribers();
-      toast.success("All deleted");
-      refreshSubscribers();
+      setShowDeleteAllSubscribersModal(true);
+      return;
     }
     if (action === "markRead") {
       await markAllSubscribersAsRead();
@@ -706,6 +746,26 @@ const AdminDashboard = () => {
         a.click();
         toast.success("Exported!");
       }
+    }
+  };
+
+  // Tambah function ini selepas handleSubscriberAction:
+  const confirmDeleteAllSubscribers = async () => {
+    if (deleteAllSubscribersConfirmText !== "DELETE ALL") return;
+    setIsLoading(true);
+    const tid = toast.loading("Deleting all subscribers...");
+    try {
+      await deleteAllSubscribers();
+      setSubscribers([]);
+      setSubscriberUnreadCount(0);
+      setShowDeleteAllSubscribersModal(false);
+      setDeleteAllSubscribersConfirmText("");
+      toast.success("All subscribers deleted!", { id: tid });
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete", { id: tid });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -1979,6 +2039,8 @@ const AdminDashboard = () => {
                 animate="visible"
               >
                 <SectionHeader title="Message Inbox" showAddButton={false} />
+
+                {/* Filter Tabs */}
                 <div className="flex flex-wrap gap-2 mb-4">
                   {[
                     { id: "all", label: "All", count: contactMessages.length },
@@ -2022,19 +2084,90 @@ const AdminDashboard = () => {
                     </button>
                   ))}
                 </div>
-                <div className="relative mb-4">
-                  <Search
-                    className="absolute left-3 top-3 text-gray-400"
-                    size={18}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Search messages..."
-                    value={inboxSearch}
-                    onChange={(e) => setInboxSearch(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-1 focus:ring-black focus:border-black outline-none transition-all shadow-sm"
-                  />
+
+                {/* Search & Action Buttons */}
+                <div className="flex flex-wrap gap-3 mb-4">
+                  <div className="relative flex-1 min-w-[200px]">
+                    <Search
+                      className="absolute left-3 top-3 text-gray-400"
+                      size={18}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Search messages..."
+                      value={inboxSearch}
+                      onChange={(e) => setInboxSearch(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-1 focus:ring-black focus:border-black outline-none transition-all shadow-sm"
+                    />
+                  </div>
+
+                  {/* Select Mode Toggle Button */}
+                  <button
+                    onClick={() => {
+                      setIsInboxSelectMode(!isInboxSelectMode);
+                      if (isInboxSelectMode) setSelectedMessageIds([]);
+                    }}
+                    className={`px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors flex items-center gap-2 ${
+                      isInboxSelectMode
+                        ? "bg-black text-white border-black"
+                        : "bg-white border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    <Check size={16} />
+                    {isInboxSelectMode ? "Cancel" : "Select"}
+                  </button>
                 </div>
+
+                {/* Action Buttons Row */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {/* Delete Selected Button - Only show when items selected */}
+                  {isInboxSelectMode && selectedMessageIds.length > 0 && (
+                    <button
+                      onClick={deleteSelectedMessages}
+                      disabled={isLoading}
+                      className="px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium flex gap-2 items-center hover:bg-red-100 transition-colors disabled:opacity-50"
+                    >
+                      {isLoading ? (
+                        <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={16} />
+                      )}
+                      Delete Selected ({selectedMessageIds.length})
+                    </button>
+                  )}
+
+                  {/* Delete All Button - Only show when messages exist */}
+                  {contactMessages.length > 0 && (
+                    <button
+                      onClick={() => setShowDeleteAllModal(true)}
+                      className="px-4 py-2 bg-white text-red-600 border border-red-200 rounded-xl text-sm font-medium flex items-center gap-2 hover:bg-red-50 transition-colors"
+                    >
+                      <AlertTriangle size={16} /> Delete All
+                    </button>
+                  )}
+                </div>
+
+                {/* Stats Bar */}
+                <div className="flex gap-4 mb-6 flex-wrap">
+                  <div className="px-4 py-2 bg-white rounded-xl border border-gray-300 text-sm flex items-center gap-2">
+                    <Mail size={16} className="text-gray-400" />
+                    Total:{" "}
+                    <span className="font-bold">{contactMessages.length}</span>
+                  </div>
+                  <div className="px-4 py-2 bg-red-50 rounded-xl border border-red-200 text-sm text-red-700 flex items-center gap-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                    Unread: <span className="font-bold">{unreadCount}</span>
+                  </div>
+                  <div className="px-4 py-2 bg-yellow-50 rounded-xl border border-yellow-200 text-sm text-yellow-700 flex items-center gap-2">
+                    <Star
+                      size={14}
+                      className="fill-yellow-500 text-yellow-500"
+                    />
+                    Starred: <span className="font-bold">{starredCount}</span>
+                  </div>
+                </div>
+
+                {/* Message Cards */}
                 {isDataLoading ? (
                   <div className="grid gap-3">
                     {[1, 2, 3].map((i) => (
@@ -2064,9 +2197,33 @@ const AdminDashboard = () => {
                       >
                         <div
                           className="p-4 cursor-pointer active:bg-gray-50 transition-colors flex flex-col sm:flex-row gap-4"
-                          onClick={() => openMessageDetail(message)}
+                          onClick={() => {
+                            if (!isInboxSelectMode) {
+                              openMessageDetail(message);
+                            }
+                          }}
                         >
                           <div className="flex items-start gap-3 pt-1 flex-shrink-0">
+                            {/* Checkbox - Only show in select mode */}
+                            {isInboxSelectMode && (
+                              <input
+                                type="checkbox"
+                                checked={selectedMessageIds.includes(
+                                  message.id
+                                )}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedMessageIds((prev) =>
+                                    prev.includes(message.id)
+                                      ? prev.filter((id) => id !== message.id)
+                                      : [...prev, message.id]
+                                  );
+                                }}
+                                onClick={(e) => e.stopPropagation()}
+                                className="w-5 h-5 rounded border-gray-300 mt-1"
+                              />
+                            )}
+
                             <div
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -2196,10 +2353,44 @@ const AdminDashboard = () => {
                     ))}
                   </div>
                 )}
+
+                {/* Select All Bar - Only show in select mode */}
+                {isInboxSelectMode && filteredMessages.length > 0 && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded-xl border border-gray-300 flex items-center justify-between">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={
+                          selectedMessageIds.length ===
+                            filteredMessages.length &&
+                          filteredMessages.length > 0
+                        }
+                        onChange={() => {
+                          if (
+                            selectedMessageIds.length ===
+                            filteredMessages.length
+                          )
+                            setSelectedMessageIds([]);
+                          else
+                            setSelectedMessageIds(
+                              filteredMessages.map((m) => m.id)
+                            );
+                        }}
+                        className="w-5 h-5 rounded border-gray-300"
+                      />
+                      <span className="text-sm font-medium text-gray-700">
+                        Select All ({filteredMessages.length})
+                      </span>
+                    </label>
+                    <span className="text-sm text-gray-500">
+                      {selectedMessageIds.length} selected
+                    </span>
+                  </div>
+                )}
               </motion.div>
             )}
 
-                      {/* SUBSCRIBERS SECTION */}
+            {/* SUBSCRIBERS SECTION */}
             {activeSection === "subscribers" && (
               <motion.div
                 key="subscribers"
@@ -2208,25 +2399,27 @@ const AdminDashboard = () => {
                 animate="visible"
               >
                 <SectionHeader title="Subscribers" showAddButton={false} />
-                
+
                 {/* Filter Tabs - Now Working! */}
                 <div className="flex flex-wrap gap-2 mb-4">
                   {[
                     { id: "all", label: "All", count: subscribers.length },
-                    { 
-                      id: "new", 
-                      label: "New", 
-                      count: subscribers.filter(s => !s.is_read).length 
+                    {
+                      id: "new",
+                      label: "New",
+                      count: subscribers.filter((s) => !s.is_read).length,
                     },
-                    { 
-                      id: "read", 
-                      label: "Read", 
-                      count: subscribers.filter(s => s.is_read).length 
+                    {
+                      id: "read",
+                      label: "Read",
+                      count: subscribers.filter((s) => s.is_read).length,
                     },
                   ].map((tab) => (
                     <button
                       key={tab.id}
-                      onClick={() => setSubscriberFilter(tab.id as "all" | "new" | "read")}
+                      onClick={() =>
+                        setSubscriberFilter(tab.id as "all" | "new" | "read")
+                      }
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-all border flex items-center gap-2 ${
                         subscriberFilter === tab.id
                           ? "bg-black text-white border-black"
@@ -2292,14 +2485,16 @@ const AdminDashboard = () => {
 
                 {/* Action Buttons Row */}
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {isSubscriberSelectMode && selectedSubscriberIds.length > 0 && (
-                    <button
-                      onClick={() => handleSubscriberAction("deleteSelected")}
-                      className="px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium flex gap-2 items-center hover:bg-red-100 transition-colors"
-                    >
-                      <Trash2 size={16} /> Delete ({selectedSubscriberIds.length})
-                    </button>
-                  )}
+                  {isSubscriberSelectMode &&
+                    selectedSubscriberIds.length > 0 && (
+                      <button
+                        onClick={() => handleSubscriberAction("deleteSelected")}
+                        className="px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-medium flex gap-2 items-center hover:bg-red-100 transition-colors"
+                      >
+                        <Trash2 size={16} /> Delete (
+                        {selectedSubscriberIds.length})
+                      </button>
+                    )}
                   <button
                     onClick={() => handleSubscriberAction("markRead")}
                     className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-xl text-sm font-medium flex items-center gap-2 hover:bg-green-100 transition-colors"
@@ -2326,15 +2521,22 @@ const AdminDashboard = () => {
                 <div className="flex gap-4 mb-6 flex-wrap">
                   <div className="px-4 py-2 bg-white rounded-xl border border-gray-300 text-sm flex items-center gap-2">
                     <Users size={16} className="text-gray-400" />
-                    Total: <span className="font-bold">{subscribers.length}</span>
+                    Total:{" "}
+                    <span className="font-bold">{subscribers.length}</span>
                   </div>
                   <div className="px-4 py-2 bg-red-50 rounded-xl border border-red-200 text-sm text-red-700 flex items-center gap-2">
                     <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                    New: <span className="font-bold">{subscribers.filter(s => !s.is_read).length}</span>
+                    New:{" "}
+                    <span className="font-bold">
+                      {subscribers.filter((s) => !s.is_read).length}
+                    </span>
                   </div>
                   <div className="px-4 py-2 bg-green-50 rounded-xl border border-green-200 text-sm text-green-700 flex items-center gap-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    Read: <span className="font-bold">{subscribers.filter(s => s.is_read).length}</span>
+                    Read:{" "}
+                    <span className="font-bold">
+                      {subscribers.filter((s) => s.is_read).length}
+                    </span>
                   </div>
                 </div>
 
@@ -2391,7 +2593,10 @@ const AdminDashboard = () => {
                               }`}
                             >
                               {sub.is_read ? (
-                                <MailOpen size={20} className="text-green-600" />
+                                <MailOpen
+                                  size={20}
+                                  className="text-green-600"
+                                />
                               ) : (
                                 <Mail size={20} className="text-red-600" />
                               )}
@@ -2433,7 +2638,9 @@ const AdminDashboard = () => {
                           {/* Action Buttons */}
                           <div className="flex gap-2 w-full sm:w-auto justify-end flex-shrink-0">
                             <button
-                              onClick={() => copyToClipboard(sub.email, "Email")}
+                              onClick={() =>
+                                copyToClipboard(sub.email, "Email")
+                              }
                               className="p-2.5 text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors border border-gray-300"
                               title="Copy Email"
                             >
@@ -2453,7 +2660,9 @@ const AdminDashboard = () => {
                               <Mail size={18} />
                             </button>
                             <button
-                              onClick={() => handleSubscriberAction("delete", sub.id)}
+                              onClick={() =>
+                                handleSubscriberAction("delete", sub.id)
+                              }
                               className="p-2.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors border border-red-200"
                               title="Delete"
                             >
@@ -2473,14 +2682,20 @@ const AdminDashboard = () => {
                       <input
                         type="checkbox"
                         checked={
-                          selectedSubscriberIds.length === filteredSubscribers.length &&
+                          selectedSubscriberIds.length ===
+                            filteredSubscribers.length &&
                           filteredSubscribers.length > 0
                         }
                         onChange={() => {
-                          if (selectedSubscriberIds.length === filteredSubscribers.length)
+                          if (
+                            selectedSubscriberIds.length ===
+                            filteredSubscribers.length
+                          )
                             setSelectedSubscriberIds([]);
                           else
-                            setSelectedSubscriberIds(filteredSubscribers.map((s) => s.id));
+                            setSelectedSubscriberIds(
+                              filteredSubscribers.map((s) => s.id)
+                            );
                         }}
                         className="w-5 h-5 rounded border-gray-300"
                       />
@@ -2504,6 +2719,7 @@ const AdminDashboard = () => {
         {(Object.values(modals).some((v) => v) ||
           showDeleteModal ||
           showDeleteAllModal ||
+          showDeleteAllSubscribersModal || // ✅ TAMBAH INI
           showLogoutModal) && (
           <motion.div
             variants={modalVariants}
@@ -2524,6 +2740,8 @@ const AdminDashboard = () => {
               });
               setShowDeleteModal(false);
               setShowDeleteAllModal(false);
+              setShowDeleteAllSubscribersModal(false); // ✅ TAMBAH INI
+              setDeleteAllSubscribersConfirmText(""); // ✅ TAMBAH INI
               setShowLogoutModal(false);
             }}
           >
@@ -3180,6 +3398,75 @@ const AdminDashboard = () => {
               </motion.div>
             )}
 
+            {/* DELETE ALL SUBSCRIBERS MODAL */}
+            {showDeleteAllSubscribersModal && (
+              <motion.div
+                variants={modalVariants}
+                className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 border border-gray-200"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="text-center">
+                  <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center text-red-500 mx-auto mb-4 border border-red-100">
+                    <AlertTriangle size={28} />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 text-gray-900">
+                    Delete ALL Subscribers?
+                  </h3>
+                  <p className="text-gray-500 text-sm mb-2 leading-relaxed">
+                    This will permanently delete all{" "}
+                    <span className="font-bold text-red-600">
+                      {subscribers.length}
+                    </span>{" "}
+                    subscribers.
+                  </p>
+                  <p className="text-gray-500 text-sm mb-4 leading-relaxed">
+                    Type{" "}
+                    <span className="font-bold text-red-600">DELETE ALL</span>{" "}
+                    to confirm.
+                  </p>
+                  <input
+                    type="text"
+                    value={deleteAllSubscribersConfirmText}
+                    onChange={(e) =>
+                      setDeleteAllSubscribersConfirmText(
+                        e.target.value.toUpperCase()
+                      )
+                    }
+                    placeholder="DELETE ALL"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-red-500 outline-none text-center text-sm font-bold uppercase tracking-wide mb-6"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={() => {
+                      setShowDeleteAllSubscribersModal(false);
+                      setDeleteAllSubscribersConfirmText("");
+                    }}
+                    className="py-3 rounded-xl font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmDeleteAllSubscribers}
+                    disabled={
+                      isLoading ||
+                      deleteAllSubscribersConfirmText.trim() !== "DELETE ALL"
+                    }
+                    className="py-3 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isLoading ? (
+                      <Loader2 size={18} className="animate-spin" />
+                    ) : (
+                      <>
+                        <Trash2 size={18} />
+                        Delete All
+                      </>
+                    )}
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
             {/* LOGOUT MODAL */}
             {showLogoutModal && (
               <motion.div
@@ -3218,4 +3505,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-

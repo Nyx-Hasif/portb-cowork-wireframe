@@ -28,7 +28,12 @@ export default function ScrollToTopButton() {
       const documentHeight = document.documentElement.scrollHeight;
       const scrollTop = window.scrollY;
       const scrollableHeight = documentHeight - windowHeight;
-      const progress = (scrollTop / scrollableHeight) * 100;
+
+      // ✅ FIX: Add check for scrollableHeight to prevent division by zero
+      const progress =
+        scrollableHeight > 0
+          ? Math.min(100, Math.max(0, (scrollTop / scrollableHeight) * 100))
+          : 0;
 
       setScrollProgress(progress);
 
@@ -69,8 +74,10 @@ export default function ScrollToTopButton() {
 
   const radius = 20;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset =
-    circumference - (scrollProgress / 100) * circumference;
+
+  // ✅ FIX: Add fallback to ensure strokeDashoffset is never NaN
+  const safeProgress = Number.isFinite(scrollProgress) ? scrollProgress : 0;
+  const strokeDashoffset = circumference - (safeProgress / 100) * circumference;
 
   return (
     <button
@@ -123,7 +130,9 @@ export default function ScrollToTopButton() {
           strokeWidth="2"
           fill="none"
           strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
+          strokeDashoffset={
+            Number.isFinite(strokeDashoffset) ? strokeDashoffset : circumference
+          }
           className={`transition-all duration-300 ease-out ${
             isDarkSection ? "text-black" : "text-white"
           }`}
