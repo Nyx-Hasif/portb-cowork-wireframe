@@ -148,7 +148,11 @@ const AdminDashboard = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const router = useRouter();
 
-  const openWhatsAppReply = (phone: string, name: string) => {
+  const openWhatsAppReply = (
+    phone: string,
+    name: string,
+    originalMessage?: string
+  ) => {
     if (!phone) {
       toast.error("No phone number");
       return;
@@ -159,12 +163,28 @@ const AdminDashboard = () => {
       if (cleanPhone.startsWith("0")) whatsappNumber = "+6" + cleanPhone;
       else whatsappNumber = "+60" + cleanPhone;
     }
-    const message = `Hi ${name}, thank you for your message through Port B. How can we help you?`;
+
+    // ✅ Professional template with website mention
+    const replyMessage = originalMessage
+      ? `Hi ${name},
+
+Terima kasih kerana menghubungi *Port B Coworking Space* 
+
+Mengenai pertanyaan anda melalui website:
+▸ _"${originalMessage}"_
+
+`
+      : `Hi ${name},
+
+Terima kasih kerana menghubungi *Port B Coworking Space* 
+
+`;
+
     window.open(
       `https://wa.me/${whatsappNumber.replace(
         /\+/g,
         ""
-      )}?text=${encodeURIComponent(message)}`,
+      )}?text=${encodeURIComponent(replyMessage)}`,
       "_blank"
     );
     toggleModal("messageDetail", false);
@@ -1323,15 +1343,24 @@ const AdminDashboard = () => {
         </nav>
 
         <div className="p-4 border-t border-gray-300 bg-gray-50/50 flex-shrink-0">
-          <div className="bg-white border border-gray-300 p-3 rounded-xl flex items-center gap-3 mb-3 shadow-sm">
-            <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 border border-gray-300">
+          {/* ✅ Clickable Admin Card - Navigate to Homepage */}
+          <button
+            onClick={() => router.push("/")}
+            className="w-full bg-white border border-gray-300 p-3 rounded-xl flex items-center gap-3 mb-3 shadow-sm hover:bg-gray-50 hover:border-gray-400 transition-all cursor-pointer group"
+          >
+            <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 border border-gray-300 group-hover:bg-black group-hover:text-white group-hover:border-black transition-all">
               <User size={16} />
             </div>
-            <div className="overflow-hidden flex-1">
+            <div className="overflow-hidden flex-1 text-left">
               <p className="text-sm font-bold truncate">Admin</p>
               <p className="text-xs text-gray-500 truncate">{user?.email}</p>
             </div>
-          </div>
+            <ChevronRight
+              size={16}
+              className="text-gray-400 group-hover:text-black transition-colors"
+            />
+          </button>
+
           <button
             onClick={() => setShowLogoutModal(true)}
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 transition-all"
@@ -2344,8 +2373,10 @@ const AdminDashboard = () => {
                                 if (message.phone)
                                   openWhatsAppReply(
                                     message.phone,
-                                    message.name
+                                    message.name,
+                                    message.message
                                   );
+                                // ✅ Tambah message.message
                                 else toast.error("No phone number");
                               }}
                               disabled={!message.phone}
@@ -2689,7 +2720,7 @@ const AdminDashboard = () => {
                             >
                               <Copy size={18} />
                             </button>
-                           
+
                             <button
                               onClick={() =>
                                 handleSubscriberAction("delete", sub.id)
@@ -2966,7 +2997,8 @@ const AdminDashboard = () => {
                         if (selectedMessage.phone) {
                           openWhatsAppReply(
                             selectedMessage.phone,
-                            selectedMessage.name
+                            selectedMessage.name,
+                            selectedMessage.message // ✅ Tambah selectedMessage.message
                           );
                         } else {
                           toast.error("No phone number to reply to");
