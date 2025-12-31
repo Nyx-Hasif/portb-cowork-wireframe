@@ -769,6 +769,31 @@ const AdminDashboard = () => {
     }
   };
 
+  // Copy emails function
+  const copySubscriberEmails = () => {
+    let emailsToCopy: string[] = [];
+
+    // If in select mode and has selected items, copy only selected
+    if (isSubscriberSelectMode && selectedSubscriberIds.length > 0) {
+      emailsToCopy = subscribers
+        .filter((sub) => selectedSubscriberIds.includes(sub.id))
+        .map((sub) => sub.email);
+    } else {
+      // Otherwise copy all filtered emails
+      emailsToCopy = filteredSubscribers.map((sub) => sub.email);
+    }
+
+    if (emailsToCopy.length === 0) {
+      toast.error("No emails to copy");
+      return;
+    }
+
+    // Join with comma and space for Gmail compatibility
+    const emailString = emailsToCopy.join(", ");
+    navigator.clipboard.writeText(emailString);
+    toast.success(`${emailsToCopy.length} email(s) copied!`, { icon: "📋" });
+  };
+
   // FILE HANDLERS
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>, key: string) => {
     const file = e.target.files?.[0];
@@ -2485,6 +2510,7 @@ const AdminDashboard = () => {
 
                 {/* Action Buttons Row */}
                 <div className="flex flex-wrap gap-2 mb-4">
+                  {/* Delete Selected - existing */}
                   {isSubscriberSelectMode &&
                     selectedSubscriberIds.length > 0 && (
                       <button
@@ -2495,18 +2521,35 @@ const AdminDashboard = () => {
                         {selectedSubscriberIds.length})
                       </button>
                     )}
+
+                  {/* ✅ NEW: Copy Emails Button */}
+                  <button
+                    onClick={copySubscriberEmails}
+                    className="px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-sm font-medium flex items-center gap-2 hover:bg-blue-100 transition-colors"
+                  >
+                    <Copy size={16} />
+                    {isSubscriberSelectMode && selectedSubscriberIds.length > 0
+                      ? `Copy (${selectedSubscriberIds.length})`
+                      : `Copy All (${filteredSubscribers.length})`}
+                  </button>
+
+                  {/* Mark All Read - existing */}
                   <button
                     onClick={() => handleSubscriberAction("markRead")}
                     className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-xl text-sm font-medium flex items-center gap-2 hover:bg-green-100 transition-colors"
                   >
                     <CheckCircle2 size={16} /> Mark All Read
                   </button>
+
+                  {/* Export CSV - existing */}
                   <button
                     onClick={() => handleSubscriberAction("export")}
                     className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-xl text-sm font-medium flex gap-2 items-center hover:bg-gray-50 transition-colors"
                   >
                     <Download size={16} /> Export CSV
                   </button>
+
+                  {/* Delete All - existing */}
                   {subscribers.length > 0 && (
                     <button
                       onClick={() => handleSubscriberAction("deleteAll")}
@@ -2646,19 +2689,7 @@ const AdminDashboard = () => {
                             >
                               <Copy size={18} />
                             </button>
-                            <button
-                              onClick={() => {
-                                window.location.href = `mailto:${sub.email}`;
-                              }}
-                              className={`p-2.5 rounded-xl transition-colors border ${
-                                sub.is_read
-                                  ? "text-gray-500 bg-gray-50 hover:bg-gray-100 border-gray-300"
-                                  : "text-green-600 bg-green-50 hover:bg-green-100 border-green-200"
-                              }`}
-                              title="Send Email"
-                            >
-                              <Mail size={18} />
-                            </button>
+                           
                             <button
                               onClick={() =>
                                 handleSubscriberAction("delete", sub.id)
