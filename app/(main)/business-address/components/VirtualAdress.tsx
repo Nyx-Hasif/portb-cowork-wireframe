@@ -1,101 +1,157 @@
 "use client";
-import React from "react";
-import { motion } from "framer-motion";
-import SpotlightCard from "@/components/SpotlightCard";
-// ✅  Minimal outline icons dari Heroicons
-import {
-  MapPinIcon,
-  EnvelopeOpenIcon,
-  LockClosedIcon,
-  BellAlertIcon,
-  ShieldCheckIcon,
-} from "@heroicons/react/24/outline";
+import React, { useState } from "react";
+import Image from "next/image"; // ✅ ADDED: Import Next.js Image
+import { MapPin, Mail, Lock, Bell, Shield, ArrowRight } from "lucide-react";
 
-const VirtualAddress = () => {
-  const features = [
-    { id: 1, title: "Address at PortB", icon: MapPinIcon },
-    { id: 2, title: "Receive Mail and Packages", icon: EnvelopeOpenIcon },
-    { id: 3, title: "Your Own Secure Locking Mailbox", icon: LockClosedIcon },
-    { id: 4, title: "Get Notified When Mail Arrives", icon: BellAlertIcon },
-    { id: 5, title: "24/7 Secure Mail Access", icon: ShieldCheckIcon },
-  ];
+const features = [
+  {
+    id: 1,
+    title: "Prestigious Address",
+    desc: "Establish your presence in the city's premier industrial district.",
+    icon: <MapPin className="w-5 h-5" />,
+    image:
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=800&auto=format&fit=crop&grayscale=true",
+  },
+  {
+    id: 2,
+    title: "Mail Management",
+    desc: "Seamless handling of all your professional correspondence.",
+    icon: <Mail className="w-5 h-5" />,
+    image:
+      "https://images.unsplash.com/photo-1510074377623-8cf13fb86c08?q=80&w=800&auto=format&fit=crop&grayscale=true",
+  },
+  {
+    id: 3,
+    title: "Private Locking",
+    desc: "Your own physical anchor in our space with secure mailboxes.",
+    icon: <Lock className="w-5 h-5" />,
+    image:
+      "https://images.unsplash.com/photo-1582139329536-e7284fece509?q=80&w=800&auto=format&fit=crop&grayscale=true",
+  },
+  {
+    id: 4,
+    title: "Smart Alerts",
+    desc: "Real-time digital notifications the moment your mail arrives.",
+    icon: <Bell className="w-5 h-5" />,
+    image:
+      "https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=800&auto=format&fit=crop&grayscale=true",
+  },
+  {
+    id: 5,
+    title: "24/7 Shield",
+    desc: "Round-the-clock secure access to your business parcels.",
+    icon: <Shield className="w-5 h-5" />,
+    image:
+      "https://images.unsplash.com/photo-1558002038-1055907df827?q=80&w=800&auto=format&fit=crop&grayscale=true",
+  },
+];
+
+const VirtualAddress: React.FC = () => {
+  const [activeFeature, setActiveFeature] = useState(features[0]);
 
   return (
-    <section className="w-full max-w-[100rem] mx-auto px-4 md:py-20 py-10  text-gray-100">
-      {/* === HEADER === */}
-      <div className="text-center mb-12 ">
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-black">
-          Virtual Business Address
-        </h1>
-        <p className="mt-4 text-black text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-          A secure, professional address for your business correspondence — accessible anytime.
-        </p>
-      </div>
+    <section className="py-16 md:py-20 bg-black overflow-hidden border-t border-white/5">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex flex-col md:flex-row gap-12 lg:gap-16">
+          {/* Left Side: Text List */}
+          <div className="md:w-1/2">
+            <div className="mb-12">
+              <span className="text-[10px] uppercase tracking-[0.5em] text-gray-500 mb-4 block">
+                Virtual Presence
+              </span>
+              <h2 className="text-4xl md:text-6xl lg:text-7xl font-serif text-white tracking-tighter leading-none mb-6">
+                THE <br />
+                <span className="italic text-gray-500">IDENTITY.</span>
+              </h2>
+              <p className="text-gray-400 font-light leading-relaxed max-w-sm text-sm md:text-base">
+                A secure, professional anchor for your business. Elevate your
+                brand without the overhead of a physical suite.
+              </p>
+            </div>
 
-      {/* === GRID (pyramid pattern) === */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 place-items-center">
-        {features.map((item, index) => {
-          let colClass = "md:col-span-2 lg:col-span-2";
-          if (index === 0) colClass += " md:col-start-1";
-          if (index === 1) colClass += " md:col-start-3";
-          if (index === 2) colClass += " md:col-start-1 md:row-start-2";
-          if (index === 3) colClass += " md:col-start-3 md:row-start-2";
-          if (index === 4) colClass += " md:col-start-2 md:row-start-3";
-          if (index === 0) colClass += " lg:col-start-1 lg:row-start-1";
-          if (index === 1) colClass += " lg:col-start-3 lg:row-start-1";
-          if (index === 2) colClass += " lg:col-start-5 lg:row-start-1";
-          if (index === 3) colClass += " lg:col-start-2 lg:row-start-2";
-          if (index === 4) colClass += " lg:col-start-4 lg:row-start-2";
-
-          const Icon = item.icon;
-
-          return (
-            <motion.div
-              key={item.id}
-              className={`w-full h-full ${colClass}`}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-            >
-              <SpotlightCard
-                spotlightColor="rgba(0, 19, 250, 0.2)"
-                className="group flex flex-col justify-center items-center text-center h-60 
-             rounded-3xl border border-gray-300 bg-[#e9eef3] text-black 
-             shadow-sm transition-all duration-500 
-             hover:shadow-2xl hover:-translate-y-1 
-             hover:border-blue-400/60 
-             hover:ring-1 hover:ring-blue-300/30 
-             hover:ring-offset-2 hover:ring-offset-[#e9eef3]
-             cursor-pointer"
-              >
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-4"
+            {/* Feature list with backgrounds */}
+            <div className="space-y-2">
+              {features.map((item) => (
+                <div
+                  key={item.id}
+                  onMouseEnter={() => setActiveFeature(item)}
+                  className={`group cursor-pointer py-4 md:py-5 px-4 border transition-all duration-500 flex items-center justify-between ${
+                    activeFeature.id === item.id
+                      ? "bg-white/[0.07] border-white/20 shadow-lg"
+                      : "bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10"
+                  }`}
                 >
-                  {/* ICON WRAPPER */}
-                  <div
-                    className="mx-auto flex items-center justify-center w-14 h-14 
-                 bg-yellow-500 rounded-full backdrop-blur-sm 
-                 transition-all duration-500 
-                 group-hover:bg-blue-500 
-                 group-hover:shadow-md group-hover:shadow-blue-200/70"
-                  >
-                    <Icon
-                      className="w-7 h-7 text-black transition-colors duration-500 
-                   group-hover:text-white"
-                    />
+                  <div className="flex items-center gap-4 md:gap-6">
+                    <span
+                      className={`text-xs font-serif transition-colors duration-500 ${
+                        activeFeature.id === item.id
+                          ? "text-white"
+                          : "text-gray-600 group-hover:text-gray-500"
+                      }`}
+                    >
+                      0{item.id}
+                    </span>
+                    <h3
+                      className={`text-lg md:text-xl lg:text-2xl font-serif transition-all duration-500 ${
+                        activeFeature.id === item.id
+                          ? "text-white"
+                          : "text-gray-400 group-hover:text-gray-300"
+                      }`}
+                    >
+                      {item.title}
+                    </h3>
                   </div>
+                  <div
+                    className={`transition-all duration-500 ${
+                      activeFeature.id === item.id
+                        ? "opacity-100 translate-x-0"
+                        : "opacity-0 -translate-x-4 group-hover:opacity-50"
+                    }`}
+                  >
+                    <ArrowRight className="text-white w-5 h-5" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-                  <p className="text-lg md:text-2xl font-medium leading-snug">
-                    {item.title}
-                  </p>
-                </motion.div>
-              </SpotlightCard>
-            </motion.div>
-          );
-        })}
+          {/* Right Side: Dynamic Visual Frame */}
+          <div className="md:w-1/2 relative">
+            <div className="md:sticky md:top-24 aspect-[3/4] overflow-hidden border border-white/10 bg-zinc-900 group rounded-lg">
+              <div className="absolute inset-0 bg-black/40 z-10 transition-opacity duration-500 group-hover:opacity-0"></div>
+
+              {/* ✅ UPDATED: Replace img with Next.js Image */}
+              <Image
+                key={activeFeature.id}
+                src={activeFeature.image}
+                alt={activeFeature.title}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover grayscale brightness-75 transition-all duration-1000 opacity-80 group-hover:opacity-100 group-hover:brightness-100"
+                priority={activeFeature.id === 1} // ✅ Priority load for first feature
+              />
+
+              {/* Detail Card Overlay */}
+              <div className="absolute bottom-8 left-8 right-8 z-20 p-6 bg-black/70 backdrop-blur-2xl border border-white/5 shadow-2xl rounded-lg">
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="p-2.5 bg-white text-black">
+                    {activeFeature.icon}
+                  </div>
+                  <span className="text-[10px] uppercase tracking-widest text-white/40">
+                    Feature Details
+                  </span>
+                </div>
+                <p className="text-white text-base md:text-lg font-light leading-relaxed italic">
+                  {activeFeature.desc}
+                </p>
+              </div>
+
+              {/* Aesthetic Grid Lines */}
+              <div className="absolute top-0 right-1/4 h-full w-px bg-white/5"></div>
+              <div className="absolute top-1/4 left-0 w-full h-px bg-white/5"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

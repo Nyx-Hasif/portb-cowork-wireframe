@@ -1,158 +1,147 @@
-"use client";
 import React from "react";
-import { motion } from "framer-motion";
 import {
-  EnvelopeIcon,
-  ArchiveBoxIcon,
-  BellAlertIcon,
-} from "@heroicons/react/24/outline";
+  Mail,
+  Package,
+  Bell,
+  ShieldCheck,
+  ArrowRight,
+  Zap,
+} from "lucide-react";
 
 const addOns = [
-  { id: 1, icon: EnvelopeIcon, title: "Mail Handling", price: "RM 20 / month" },
-  {
-    id: 2,
-    icon: ArchiveBoxIcon,
-    title: "Parcel Storage",
-    price: "RM 30 / month",
-  },
-  {
-    id: 3,
-    icon: BellAlertIcon,
-    title: "Mail Notifications",
-    price: "RM 10 / month",
-  },
+  { id: 1, icon: <Mail size={18} />, title: "Mail Handling", price: "20" },
+  { id: 2, icon: <Package size={18} />, title: "Parcel Storage", price: "30" },
+  { id: 3, icon: <Bell size={18} />, title: "Digital Alerts", price: "10" },
 ];
 
-const BillingAddress = () => {
+const BillingAddress: React.FC = () => {
   return (
-    <section className="w-full overflow-x-hidden bg-[#f9fafb] py-10 md:py-20">
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* === HEADER === */}
-        <div className="w-full max-w-full px-4 sm:px-6 md:px-8">
-          <div className="text-center space-y-4 mb-10 md:mb-16">
-            <h1 className="text-3xl md:text-5xl font-bold text-gray-900 leading-snug">
-              Billing Your Address
-            </h1>
+    <section className="py-16 md:py-20 bg-black border-t border-white/5">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 border border-white/10 bg-black overflow-hidden">
+          {/* Section 1: The Value Statement (Left) */}
+          <div className="lg:col-span-7 p-8 md:p-16 border-b lg:border-b-0 lg:border-r border-white/5 relative overflow-hidden bg-zinc-900">
+            <div className="relative z-10">
+              <span className="text-[10px] uppercase tracking-[0.6em] text-gray-500 mb-8 block">
+                Efficiency Model
+              </span>
 
-            <p className="text-base md:text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
-              Get your business address from as low as RM 1 per day at
-              Kota&nbsp;Bharu.
-            </p>
+              <div className="mb-12">
+                <h2 className="text-5xl md:text-7xl lg:text-[8rem] font-serif text-white leading-none tracking-tighter mb-4">
+                  RM<span className="italic text-gray-500">1</span>
+                </h2>
+                <p className="text-lg md:text-xl lg:text-2xl font-light text-gray-400 tracking-tight uppercase">
+                  Per day. The ultimate business <br />
+                  address at Kota Bharu.
+                </p>
+              </div>
 
-            <p className="text-base md:text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
-              No deposit. Cancel anytime. Annual plan saves you more.
-            </p>
+              <div className="space-y-4 max-w-sm">
+                <div className="flex items-center gap-3 text-xs uppercase tracking-[0.3em] text-gray-500">
+                  <Zap size={14} className="text-white" /> Zero Deposit
+                </div>
+                <div className="flex items-center gap-3 text-xs uppercase tracking-[0.3em] text-gray-500">
+                  <Zap size={14} className="text-white" /> Cancel Anytime
+                </div>
+                <div className="flex items-center gap-3 text-xs uppercase tracking-[0.3em] text-gray-500">
+                  <Zap size={14} className="text-white" /> Annual Savings
+                </div>
+              </div>
+            </div>
+
+            <div className="absolute top-0 right-0 w-1/2 h-full bg-white/[0.02] -skew-x-12 translate-x-1/2"></div>
+          </div>
+
+          {/* Section 2: The Ledger (Right) */}
+          <div className="lg:col-span-5 flex flex-col">
+            {/* Top Tier: Official Address */}
+            <div className="p-8 md:p-12 border-b border-white/5 bg-black group">
+              <div className="flex justify-between items-start mb-8">
+                <div>
+                  <h3 className="text-xl md:text-2xl font-serif text-white mb-2">
+                    Annual Access
+                  </h3>
+                  <p className="text-[10px] uppercase tracking-widest text-gray-500">
+                    Business Address + Mail Pickup
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-3xl md:text-4xl font-serif text-white">
+                    365
+                  </span>
+                  <span className="text-xs text-gray-500 ml-2">RM / YR</span>
+                </div>
+              </div>
+
+              <ul className="space-y-3 mb-8">
+                {[
+                  "Official business address",
+                  "Mail collection (self-pickup)",
+                  "Dashboard & notifications",
+                ].map((feat, i) => (
+                  <li
+                    key={i}
+                    className="flex items-center gap-3 text-xs text-gray-400 uppercase tracking-widest"
+                  >
+                    <ShieldCheck size={14} className="text-white/20" /> {feat}
+                  </li>
+                ))}
+              </ul>
+
+              <button className="w-full group/btn py-4 bg-white text-black text-[10px] uppercase tracking-[0.5em] font-bold hover:bg-gray-200 transition-all duration-500 flex items-center justify-center gap-4 shadow-xl">
+                Initialize Plan{" "}
+                <ArrowRight
+                  size={14}
+                  className="group-hover/btn:translate-x-2 transition-transform"
+                />
+              </button>
+            </div>
+
+            {/* Bottom Tier: Add-ons */}
+            <div className="p-8 md:p-12 bg-zinc-900 flex-1">
+              <h4 className="text-[10px] uppercase tracking-[0.4em] text-gray-500 mb-8">
+                Optional Expansions
+              </h4>
+              <div className="space-y-5">
+                {addOns.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex justify-between items-center group/item cursor-default"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="text-gray-600 group-hover/item:text-white transition-colors">
+                        {item.icon}
+                      </div>
+                      <span className="text-xs uppercase tracking-widest text-gray-500 group-hover/item:text-white transition-colors">
+                        {item.title}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="h-px w-6 bg-white/5 group-hover/item:w-10 transition-all"></div>
+                      <span className="text-xs font-bold text-white">
+                        RM {item.price}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* === MAIN GRID === */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 w-full max-w-full">
-          {/* ---------- ADD‑ONS ---------- */}
-          <motion.div
-            initial={{ y: 30, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4 }}
-            className="w-full rounded-3xl bg-[#e9eef3] border border-gray-300 shadow-sm hover:shadow-lg transition-all duration-500 p-6 flex flex-col"
-          >
-            <div className="flex justify-between items-center flex-wrap gap-3 mb-6">
-              <h2 className="text-2xl font-semibold text-gray-900">Add‑Ons</h2>
-              <p className="text-sm font-bold bg-gray-900 text-white px-3 py-1 rounded-full">
-                Popular
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              {addOns.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div
-                    key={item.id}
-                    className="flex justify-between items-center bg-white rounded-xl p-4 border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all duration-300 min-w-0"
-                  >
-                    <div className="flex items-center gap-4 text-gray-900 min-w-0">
-                      <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 flex-shrink-0">
-                        <Icon className="w-5 h-5" />
-                      </div>
-                      <p className="font-medium truncate">{item.title}</p>
-                    </div>
-                    <p className="text-sm font-semibold text-gray-700 whitespace-nowrap ml-2">
-                      {item.price}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          </motion.div>
-
-          {/* ---------- OFFICIAL BUSINESS ADDRESS ---------- */}
-          <motion.div
-            initial={{ y: 30, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            className="w-full rounded-3xl bg-[#e9eef3] border border-gray-300 shadow-sm hover:shadow-lg transition-all duration-500 flex flex-col overflow-hidden"
-          >
-            {/* Header */}
-            <div
-              className="flex flex-wrap justify-between items-center 
-                         border-b border-gray-200 px-4 sm:px-6 md:px-8 py-6 gap-2 w-full min-w-0"
-            >
-              <h2
-                className="text-2xl md:text-3xl font-semibold text-gray-900 
-                           whitespace-normal break-words flex-shrink"
-              >
-                Official Business Address
-              </h2>
-              <span className="text-sm font-bold bg-gray-900 text-white px-3 py-1 rounded-full flex-shrink-0">
-                Best Value
-              </span>
-            </div>
-
-            {/* Small description */}
-            <div className="px-4 sm:px-6 md:px-8 py-4 text-gray-700 text-lg">
-              Registered Address + Mail Pickup
-            </div>
-
-            {/* Price */}
-            <div className="text-center py-8 px-2">
-              <h3 className="text-5xl md:text-6xl font-bold text-gray-900">
-                RM 365
-              </h3>
-              <p className="text-gray-600 text-lg md:text-xl">
-                / year — ≈ RM 1 / day
-              </p>
-            </div>
-
-            {/* Features */}
-            <div className="px-4 sm:px-6 md:px-8 py-4 text-gray-800 space-y-3 text-lg border-t border-gray-200">
-              <div className="flex items-start gap-3 leading-snug">
-                <span>✅</span>
-                <p>Official business address</p>
-              </div>
-              <div className="flex items-start gap-3 leading-snug">
-                <span>✅</span>
-                <p>Mail collection (self‑pickup)</p>
-              </div>
-              <div className="flex items-start gap-3 leading-snug">
-                <span>✅</span>
-                <p>Dashboard & notifications</p>
-              </div>
-            </div>
-
-            {/* Buttons */}
-            <div
-              className="flex flex-col sm:flex-row justify-between items-center gap-3 
-                         px-4 sm:px-6 md:px-8 py-6 border-t border-gray-200 w-full"
-            >
-              <button className="w-full sm:w-auto px-5 py-2 rounded-md border border-gray-900 text-gray-900 font-medium hover:bg-gray-900 hover:text-white transition">
-                Get This Plan
-              </button>
-              <button className="w-full sm:w-auto px-5 py-2 rounded-md border border-gray-900 text-gray-900 font-medium hover:bg-gray-900 hover:text-white transition">
-                Call 011‑12345678
-              </button>
-            </div>
-          </motion.div>
+        {/* Footer Support */}
+        <div className="mt-12 flex flex-col md:flex-row justify-between items-center gap-6 opacity-40">
+          <p className="text-[10px] uppercase tracking-widest text-white">
+            Pricing Subject to GST if applicable
+          </p>
+          <div className="flex gap-6 flex-wrap justify-center">
+            <span className="text-[10px] uppercase tracking-widest text-white">
+              Call: 011-12345678
+            </span>
+            <span className="text-[10px] uppercase tracking-widest text-white">
+              Support: desk@portb.com
+            </span>
+          </div>
         </div>
       </div>
     </section>
