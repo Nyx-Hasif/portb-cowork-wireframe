@@ -330,3 +330,25 @@ section {
     transform: translateX(calc(-50% - 10px));
   }
 }
+
+
+/* Better touch targets */
+@media (hover: none) and (pointer: coarse) {
+  /* Touch devices only */
+  button {
+    min-height: 44px; /* iOS recommended */
+    min-width: 44px;
+  }
+  
+  /* Disable hover on touch devices */
+  .group:hover {
+    /* Hover won't trigger accidentally */
+  }
+}
+
+/* Active state feedback */
+button:active,
+[role="button"]:active {
+  transform: scale(0.98);
+  transition: transform 0.1s;
+}
