@@ -18,6 +18,7 @@ const Navbar = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
 
+  // ✅ FIXED: Same scroll behavior for ALL pages
   useEffect(() => {
     let ticking = false;
 
@@ -26,11 +27,15 @@ const Navbar = () => {
         window.requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
 
+          // Update scrolled state
           setIsScrolled(currentScrollY > 50);
 
+          // ✅ Apply hide/show to ALL pages (removed isHomePage check)
           if (currentScrollY < lastScrollY || currentScrollY < 50) {
+            // Scrolling up or at top - show navbar
             setIsVisible(true);
           } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+            // Scrolling down - hide navbar
             setIsVisible(false);
             setActiveDropdown(null);
           }
@@ -44,8 +49,9 @@ const Navbar = () => {
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
+  }, [lastScrollY]); // ✅ Removed isHomePage dependency
 
+  // Lock body scroll when mobile menu open
   useEffect(() => {
     if (isMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -84,14 +90,14 @@ const Navbar = () => {
     setMobileDropdown(mobileDropdown === menu ? null : menu);
   };
 
+  // Only transparent on home page at top
   const isTransparent = isHomePage && !isScrolled && !isMenuOpen;
 
   return (
     <>
-      {/* ✅ BOOSTED: Main Navbar z-index */}
+      {/* Main Navbar */}
       <header
-        className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-300 ease-out ${
-          // ✅ CHANGED: z-[100] → z-[9999]
+        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ease-out ${
           isVisible ? "translate-y-0" : "-translate-y-full"
         } ${isTransparent ? "bg-transparent" : "bg-white shadow-sm"}`}
         style={{
@@ -102,8 +108,7 @@ const Navbar = () => {
         <div className="mx-auto px-6 md:px-12">
           <nav className="flex items-center justify-between py-4">
             {/* Logo */}
-            <Link href="/" className="flex-shrink-0 relative z-[10000]">
-              {/* ✅ ADDED: z-[10000] */}
+            <Link href="/" className="flex-shrink-0">
               <Image
                 src={assets.portb_logo}
                 alt="PortB Cowork"
@@ -118,8 +123,7 @@ const Navbar = () => {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-8 text-lg relative z-[10000]">
-              {/* ✅ ADDED: z-[10000] */}
+            <div className="hidden md:flex items-center gap-8 text-lg">
               <Link
                 href="/"
                 className={`transition-colors duration-200 ${
@@ -153,8 +157,7 @@ const Navbar = () => {
                 </button>
 
                 {activeDropdown === "packages" && (
-                  <div className="absolute top-full left-0 pt-2 z-[10001] animate-in fade-in slide-in-from-top-2 duration-200">
-                    {/* ✅ CHANGED: z-[200] → z-[10001] */}
+                  <div className="absolute top-full left-0 pt-2 z-[200] animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="min-w-[220px] bg-white rounded-lg shadow-xl border border-gray-100 py-2">
                       {menuItems.packages.map((item) => (
                         <Link
@@ -192,8 +195,7 @@ const Navbar = () => {
                 </button>
 
                 {activeDropdown === "community" && (
-                  <div className="absolute top-full left-0 pt-2 z-[10001] animate-in fade-in slide-in-from-top-2 duration-200">
-                    {/* ✅ CHANGED: z-[200] → z-[10001] */}
+                  <div className="absolute top-full left-0 pt-2 z-[200] animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="min-w-[220px] bg-white rounded-lg shadow-xl border border-gray-100 py-2">
                       {menuItems.community.map((item) => (
                         <Link
@@ -223,8 +225,7 @@ const Navbar = () => {
 
             {/* Desktop Admin Icon Button */}
             {!isLoginPage && (
-              <div className="hidden md:block relative z-[10000]">
-                {/* ✅ ADDED: z-[10000] */}
+              <div className="hidden md:block">
                 <Link
                   href="/login"
                   className={`inline-flex items-center justify-center p-2 rounded-full transition-all duration-200 ${
@@ -245,8 +246,7 @@ const Navbar = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={toggleMobileMenu}
-              className={`md:hidden p-2 -mr-2 rounded-md transition-colors relative z-[10000] ${
-                // ✅ ADDED: z-[10000]
+              className={`md:hidden p-2 -mr-2 rounded-md transition-colors ${
                 isTransparent
                   ? "text-white hover:bg-white/10"
                   : "text-gray-800 hover:bg-gray-100"
@@ -273,29 +273,23 @@ const Navbar = () => {
       {/* Spacer - Only for non-home pages */}
       {!isHomePage && <div className="h-[100px] md:h-[110px]" />}
 
-      {/* ✅ BOOSTED: Mobile Menu Backdrop */}
+      {/* Mobile Menu Backdrop */}
       {isMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9998] md:hidden"
-          // ✅ CHANGED: z-40 → z-[9998]
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
           onClick={closeMobileMenu}
         />
       )}
 
-      {/* ✅ BOOSTED: Mobile Menu - Maximum Z-Index */}
+      {/* Mobile Menu */}
       <div
-        className={`fixed top-[100px] left-0 right-0 bg-white border-t shadow-lg z-[9999] md:hidden transition-all duration-300 ${
-          // ✅ CHANGED: z-50 → z-[9999]
+        className={`fixed top-[100px] left-0 right-0 bg-white border-t shadow-lg z-40 md:hidden transition-all duration-300 ${
           isMenuOpen
             ? "max-h-screen opacity-100"
             : "max-h-0 opacity-0 overflow-hidden"
         }`}
-        style={{
-          backgroundColor: "#ffffff",
-          zIndex: 9999, // ✅ ADDED: Inline z-index as backup
-        }}
       >
-        <nav className="px-4 py-4 space-y-1 max-h-[calc(100vh-100px)] overflow-y-auto bg-white">
+        <nav className="px-4 py-4 space-y-1 max-h-[calc(100vh-100px)] overflow-y-auto">
           <Link
             href="/"
             onClick={closeMobileMenu}
@@ -318,11 +312,11 @@ const Navbar = () => {
               />
             </button>
             <div
-              className={`overflow-hidden transition-all duration-300 bg-white ${
+              className={`overflow-hidden transition-all duration-300 ${
                 mobileDropdown === "packages" ? "max-h-48" : "max-h-0"
               }`}
             >
-              <div className="pl-4 space-y-1 py-2 bg-gray-50">
+              <div className="pl-4 space-y-1 py-2">
                 {menuItems.packages.map((item) => (
                   <Link
                     key={item.href}
@@ -351,11 +345,11 @@ const Navbar = () => {
               />
             </button>
             <div
-              className={`overflow-hidden transition-all duration-300 bg-white ${
+              className={`overflow-hidden transition-all duration-300 ${
                 mobileDropdown === "community" ? "max-h-48" : "max-h-0"
               }`}
             >
-              <div className="pl-4 space-y-1 py-2 bg-gray-50">
+              <div className="pl-4 space-y-1 py-2">
                 {menuItems.community.map((item) => (
                   <Link
                     key={item.href}
@@ -379,7 +373,7 @@ const Navbar = () => {
           </Link>
 
           {!isLoginPage && (
-            <div className="pt-4 border-t bg-white">
+            <div className="pt-4 border-t">
               <Link
                 href="/login"
                 onClick={closeMobileMenu}
