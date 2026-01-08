@@ -68,6 +68,7 @@ const Navbar = () => {
       { label: "Coworking Space", href: "/coworking-space" },
       { label: "Business Address", href: "/business-address" },
       { label: "Amenities", href: "/amenities" },
+      { label: "Program", href: "/program" },
     ],
     community: [
       { label: "Previous Events", href: "/previous-events" },

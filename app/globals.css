@@ -352,3 +352,12 @@ button:active,
   transform: scale(0.98);
   transition: transform 0.1s;
 }
+
+/* Hide scrollbar everywhere with this class */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

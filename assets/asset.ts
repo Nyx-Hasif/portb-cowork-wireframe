@@ -71,6 +71,18 @@ import sogno_signature from "./sogno_signature.png";
 import feedback_thumbnail_1 from "./feedback_thumbnail_1.png";
 import feedback_thumbnail_2 from "./feedback_thumbnail_2.png";
 import feedback_thumbnail_3 from "./feedback_thumbnail_3.png";
+import july_lai from "./july_lai.png";
+import profile_july_lai from "./profile_july_lai.png";
+import portb_yoga_1 from "./portb_yoga_1.png";
+import portb_yoga_2 from "./portb_yoga_2.png";
+import portb_yoga_3 from "./portb_yoga_3.png";
+import portb_yoga_4 from "./portb_yoga_4.png";
+import portb_yoga_5 from "./portb_yoga_5.png";
+import portb_yoga_6 from "./portb_yoga_6.png";
+import portb_yoga_7 from "./portb_yoga_7.png";
+import atirah from "./atirah.png";
+import profile_atirah from "./profile_atirah.png";
+
 
 /* ---- Gallery images ---- */
 export const images: GalleryYearGroup[] = [
@@ -223,6 +235,17 @@ export const assets = {
   feedback_thumbnail_1,
   feedback_thumbnail_2,
   feedback_thumbnail_3,
+  july_lai,
+  profile_july_lai,
+  portb_yoga_1,
+  portb_yoga_2,
+  portb_yoga_3,
+  portb_yoga_4,
+  portb_yoga_5,
+  portb_yoga_6,
+  portb_yoga_7,
+  atirah,
+  profile_atirah,
 
 };
 
