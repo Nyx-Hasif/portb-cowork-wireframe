@@ -88,6 +88,14 @@ import theraphy_thumbnail_2 from "./theraphy_thumbnail_2.png";
 import theraphy_thumbnail_3 from "./theraphy_thumbnail_3.png";
 import theraphy_thumbnail_4 from "./theraphy_thumbnail_4.png";
 import yoga_video_thumbnail_1 from "./yoga_video_thumbnail_1.png";
+import yoga_benefit_1 from "./yoga_benefit_1.png";
+import yoga_benefit_2 from "./yoga_benefit_2.png";
+import yoga_benefit_3 from "./yoga_benefit_3.png";
+import theraphy_benefit_1 from "./theraphy_benefit_1.png";
+import theraphy_benefit_2 from "./theraphy_benefit_2.png";
+import theraphy_benefit_3 from "./theraphy_benefit_3.png";
+import cta_portb_bg from "./cta_portb_bg.png";
+
 
 
 /* ---- Gallery images ---- */
@@ -257,7 +265,15 @@ export const assets = {
   theraphy_thumbnail_2,
   theraphy_thumbnail_3,
   theraphy_thumbnail_4,
-  yoga_video_thumbnail_1
+  yoga_video_thumbnail_1,
+  yoga_benefit_1,
+  yoga_benefit_2,
+  yoga_benefit_3,
+  theraphy_benefit_1,
+  theraphy_benefit_2,
+  theraphy_benefit_3,
+  cta_portb_bg,
+
 
 };
 

@@ -31,9 +31,9 @@ export const TRAINER_DATA: Record<ProgramType, TrainerData> = {
             { type: 'image', url: assets.portb_yoga_7, thumbnail: assets.portb_yoga_7 },
         ],
         benefits: [
-            { title: "Increased Flexibility", description: "Improve your range of motion and reduce the risk of injury through targeted stretching.", imageUrl: "https://images.unsplash.com/photo-1593810450967-f9c42742e326?q=80&w=1744&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
-            { title: "Stress Reduction", description: "Lower cortisol levels and find your center in a chaotic world with breathing exercises.", imageUrl: "https://images.unsplash.com/photo-1640262653851-103cbaf802d5?q=80&w=2668&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
-            { title: "Muscle Toning", description: "Build lean strength using only your own body weight and isometric holds.", imageUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&q=80&w=600" }
+            { title: "Increased Flexibility", description: "Improve your range of motion and reduce the risk of injury through targeted stretching.", imageUrl: assets.yoga_benefit_1 },
+            { title: "Stress Reduction", description: "Lower cortisol levels and find your center in a chaotic world with breathing exercises.", imageUrl: assets.yoga_benefit_2 },
+            { title: "Muscle Toning", description: "Build lean strength using only your own body weight and isometric holds.", imageUrl: assets.yoga_benefit_3 }
         ],
         faqs: [
             { question: "Why Join this programs?", answer: "Our program is designed for all levels, focusing on long-term sustainability and mental clarity, not just physical poses." },
@@ -67,9 +67,9 @@ export const TRAINER_DATA: Record<ProgramType, TrainerData> = {
            
         ],
         benefits: [
-            { title: "Emotional Resilience", description: "Develop tools to handle life's ups and downs with grace and stability.", imageUrl: "https://images.unsplash.com/photo-1516589174184-c6858b16ecaf?auto=format&fit=crop&q=80&w=600" },
-            { title: "Improved Focus", description: "Learn mindfulness techniques to stay present and productive in high-pressure roles.", imageUrl: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=600" },
-            { title: "Trauma Healing", description: "A safe space to process and move past historical obstacles with professional care.", imageUrl: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&q=80&w=600" }
+            { title: "Emotional Resilience", description: "Develop tools to handle life's ups and downs with grace and stability.", imageUrl: assets.theraphy_benefit_1 },
+            { title: "Improved Focus", description: "Learn mindfulness techniques to stay present and productive in high-pressure roles.", imageUrl: assets.theraphy_benefit_2 },
+            { title: "Trauma Healing", description: "A safe space to process and move past historical obstacles with professional care.", imageUrl: assets.theraphy_benefit_3 }
         ],
         faqs: [
             { question: "Why Join this programs?", answer: "Our mental therapy program offers structured, science-backed pathways to emotional stability and self-discovery." },
