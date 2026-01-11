@@ -5,20 +5,25 @@ import { ProgramType } from "@/types/types";
 import { TRAINER_DATA } from "../data";
 import LandingPageContent from "../components/LandingPageContent";
 
-// Generate static params for SSG
+// ============================================
+// GENERATE STATIC PARAMS FOR SSG
+// ============================================
 export async function generateStaticParams() {
   return Object.values(ProgramType).map((slug) => ({
     slug: slug,
   }));
 }
 
-// Generate metadata dynamically
+// ============================================
+// GENERATE METADATA DYNAMICALLY
+// ============================================
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const programType = params.slug as ProgramType;
+  const { slug } = await params;
+  const programType = slug as ProgramType;
   const data = TRAINER_DATA[programType];
 
   if (!data) {
@@ -31,12 +36,19 @@ export async function generateMetadata({
   };
 }
 
+// ============================================
+// PAGE PROPS INTERFACE
+// ============================================
 interface PageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
-export default function ProgramLandingPage({ params }: PageProps) {
-  const programType = params.slug as ProgramType;
+// ============================================
+// PAGE COMPONENT
+// ============================================
+export default async function ProgramLandingPage({ params }: PageProps) {
+  const { slug } = await params;
+  const programType = slug as ProgramType;
   const data = TRAINER_DATA[programType];
 
   // If program not found, show 404

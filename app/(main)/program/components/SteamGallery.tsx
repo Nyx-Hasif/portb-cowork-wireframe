@@ -15,6 +15,7 @@ import {
   ZoomOut,
   Volume2,
   VolumeX,
+  RotateCcw,
 } from "lucide-react";
 
 interface SteamGalleryProps {
@@ -43,6 +44,7 @@ interface ModernVideoPlayerProps {
   poster?: string;
   initialTime?: number;
   initialMuted?: boolean;
+  initialIsPlaying?: boolean;
   onTimeUpdate?: (time: number) => void;
   onMutedChange?: (muted: boolean) => void;
   onPlayingChange?: (playing: boolean) => void;
@@ -55,6 +57,7 @@ const ModernVideoPlayer: React.FC<ModernVideoPlayerProps> = ({
   poster,
   initialTime = 0,
   initialMuted = false,
+  initialIsPlaying = false,
   onTimeUpdate,
   onMutedChange,
   onPlayingChange,
@@ -66,10 +69,14 @@ const ModernVideoPlayer: React.FC<ModernVideoPlayerProps> = ({
   const [currentTime, setCurrentTime] = useState(initialTime);
   const [duration, setDuration] = useState(0);
   const [isReady, setIsReady] = useState(false);
+  const [hasEnded, setHasEnded] = useState(false);
 
   // UI States
   const [isDragging, setIsDragging] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const [isHoveringProgress, setIsHoveringProgress] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize Video
   useEffect(() => {
@@ -82,7 +89,10 @@ const ModernVideoPlayer: React.FC<ModernVideoPlayerProps> = ({
         video.muted = initialMuted;
         setIsReady(true);
         onReady?.();
-        video.play().catch(() => {});
+
+        if (initialIsPlaying) {
+          video.play().catch(() => {});
+        }
       }
     };
 
@@ -97,6 +107,7 @@ const ModernVideoPlayer: React.FC<ModernVideoPlayerProps> = ({
 
     const handlePlay = () => {
       setIsPlaying(true);
+      setHasEnded(false);
       onPlayingChange?.(true);
     };
 
@@ -105,11 +116,18 @@ const ModernVideoPlayer: React.FC<ModernVideoPlayerProps> = ({
       onPlayingChange?.(false);
     };
 
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setHasEnded(true);
+      onPlayingChange?.(false);
+    };
+
     video.addEventListener("canplay", handleCanPlay);
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
     video.addEventListener("play", handlePlay);
     video.addEventListener("pause", handlePause);
+    video.addEventListener("ended", handleEnded);
 
     if (video.readyState >= 3) handleCanPlay();
     if (video.readyState >= 1) handleLoadedMetadata();
@@ -120,16 +138,46 @@ const ModernVideoPlayer: React.FC<ModernVideoPlayerProps> = ({
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
       video.removeEventListener("play", handlePlay);
       video.removeEventListener("pause", handlePause);
+      video.removeEventListener("ended", handleEnded);
     };
   }, [
     videoRef,
     initialTime,
     initialMuted,
+    initialIsPlaying,
     onReady,
     isReady,
     onTimeUpdate,
     onPlayingChange,
   ]);
+
+  // YouTube-style auto-hide controls
+  const handleMouseMove = useCallback(() => {
+    setShowControls(true);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    if (isPlaying && !isDragging && !isHoveringProgress) {
+      controlsTimeoutRef.current = setTimeout(() => {
+        setShowControls(false);
+      }, 3000);
+    }
+  }, [isPlaying, isDragging, isHoveringProgress]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (isPlaying && !isDragging && !isHoveringProgress) {
+      setShowControls(false);
+    }
+  }, [isPlaying, isDragging, isHoveringProgress]);
+
+  useEffect(() => {
+    if (!isPlaying || isHoveringProgress) {
+      setShowControls(true);
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+    }
+  }, [isPlaying, isHoveringProgress]);
 
   // Player Actions
   const togglePlay = useCallback(
@@ -142,6 +190,18 @@ const ModernVideoPlayer: React.FC<ModernVideoPlayerProps> = ({
       } else {
         video.pause();
       }
+    },
+    [videoRef]
+  );
+
+  const handleReplay = useCallback(
+    (e?: React.MouseEvent) => {
+      e?.stopPropagation();
+      const video = videoRef.current;
+      if (!video) return;
+      video.currentTime = 0;
+      setHasEnded(false);
+      video.play();
     },
     [videoRef]
   );
@@ -159,7 +219,6 @@ const ModernVideoPlayer: React.FC<ModernVideoPlayerProps> = ({
     [videoRef, duration]
   );
 
-  // Handle click on progress bar
   const handleProgressClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
@@ -168,7 +227,6 @@ const ModernVideoPlayer: React.FC<ModernVideoPlayerProps> = ({
     [seekToPosition]
   );
 
-  // Handle mouse down on progress bar (start dragging)
   const handleProgressMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
@@ -178,7 +236,6 @@ const ModernVideoPlayer: React.FC<ModernVideoPlayerProps> = ({
     [seekToPosition]
   );
 
-  // Dragging Logic
   useEffect(() => {
     if (!isDragging) return;
 
@@ -205,6 +262,8 @@ const ModernVideoPlayer: React.FC<ModernVideoPlayerProps> = ({
     <div
       className="relative w-full h-full bg-black group/player select-none"
       onClick={togglePlay}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
     >
       {/* Loading Spinner */}
       {!isReady && initialTime > 0 && (
@@ -222,13 +281,12 @@ const ModernVideoPlayer: React.FC<ModernVideoPlayerProps> = ({
           !isReady && initialTime > 0 ? "opacity-0" : "opacity-100"
         }`}
         playsInline
-        loop
       />
 
-      {/* Center Play Button (Only when paused) */}
+      {/* Center Play Button */}
       <div
         className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-300 ${
-          !isPlaying ? "opacity-100" : "opacity-0"
+          !isPlaying && !hasEnded ? "opacity-100" : "opacity-0"
         }`}
       >
         <div className="p-6 bg-black/40 backdrop-blur-md rounded-full border border-white/10 shadow-2xl">
@@ -236,29 +294,65 @@ const ModernVideoPlayer: React.FC<ModernVideoPlayerProps> = ({
         </div>
       </div>
 
-      {/* Bottom Controls - SENTIASA KELIHATAN & BOLEH KLIK */}
+      {/* Replay Button */}
       <div
-        className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent z-[60]"
-        onClick={(e) => e.stopPropagation()}
+        className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${
+          hasEnded ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
       >
-        {/* Progress Bar */}
+        <button
+          onClick={handleReplay}
+          className="p-6 bg-black/60 backdrop-blur-md rounded-full border border-white/20 shadow-2xl hover:scale-110 hover:bg-black/80 transition-all"
+        >
+          <RotateCcw size={40} className="text-white" />
+        </button>
+      </div>
+
+      {/* Progress Bar */}
+      <div
+        className="absolute bottom-12 sm:bottom-16 left-0 right-0 px-4 sm:px-6 z-[61] pb-2 pt-4"
+        onClick={(e) => e.stopPropagation()}
+        onMouseEnter={() => setIsHoveringProgress(true)}
+        onMouseLeave={() => setIsHoveringProgress(false)}
+      >
         <div
           ref={progressRef}
-          className="group/bar relative h-2 sm:h-1.5 hover:h-3 sm:hover:h-2.5 bg-white/20 w-full rounded-full cursor-pointer transition-all duration-200 mb-4"
+          className={`group/bar relative bg-white/20 w-full rounded-full cursor-pointer transition-all duration-200 ${
+            showControls || isHoveringProgress || isDragging
+              ? "h-1 hover:h-2.5"
+              : "h-0"
+          } ${
+            showControls || isHoveringProgress || isDragging
+              ? "opacity-100"
+              : "opacity-60"
+          }`}
           onClick={handleProgressClick}
           onMouseDown={handleProgressMouseDown}
         >
-          {/* Progress Fill */}
           <div
             className="absolute top-0 left-0 h-full bg-white rounded-full transition-all duration-75"
             style={{ width: `${progressPercent}%` }}
           >
-            {/* Scrubber Handle */}
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-4 h-4 bg-white rounded-full shadow-lg scale-0 group-hover/bar:scale-100 transition-transform" />
+            <div
+              className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-3.5 h-3.5 bg-white rounded-full shadow-lg transition-all duration-200 ${
+                isHoveringProgress || isDragging
+                  ? "scale-100 opacity-100"
+                  : "scale-0 opacity-0"
+              }`}
+            />
           </div>
         </div>
+      </div>
 
-        {/* Buttons Row */}
+      {/* Bottom Controls */}
+      <div
+        className={`absolute bottom-0 left-0 right-0 p-4 sm:p-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent z-[60] transition-all duration-300 ${
+          showControls
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-4 pointer-events-none"
+        }`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 sm:gap-4">
             <button
@@ -297,13 +391,14 @@ const ModernVideoPlayer: React.FC<ModernVideoPlayerProps> = ({
 };
 
 // ============================================
-// LIGHTBOX MODAL (Fullscreen Container)
+// LIGHTBOX MODAL
 // ============================================
 interface LightboxModalProps {
   items: GalleryItem[];
   activeIndex: number;
   setActiveIndex: (index: number) => void;
   onClose: (currentTime: number, isMuted: boolean, isPlaying: boolean) => void;
+  onLightboxVideoReady?: () => void;
   initialVideoTime?: number;
   initialIsMuted?: boolean;
   initialIsPlaying?: boolean;
@@ -314,6 +409,7 @@ const LightboxModal: React.FC<LightboxModalProps> = ({
   activeIndex,
   setActiveIndex,
   onClose,
+  onLightboxVideoReady,
   initialVideoTime = 0,
   initialIsMuted = false,
   initialIsPlaying = false,
@@ -323,7 +419,6 @@ const LightboxModal: React.FC<LightboxModalProps> = ({
   const [showUI, setShowUI] = useState(true);
   const uiTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Video state refs (to avoid stale closures)
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoStateRef = useRef({
     time: initialVideoTime,
@@ -333,14 +428,12 @@ const LightboxModal: React.FC<LightboxModalProps> = ({
 
   const currentItem = items[activeIndex];
 
-  // Global Interaction Handler
   const handleInteraction = useCallback(() => {
     setShowUI(true);
     if (uiTimeoutRef.current) clearTimeout(uiTimeoutRef.current);
     uiTimeoutRef.current = setTimeout(() => setShowUI(false), 3000);
   }, []);
 
-  // Lock body scroll
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -354,13 +447,11 @@ const LightboxModal: React.FC<LightboxModalProps> = ({
     return () => setMounted(false);
   }, [handleInteraction]);
 
-  // Handle close - sync video state back
   const handleClose = useCallback(() => {
     const state = videoStateRef.current;
     onClose(state.time, state.muted, state.playing);
   }, [onClose]);
 
-  // Navigation
   const next = useCallback(() => {
     setActiveIndex((activeIndex + 1) % items.length);
     setIsZoomed(false);
@@ -371,7 +462,6 @@ const LightboxModal: React.FC<LightboxModalProps> = ({
     setIsZoomed(false);
   }, [activeIndex, items.length, setActiveIndex]);
 
-  // Keyboard handler
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       handleInteraction();
@@ -402,7 +492,7 @@ const LightboxModal: React.FC<LightboxModalProps> = ({
       onTouchStart={handleInteraction}
       onClick={handleInteraction}
     >
-      {/* ===== TOP BAR (Auto-hide) ===== */}
+      {/* TOP BAR */}
       <div
         className={`absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-start z-40 transition-all duration-300 ${
           showUI
@@ -438,9 +528,8 @@ const LightboxModal: React.FC<LightboxModalProps> = ({
         </div>
       </div>
 
-      {/* ===== CONTENT AREA ===== */}
+      {/* CONTENT AREA */}
       <div className="flex-1 relative w-full h-full flex items-center justify-center">
-        {/* Arrows (Auto-hide) - Hidden on mobile, shown on tablet+ */}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -469,7 +558,6 @@ const LightboxModal: React.FC<LightboxModalProps> = ({
           <ChevronRight size={32} className="sm:w-10 sm:h-10" />
         </button>
 
-        {/* Media */}
         <div className="w-full h-full">
           {currentItem.type === "video" ? (
             <ModernVideoPlayer
@@ -478,6 +566,7 @@ const LightboxModal: React.FC<LightboxModalProps> = ({
               poster={getImageSrc(currentItem.thumbnail)}
               initialTime={initialVideoTime}
               initialMuted={initialIsMuted}
+              initialIsPlaying={initialIsPlaying}
               onTimeUpdate={(t) => {
                 videoStateRef.current.time = t;
               }}
@@ -486,6 +575,9 @@ const LightboxModal: React.FC<LightboxModalProps> = ({
               }}
               onPlayingChange={(p) => {
                 videoStateRef.current.playing = p;
+              }}
+              onReady={() => {
+                onLightboxVideoReady?.();
               }}
             />
           ) : (
@@ -513,7 +605,7 @@ const LightboxModal: React.FC<LightboxModalProps> = ({
         </div>
       </div>
 
-      {/* ===== THUMBNAIL STRIP (Auto-hide) ===== */}
+      {/* THUMBNAIL STRIP */}
       <div
         className={`absolute bottom-0 left-0 right-0 z-40 transition-all duration-300 ${
           showUI
@@ -522,47 +614,44 @@ const LightboxModal: React.FC<LightboxModalProps> = ({
         }`}
       >
         <div className="bg-gradient-to-t from-black via-black/80 to-transparent pt-6 sm:pt-8 pb-4 sm:pb-6 px-4">
-          <div
-            className="flex justify-center gap-2 max-w-4xl mx-auto overflow-x-auto"
-            style={{
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
-            }}
-          >
-            <style jsx>{`
-              div::-webkit-scrollbar {
-                display: none;
-              }
-            `}</style>
-            {items.map((item, idx) => (
-              <button
-                key={idx}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveIndex(idx);
-                  setIsZoomed(false);
-                }}
-                className={`relative flex-shrink-0 w-16 sm:w-20 md:w-24 aspect-video rounded-lg overflow-hidden transition-all duration-300 ${
-                  activeIndex === idx
-                    ? "ring-2 ring-white ring-offset-2 ring-offset-black opacity-100 scale-105"
-                    : "opacity-50 hover:opacity-100 hover:scale-105"
-                }`}
-              >
-                <Image
-                  src={item.thumbnail}
-                  alt=""
-                  fill
-                  sizes="96px"
-                  className="object-cover"
-                  draggable={false}
-                />
-                {item.type === "video" && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                    <Play size={14} fill="white" className="text-white" />
-                  </div>
-                )}
-              </button>
-            ))}
+          <div className="flex justify-center items-center w-full">
+            <div
+              className="flex gap-3 max-w-4xl overflow-x-auto hide-scrollbar py-2 px-2"
+              style={{
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
+            >
+              {items.map((item, idx) => (
+                <button
+                  key={idx}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveIndex(idx);
+                    setIsZoomed(false);
+                  }}
+                  className={`relative flex-shrink-0 w-16 sm:w-20 md:w-24 aspect-video rounded-lg overflow-hidden transition-all duration-300 ${
+                    activeIndex === idx
+                      ? "ring-2 ring-white ring-offset-2 ring-offset-black opacity-100 scale-105"
+                      : "opacity-50 hover:opacity-100 hover:scale-105"
+                  }`}
+                >
+                  <Image
+                    src={item.thumbnail}
+                    alt=""
+                    fill
+                    sizes="96px"
+                    className="object-cover"
+                    draggable={false}
+                  />
+                  {item.type === "video" && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                      <Play size={14} fill="white" className="text-white" />
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -578,18 +667,17 @@ const SteamGallery: React.FC<SteamGalleryProps> = ({ items }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [hasStartedPlaying, setHasStartedPlaying] = useState(false);
+  const [hasEnded, setHasEnded] = useState(false);
   const [videoState, setVideoState] = useState({
     time: 0,
     muted: false,
     playing: false,
   });
 
-  // Main video ref
   const mainVideoRef = useRef<HTMLVideoElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const thumbRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  // Sync active thumbnail scroll
   useEffect(() => {
     const activeThumb = thumbRefs.current[activeIndex];
     if (activeThumb && scrollRef.current) {
@@ -601,16 +689,15 @@ const SteamGallery: React.FC<SteamGalleryProps> = ({ items }) => {
         behavior: "smooth",
       });
     }
-    // Reset state when changing item
     setVideoState({ time: 0, muted: false, playing: false });
     setHasStartedPlaying(false);
+    setHasEnded(false);
   }, [activeIndex]);
 
   const currentItem = items[activeIndex];
 
-  // Open Lightbox
+  // ✅ Open lightbox - Don't pause main video yet
   const handleOpenLightbox = useCallback(() => {
-    // Get current video state before opening
     if (mainVideoRef.current && currentItem.type === "video") {
       const video = mainVideoRef.current;
       setVideoState({
@@ -618,28 +705,31 @@ const SteamGallery: React.FC<SteamGalleryProps> = ({ items }) => {
         muted: video.muted,
         playing: !video.paused,
       });
-      video.pause();
+      // Don't pause here - will pause when lightbox is ready
     }
     setIsLightboxOpen(true);
   }, [currentItem.type]);
 
-  // Close Lightbox and sync back
+  // ✅ Pause main video when lightbox video is ready
+  const handleLightboxVideoReady = useCallback(() => {
+    if (mainVideoRef.current) {
+      mainVideoRef.current.pause();
+    }
+  }, []);
+
   const handleCloseLightbox = useCallback(
     (time: number, muted: boolean, playing: boolean) => {
       setIsLightboxOpen(false);
 
-      // Sync video state back to main video
       if (mainVideoRef.current && currentItem.type === "video") {
         const video = mainVideoRef.current;
         video.currentTime = time;
         video.muted = muted;
 
-        // Mark as started if time > 0
         if (time > 0) {
           setHasStartedPlaying(true);
         }
 
-        // Continue playing if it was playing in lightbox
         if (playing) {
           video.play().catch(() => {});
         }
@@ -650,7 +740,6 @@ const SteamGallery: React.FC<SteamGalleryProps> = ({ items }) => {
     [currentItem.type]
   );
 
-  // Toggle main video play
   const toggleMainPlay = useCallback(() => {
     if (!mainVideoRef.current) return;
     const video = mainVideoRef.current;
@@ -659,6 +748,7 @@ const SteamGallery: React.FC<SteamGalleryProps> = ({ items }) => {
       video.muted = false;
       video.play();
       setHasStartedPlaying(true);
+      setHasEnded(false);
       setVideoState((s) => ({ ...s, playing: true, muted: false }));
     } else {
       video.pause();
@@ -666,7 +756,16 @@ const SteamGallery: React.FC<SteamGalleryProps> = ({ items }) => {
     }
   }, []);
 
-  // Toggle mute
+  const handleReplay = useCallback(() => {
+    if (!mainVideoRef.current) return;
+    const video = mainVideoRef.current;
+    video.currentTime = 0;
+    video.muted = false;
+    setHasEnded(false);
+    video.play();
+    setVideoState({ time: 0, muted: false, playing: true });
+  }, []);
+
   const toggleMute = useCallback(() => {
     if (!mainVideoRef.current) return;
     mainVideoRef.current.muted = !mainVideoRef.current.muted;
@@ -678,7 +777,6 @@ const SteamGallery: React.FC<SteamGalleryProps> = ({ items }) => {
 
   return (
     <>
-      {/* Global styles for hiding scrollbar */}
       <style jsx global>{`
         .hide-scrollbar::-webkit-scrollbar {
           display: none;
@@ -694,7 +792,6 @@ const SteamGallery: React.FC<SteamGalleryProps> = ({ items }) => {
         <div className="relative aspect-video bg-neutral-900 rounded-xl overflow-hidden shadow-2xl group border border-neutral-800">
           {currentItem.type === "video" ? (
             <>
-              {/* Thumbnail Overlay - Only show before video has started */}
               {!hasStartedPlaying && (
                 <div
                   className="absolute inset-0 z-10 cursor-pointer"
@@ -708,7 +805,6 @@ const SteamGallery: React.FC<SteamGalleryProps> = ({ items }) => {
                     className="object-cover"
                     priority
                   />
-                  {/* Play Button Overlay */}
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                     <div className="p-5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-xl hover:scale-110 transition-transform">
                       <Play
@@ -721,13 +817,11 @@ const SteamGallery: React.FC<SteamGalleryProps> = ({ items }) => {
                 </div>
               )}
 
-              {/* Video Element - Always renders but hidden behind thumbnail initially */}
               <video
                 ref={mainVideoRef}
                 src={getImageSrc(currentItem.url)}
                 className="w-full h-full object-contain bg-black"
                 muted={videoState.muted}
-                loop
                 playsInline
                 onClick={toggleMainPlay}
                 onTimeUpdate={() => {
@@ -740,13 +834,17 @@ const SteamGallery: React.FC<SteamGalleryProps> = ({ items }) => {
                 }}
                 onPlay={() => {
                   setHasStartedPlaying(true);
+                  setHasEnded(false);
                   setVideoState((s) => ({ ...s, playing: true }));
                 }}
                 onPause={() => setVideoState((s) => ({ ...s, playing: false }))}
+                onEnded={() => {
+                  setHasEnded(true);
+                  setVideoState((s) => ({ ...s, playing: false }));
+                }}
               />
 
-              {/* Center Play/Pause Button - Only shows after video started and is paused */}
-              {hasStartedPlaying && !videoState.playing && (
+              {hasStartedPlaying && !videoState.playing && !hasEnded && (
                 <div
                   className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer z-10"
                   onClick={toggleMainPlay}
@@ -757,7 +855,17 @@ const SteamGallery: React.FC<SteamGalleryProps> = ({ items }) => {
                 </div>
               )}
 
-              {/* Bottom Controls Bar */}
+              {hasEnded && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer z-10">
+                  <button
+                    onClick={handleReplay}
+                    className="p-5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-xl hover:scale-110 hover:bg-white/20 transition-all"
+                  >
+                    <RotateCcw size={40} className="text-white" />
+                  </button>
+                </div>
+              )}
+
               <div
                 className={`absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-gradient-to-t from-black/80 to-transparent flex justify-between items-center transition-opacity duration-300 z-20 ${
                   hasStartedPlaying
@@ -800,7 +908,6 @@ const SteamGallery: React.FC<SteamGalleryProps> = ({ items }) => {
                   </span>
                 </div>
 
-                {/* Fullscreen Button - Always visible */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -817,7 +924,6 @@ const SteamGallery: React.FC<SteamGalleryProps> = ({ items }) => {
               className="relative w-full h-full cursor-pointer"
               onClick={() => setIsLightboxOpen(true)}
             >
-              {/* Main display images use object-cover to fill container */}
               <Image
                 src={currentItem.url}
                 alt=""
@@ -834,7 +940,6 @@ const SteamGallery: React.FC<SteamGalleryProps> = ({ items }) => {
             </div>
           )}
 
-          {/* Navigation Arrows */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -854,59 +959,60 @@ const SteamGallery: React.FC<SteamGalleryProps> = ({ items }) => {
             <ChevronRight size={20} className="sm:w-6 sm:h-6" />
           </button>
 
-          {/* Gallery Counter */}
           <div className="absolute top-3 sm:top-4 left-3 sm:left-4 px-2 sm:px-3 py-1 sm:py-1.5 bg-black/50 backdrop-blur rounded-full text-white/90 text-[10px] sm:text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity z-30">
             {activeIndex + 1} / {items.length}
           </div>
         </div>
 
         {/* THUMBNAIL STRIP */}
-        <div
-          className="mt-3 sm:mt-4 flex gap-2 sm:gap-3 overflow-x-auto pb-2 hide-scrollbar"
-          ref={scrollRef}
-        >
-          {items.map((item, idx) => (
-            <button
-              key={idx}
-              ref={(el) => {
-                thumbRefs.current[idx] = el;
-              }}
-              onClick={() => setActiveIndex(idx)}
-              className={`relative flex-shrink-0 w-20 sm:w-28 md:w-32 aspect-video rounded-lg overflow-hidden border-2 transition-all duration-300 ${
-                activeIndex === idx
-                  ? "border-white opacity-100 scale-105"
-                  : "border-transparent opacity-50 grayscale hover:grayscale-0 hover:opacity-100"
-              }`}
-            >
-              <Image
-                src={item.thumbnail}
-                alt=""
-                fill
-                sizes="128px"
-                className="object-cover"
-                draggable={false}
-              />
-              {item.type === "video" && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                  <Play
-                    size={16}
-                    fill="white"
-                    className="text-white drop-shadow-lg sm:w-5 sm:h-5"
-                  />
-                </div>
-              )}
-            </button>
-          ))}
+        <div className="mt-3 sm:mt-4 flex justify-center">
+          <div
+            className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 hide-scrollbar px-2 py-2"
+            ref={scrollRef}
+          >
+            {items.map((item, idx) => (
+              <button
+                key={idx}
+                ref={(el) => {
+                  thumbRefs.current[idx] = el;
+                }}
+                onClick={() => setActiveIndex(idx)}
+                className={`relative flex-shrink-0 w-20 sm:w-28 md:w-32 aspect-video rounded-lg overflow-hidden border-2 transition-all duration-300 ${
+                  activeIndex === idx
+                    ? "border-white opacity-100 scale-105"
+                    : "border-transparent opacity-50 grayscale hover:grayscale-0 hover:opacity-100"
+                }`}
+              >
+                <Image
+                  src={item.thumbnail}
+                  alt=""
+                  fill
+                  sizes="128px"
+                  className="object-cover"
+                  draggable={false}
+                />
+                {item.type === "video" && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                    <Play
+                      size={16}
+                      fill="white"
+                      className="text-white drop-shadow-lg sm:w-5 sm:h-5"
+                    />
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* LIGHTBOX MODAL */}
       {isLightboxOpen && (
         <LightboxModal
           items={items}
           activeIndex={activeIndex}
           setActiveIndex={setActiveIndex}
           onClose={handleCloseLightbox}
+          onLightboxVideoReady={handleLightboxVideoReady}
           initialVideoTime={videoState.time}
           initialIsMuted={videoState.muted}
           initialIsPlaying={videoState.playing}

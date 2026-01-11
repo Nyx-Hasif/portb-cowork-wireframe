@@ -82,6 +82,12 @@ import portb_yoga_6 from "./portb_yoga_6.png";
 import portb_yoga_7 from "./portb_yoga_7.png";
 import atirah from "./atirah.png";
 import profile_atirah from "./profile_atirah.png";
+import theraphy_video_thumbnail_1 from "./theraphy_video_thumbnail_1.png";
+import theraphy_thumbnail_1 from "./theraphy_thumbnail_1.png";
+import theraphy_thumbnail_2 from "./theraphy_thumbnail_2.png";
+import theraphy_thumbnail_3 from "./theraphy_thumbnail_3.png";
+import theraphy_thumbnail_4 from "./theraphy_thumbnail_4.png";
+import yoga_video_thumbnail_1 from "./yoga_video_thumbnail_1.png";
 
 
 /* ---- Gallery images ---- */
@@ -246,6 +252,12 @@ export const assets = {
   portb_yoga_7,
   atirah,
   profile_atirah,
+  theraphy_video_thumbnail_1,
+  theraphy_thumbnail_1,
+  theraphy_thumbnail_2,
+  theraphy_thumbnail_3,
+  theraphy_thumbnail_4,
+  yoga_video_thumbnail_1
 
 };
 

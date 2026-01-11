@@ -21,7 +21,7 @@ export const TRAINER_DATA: Record<ProgramType, TrainerData> = {
         },
         badges: ["Yoga Alliance RYT-500", "Ministry of Health Certified", "Global Wellness Award 2022", "Licensed Physiotherapist"],
         gallery: [
-             { type: 'video', url: "/videos/theraphy_video_1.mp4", thumbnail: assets.portb_yoga_1 },
+             { type: 'video', url: "/videos/theraphy_video_1.mp4", thumbnail: assets.yoga_video_thumbnail_1 },
             { type: 'image', url: assets.portb_yoga_1, thumbnail: assets.portb_yoga_1 },
             { type: 'image', url: assets.portb_yoga_2, thumbnail: assets.portb_yoga_2 },
             { type: 'image', url: assets.portb_yoga_3, thumbnail: assets.portb_yoga_3 },
@@ -51,7 +51,7 @@ export const TRAINER_DATA: Record<ProgramType, TrainerData> = {
         trainerImage: assets.atirah,
         trainerProfileImage: assets.profile_atirah,
         aboutIntro: "Clinical Psychologist specializing in cognitive behavioral therapy and mindfulness.",
-        aboutBio: "Atirah has dedicated xXx years to helping individuals overcome trauma and anxiety. He believes that mental fitness is as crucial as physical health and requires consistent, guided practice.",
+        aboutBio: "Atirah has dedicated xXx years to helping individuals overcome trauma and anxiety. She believes that mental fitness is as crucial as physical health and requires consistent, guided practice.",
         experience: {
             years: "XX Years Clinical Experience",
             description: "Former head of Behavioral Health at the Metropolitan Wellness Center.",
@@ -59,9 +59,12 @@ export const TRAINER_DATA: Record<ProgramType, TrainerData> = {
         },
         badges: ["Board Certified Therapist", "Mental Health Excellence Award", "Author of 'The Quiet Mind'", "Health Minister Appointee"],
         gallery: [
-            { type: 'video', url: "/videos/theraphy_video_1.mp4", thumbnail: 'https://images.unsplash.com/photo-1527137342181-19aab11a8ee8?auto=format&fit=crop&q=80&w=400' },
-            { type: 'image', url: 'https://images.unsplash.com/photo-1527137342181-19aab11a8ee8?auto=format&fit=crop&q=80&w=1200', thumbnail: 'https://images.unsplash.com/photo-1527137342181-19aab11a8ee8?auto=format&fit=crop&q=80&w=200' },
-            { type: 'image', url: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=1200', thumbnail: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=200' }
+            { type: 'video', url: "/videos/theraphy_video_1.mp4", thumbnail: assets.theraphy_video_thumbnail_1 },
+            { type: 'image', url: assets.theraphy_thumbnail_1, thumbnail: assets.theraphy_thumbnail_1 },
+            { type: 'image', url: assets.theraphy_thumbnail_2, thumbnail: assets.theraphy_thumbnail_2 },
+            { type: 'image', url: assets.theraphy_thumbnail_3, thumbnail: assets.theraphy_thumbnail_3 },
+            { type: 'image', url: assets.theraphy_thumbnail_4, thumbnail: assets.theraphy_thumbnail_4 },
+           
         ],
         benefits: [
             { title: "Emotional Resilience", description: "Develop tools to handle life's ups and downs with grace and stability.", imageUrl: "https://images.unsplash.com/photo-1516589174184-c6858b16ecaf?auto=format&fit=crop&q=80&w=600" },
