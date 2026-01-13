@@ -13,7 +13,7 @@ export const TRAINER_DATA: Record<ProgramType, TrainerData> = {
         trainerImage: assets.july_lai,
         trainerProfileImage: assets.profile_july_lai,
         aboutIntro: "Professional Yoga Instructor with 10+ years of practice in Malaysia.",
-        aboutBio: "Elena has spent over a decade traveling the world, learning from masters in India and Bali. Her philosophy centers on the union of breath and movement to heal the physical body and quiet the mind.",
+        aboutBio: "July Lai has spent over a decade traveling the world, learning from masters in India and Bali. Her philosophy centers on the union of breath and movement to heal the physical body and quiet the mind.",
         experience: {
             years: "10 Years Professional Practice",
             description: "Specialized in mobility recovery and athletic flexibility enhancement.",

@@ -92,7 +92,7 @@ export function InfiniteMovingCards({
             key={idx}
             className="w-[300px] sm:w-[340px] shrink-0 will-change-transform"
           >
-            <article className="group relative rounded-2xl bg-[#f8f9fb] border border-gray-100 p-6 h-[200px] flex flex-col transition-all duration-300 hover:border-gray-200 hover:shadow-lg hover:shadow-gray-100/50 hover:-translate-y-1">
+            <article className="group relative rounded-2xl bg-black/10 border border-gray-100 p-6 h-[200px] flex flex-col transition-all duration-300 hover:border-gray-200 hover:shadow-lg hover:shadow-gray-100/50 hover:-translate-y-1">
               {/* Quote Icon */}
               <Quote className="absolute top-4 right-4 w-8 h-8 text-gray-200 group-hover:text-gray-300 transition-colors" />
 

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import Image from "next/image"; // ✅ ADDED: Import Next.js Image
+import Image from "next/image";
 import { MapPin, Mail, Lock, Bell, Shield, ArrowRight } from "lucide-react";
 
 const features = [
@@ -50,52 +50,53 @@ const VirtualAddress: React.FC = () => {
   const [activeFeature, setActiveFeature] = useState(features[0]);
 
   return (
-    <section className="py-16 md:py-20 bg-black overflow-hidden border-t border-white/5">
+    <section className="py-20 bg-zinc-50 overflow-hidden border-t border-zinc-200">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex flex-col md:flex-row gap-12 lg:gap-16">
+        <div className="flex flex-col md:flex-row gap-12 lg:gap-20">
           {/* Left Side: Text List */}
           <div className="md:w-1/2">
-            <div className="mb-12">
-              <span className="text-[10px] uppercase tracking-[0.5em] text-gray-500 mb-4 block">
+            <div className="mb-16">
+              <span className="text-[10px] uppercase tracking-[0.5em] text-zinc-500 mb-4 block font-bold">
                 Virtual Presence
               </span>
-              <h2 className="text-4xl md:text-6xl lg:text-7xl font-serif text-white tracking-tighter leading-none mb-6">
+              <h2 className="text-4xl md:text-6xl lg:text-7xl font-serif text-zinc-900 tracking-tighter leading-none mb-6">
                 THE <br />
-                <span className="italic text-gray-500">IDENTITY.</span>
+                <span className="italic text-zinc-400">IDENTITY.</span>
               </h2>
-              <p className="text-gray-400 font-light leading-relaxed max-w-sm text-sm md:text-base">
+              <p className="text-zinc-500 font-light leading-relaxed max-w-sm text-sm md:text-base">
                 A secure, professional anchor for your business. Elevate your
                 brand without the overhead of a physical suite.
               </p>
             </div>
 
-            {/* Feature list with backgrounds */}
-            <div className="space-y-2">
+            {/* Feature list with Interactive Backgrounds */}
+            <div className="space-y-3">
               {features.map((item) => (
                 <div
                   key={item.id}
                   onMouseEnter={() => setActiveFeature(item)}
-                  className={`group cursor-pointer py-4 md:py-5 px-4 border transition-all duration-500 flex items-center justify-between ${
+                  // Logic: Active = Black Background, Inactive = White Background
+                  className={`group cursor-pointer py-5 px-6 border transition-all duration-500 flex items-center justify-between ${
                     activeFeature.id === item.id
-                      ? "bg-white/[0.07] border-white/20 shadow-lg"
-                      : "bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10"
+                      ? "bg-zinc-900 border-zinc-900 shadow-xl scale-[1.02]"
+                      : "bg-white border-zinc-200 hover:border-zinc-300 hover:shadow-md"
                   }`}
                 >
                   <div className="flex items-center gap-4 md:gap-6">
                     <span
                       className={`text-xs font-serif transition-colors duration-500 ${
                         activeFeature.id === item.id
-                          ? "text-white"
-                          : "text-gray-600 group-hover:text-gray-500"
+                          ? "text-zinc-500" // Number color when active
+                          : "text-zinc-300 group-hover:text-zinc-400"
                       }`}
                     >
                       0{item.id}
                     </span>
                     <h3
-                      className={`text-lg md:text-xl lg:text-2xl font-serif transition-all duration-500 ${
+                      className={`text-lg md:text-xl font-serif transition-all duration-500 ${
                         activeFeature.id === item.id
-                          ? "text-white"
-                          : "text-gray-400 group-hover:text-gray-300"
+                          ? "text-white" // Text color when active
+                          : "text-zinc-500 group-hover:text-zinc-900"
                       }`}
                     >
                       {item.title}
@@ -105,10 +106,16 @@ const VirtualAddress: React.FC = () => {
                     className={`transition-all duration-500 ${
                       activeFeature.id === item.id
                         ? "opacity-100 translate-x-0"
-                        : "opacity-0 -translate-x-4 group-hover:opacity-50"
+                        : "opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:text-zinc-400"
                     }`}
                   >
-                    <ArrowRight className="text-white w-5 h-5" />
+                    <ArrowRight
+                      className={`w-5 h-5 ${
+                        activeFeature.id === item.id
+                          ? "text-white"
+                          : "text-zinc-900"
+                      }`}
+                    />
                   </div>
                 </div>
               ))}
@@ -117,38 +124,39 @@ const VirtualAddress: React.FC = () => {
 
           {/* Right Side: Dynamic Visual Frame */}
           <div className="md:w-1/2 relative">
-            <div className="md:sticky md:top-24 aspect-[3/4] overflow-hidden border border-white/10 bg-zinc-900 group rounded-lg">
-              <div className="absolute inset-0 bg-black/40 z-10 transition-opacity duration-500 group-hover:opacity-0"></div>
+            {/* Dark Frame Container - Keeps the gallery look */}
+            <div className="md:sticky md:top-24 aspect-[3/4] overflow-hidden border border-zinc-200 bg-zinc-900 group shadow-2xl">
+              <div className="absolute inset-0 bg-black/20 z-10 transition-opacity duration-500 group-hover:opacity-0"></div>
 
-              {/* ✅ UPDATED: Replace img with Next.js Image */}
               <Image
                 key={activeFeature.id}
                 src={activeFeature.image}
                 alt={activeFeature.title}
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover grayscale brightness-75 transition-all duration-1000 opacity-80 group-hover:opacity-100 group-hover:brightness-100"
-                priority={activeFeature.id === 1} // ✅ Priority load for first feature
+                className="object-cover grayscale brightness-90 transition-all duration-1000 opacity-90 group-hover:opacity-100 group-hover:brightness-100"
+                priority={activeFeature.id === 1}
               />
 
-              {/* Detail Card Overlay */}
-              <div className="absolute bottom-8 left-8 right-8 z-20 p-6 bg-black/70 backdrop-blur-2xl border border-white/5 shadow-2xl rounded-lg">
-                <div className="flex items-center gap-4 mb-3">
-                  <div className="p-2.5 bg-white text-black">
+              {/* Detail Card Overlay - CHANGED TO WHITE */}
+              <div className="absolute bottom-8 left-8 right-8 z-20 p-8 bg-white/95 backdrop-blur-md border border-white/20 shadow-2xl">
+                <div className="flex items-center gap-4 mb-4">
+                  {/* Icon Box: Black bg for contrast */}
+                  <div className="p-3 bg-zinc-900 text-white shadow-lg">
                     {activeFeature.icon}
                   </div>
-                  <span className="text-[10px] uppercase tracking-widest text-white/40">
+                  <span className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">
                     Feature Details
                   </span>
                 </div>
-                <p className="text-white text-base md:text-lg font-light leading-relaxed italic">
+                <p className="text-zinc-800 text-base md:text-lg font-serif leading-relaxed italic">
                   {activeFeature.desc}
                 </p>
               </div>
 
-              {/* Aesthetic Grid Lines */}
-              <div className="absolute top-0 right-1/4 h-full w-px bg-white/5"></div>
-              <div className="absolute top-1/4 left-0 w-full h-px bg-white/5"></div>
+              {/* Aesthetic Grid Lines (Subtle on dark image bg) */}
+              <div className="absolute top-0 right-1/4 h-full w-px bg-white/10"></div>
+              <div className="absolute top-1/4 left-0 w-full h-px bg-white/10"></div>
             </div>
           </div>
         </div>

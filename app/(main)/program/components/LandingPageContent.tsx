@@ -25,7 +25,7 @@ interface LandingPageContentProps {
 
 const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
   return (
-    <div className="bg-white text-black selection:bg-black selection:text-white">
+    <div className="bg-white text-black selection:bg-black selection:text-white mt-[-20px]">
       {/* ============================================= */}
       {/* 1. HERO SECTION - FIXED LAYOUT */}
       {/* ============================================= */}
@@ -58,7 +58,7 @@ const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
                     size={16}
                     className="text-black flex-shrink-0"
                   />
-                  <span>Professional Certification Included</span>
+                  <span>Professional Guidance Included</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle2

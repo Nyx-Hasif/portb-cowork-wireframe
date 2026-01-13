@@ -39,7 +39,7 @@ export default function ProgramPage() {
           className="group relative h-80 sm:h-96 cursor-pointer overflow-hidden border-2 border-black transition-all md:hover:scale-[1.02] active:scale-[0.98] duration-500"
         >
           <Image
-            src="https://images.unsplash.com/photo-1527137342181-19aab11a8ee8?auto=format&fit=crop&q=80&w=800"
+            src="https://images.unsplash.com/photo-1747276361323-0c9b1fe43109?auto=format&fit=crop&q=80&w=800"
             alt="Mental Therapy"
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
@@ -56,7 +56,7 @@ export default function ProgramPage() {
       </div>
 
       <p className="mt-12 text-[10px] sm:text-xs text-gray-500 uppercase tracking-[0.3em] font-semibold text-center">
-        Professional Guidance • Group Sessions Only • Walk-in 
+        Professional Guidance • Group Sessions Only • Walk-in
       </p>
     </div>
   );
