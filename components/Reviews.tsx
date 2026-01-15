@@ -540,37 +540,20 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ videos }) => {
             e.stopPropagation();
             prevVideo();
           }}
-          className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full p-2 hover:bg-white transition z-40 cursor-pointer"
+          className="absolute left-2 md:left-3 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition z-40 cursor-pointer"
         >
-          <ChevronLeft className="w-5 h-5 text-gray-900" />
+          <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 text-gray-900" />
         </button>
+
         <button
           onClick={(e) => {
             e.stopPropagation();
             nextVideo();
           }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm rounded-full p-2 hover:bg-white transition z-40 cursor-pointer"
+          className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition z-40 cursor-pointer"
         >
-          <ChevronRight className="w-5 h-5 text-gray-900" />
+          <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-gray-900" />
         </button>
-
-        {/* Dots Indicator */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-40">
-          {videos.map((_, index) => (
-            <button
-              key={index}
-              onClick={(e) => {
-                e.stopPropagation();
-                resetVideo();
-                setDuration(0);
-                setCurrentIndex(index);
-              }}
-              className={`w-2 h-2 rounded-full transition cursor-pointer ${
-                index === currentIndex ? "bg-white w-6" : "bg-white/50"
-              }`}
-            />
-          ))}
-        </div>
       </div>
 
       {/* Video Info */}
