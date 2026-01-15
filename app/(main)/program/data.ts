@@ -8,20 +8,20 @@ export const TRAINER_DATA: Record<ProgramType, TrainerData> = {
         id: ProgramType.YOGA,
         title: "Yoga Fitness",
         heroHeader: "RECLAIM YOUR FLEXIBILITY AND INNER PEACE.",
-        heroSubheader: "Join Her Hours for a transformative journey through movement and mindfulness.",
+        heroSubheader: "Join Her Hours for a transformative journey through movement and mindfulness designed just for you.",
         trainerName: "July Lai",
         trainerImage: assets.july_lai,
         trainerProfileImage: assets.profile_july_lai,
         aboutIntro: "Professional Yoga Instructor with 10+ years of practice in Malaysia.",
-        aboutBio: "July Lai has spent over a decade traveling the world, learning from masters in India and Bali. Her philosophy centers on the union of breath and movement to heal the physical body and quiet the mind.",
+        aboutBio: "July Lai believes yoga is more than exercise.It’s a sustainable way to care for your body and mind. Her classes create a safe, calm space for women to start slowly, move with intention, and grow at their own rhythm without pressure or spiritual elements.",
         experience: {
-            years: "10 Years Professional Practice",
-            description: "Specialized in mobility recovery and athletic flexibility enhancement.",
-            background: "Certified RYT-500 from the International Yoga Alliance and Master's in Sports Science."
+            years: "10+ Years Teaching Beginner-Friendly Yoga",
+            description: "Specialized in posture alignment, breath awareness, and slow, intentional movement for women of all levels.",
+            background: "Trained in science-supported, body-respectful yoga methodology. Focus on physical wellness without chanting or religious elements."
         },
-        badges: ["Yoga Alliance RYT-500", "Ministry of Health Certified", "Global Wellness Award 2022", "Licensed Physiotherapist"],
+        badges: ["10+ Years Local Teaching Experience", "Beginner-Friendly Certified", "Muslim-Friendly Approach", "Body-Respectful Movement Philosophy"],
         gallery: [
-             { type: 'video', url: "/videos/theraphy_video_1.mp4", thumbnail: assets.yoga_video_thumbnail_1 },
+             { type: 'video', url: "/videos/yoga_video_1.mp4", thumbnail: assets.yoga_video_thumbnail_1 },
             { type: 'image', url: assets.portb_yoga_1, thumbnail: assets.portb_yoga_1 },
             { type: 'image', url: assets.portb_yoga_2, thumbnail: assets.portb_yoga_2 },
             { type: 'image', url: assets.portb_yoga_3, thumbnail: assets.portb_yoga_3 },
@@ -37,8 +37,12 @@ export const TRAINER_DATA: Record<ProgramType, TrainerData> = {
         ],
         faqs: [
             { question: "Why Join this programs?", answer: "Our program is designed for all levels, focusing on long-term sustainability and mental clarity, not just physical poses." },
-            { question: "Who Should Apply?", answer: "Anyone seeking to reconnect with their body, improve posture, or find a mindful escape from high-stress environments." },
-            { question: "Program of Focus", answer: "A blend of traditional Hatha alignment and modern Vinyasa flow, tailored to individual progression." }
+            { question: "Who Should Apply?", answer: "Her Hour is perfect for beginners seeking gentle movement, stretching, and mindful breathing guided by an experienced instructor." },
+            { question: "Is this women only?", answer: "Yes, Her Hour is conducted in women-only private setting to ensure comfort, safety and ease for all participants." },
+            { question: "How long is the class?", answer: "Each session is 60 minutes." },
+            { question: "How much is the class?", answer: "We offer paid trial and package (4 classes).Talk to us to find out more about the price." },
+            { question: "What should i prepare?", answer: "Exercise mat, wear comfortable clothing, water bottle and towel if needed." },
+            { question: "What if i have injury? Can i still join?", answer: "Please declare any injuries or conditions and check with your respective doctors before joining the session. The instructor will offer modifications where needed." },
         ],
         ctaBg: "https://images.unsplash.com/photo-1510894347713-fc3ed6fdf539?auto=format&fit=crop&q=80&w=1920"
     },

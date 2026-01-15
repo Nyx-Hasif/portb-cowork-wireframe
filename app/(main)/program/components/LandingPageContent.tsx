@@ -239,7 +239,7 @@ const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
             {data.benefits.map((benefit, idx) => (
               <div key={idx} className="group flex flex-col space-y-5">
                 {/* Benefit Image */}
-                <div className="relative aspect-[4/3] overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700 border border-neutral-100 shadow-sm rounded-sm">
+                <div className="relative aspect-[4/3] overflow-hidden lg:grayscale group-hover:grayscale-0 transition-all duration-700 border border-neutral-100 shadow-sm rounded-sm">
                   <Image
                     src={benefit.imageUrl}
                     alt={benefit.title}
@@ -290,7 +290,7 @@ const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
                   Support Terminal
                 </div>
                 <div className="text-xs font-medium text-neutral-400 mt-2 hover:text-black cursor-pointer transition-colors">
-                  support@mindbody.elite
+                  helloportb@gmail.com
                 </div>
               </div>
             </div>

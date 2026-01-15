@@ -102,8 +102,13 @@ const Amenities: React.FC = () => {
       className="py-20 bg-zinc-50 overflow-hidden border-t border-zinc-200"
     >
       <div className="max-w-7xl mx-auto px-6">
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+        {/* 
+            FIXED HEADER SECTION:
+            1. `items-start`: Mobile (kiri)
+            2. `md:items-end`: Desktop (alignment bawah kalau ada item sebelah kanan)
+            3. `mb-12 md:mb-20`: Kurangkan gap sikit kat mobile supaya tak jauh sangat
+        */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-20 gap-8">
           <div className="max-w-2xl">
             <div className="flex items-center gap-4 mb-6">
               <div className="h-px w-12 bg-zinc-400"></div>
@@ -142,8 +147,6 @@ const Amenities: React.FC = () => {
                     alt={item.title}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    // ✅ FIXED: Opacity-90 (default) supaya gambar jelas & berwarna.
-                    // ✅ FIXED: Hover hanya scale (Zoom) & Opacity penuh (100). Tiada grayscale.
                     className={`object-cover transition-all duration-1000 ease-out ${
                       isActive
                         ? "opacity-100 scale-110"
@@ -151,7 +154,7 @@ const Amenities: React.FC = () => {
                     }`}
                     priority={idx < 3}
                   />
-                  {/* Overlay Gradient: White at bottom for text readability */}
+                  {/* Overlay Gradient */}
                   <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-transparent to-transparent"></div>
                 </div>
 

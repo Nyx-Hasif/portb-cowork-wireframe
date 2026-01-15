@@ -1,10 +1,12 @@
+// components/Navbar.tsx (or wherever your file is located)
+
 "use client";
 import { assets } from "@/assets/asset";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState, useEffect } from "react";
-import { ChevronDown, Menu, X, UserCircle } from "lucide-react";
+import { ChevronDown, Menu, X, UserCircle, Sparkles } from "lucide-react";
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -18,7 +20,7 @@ const Navbar = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // ✅ FIXED: Same scroll behavior for ALL pages
+  // Scroll behavior logic
   useEffect(() => {
     let ticking = false;
 
@@ -30,7 +32,6 @@ const Navbar = () => {
           // Update scrolled state
           setIsScrolled(currentScrollY > 50);
 
-          // ✅ Apply hide/show to ALL pages (removed isHomePage check)
           if (currentScrollY < lastScrollY || currentScrollY < 50) {
             // Scrolling up or at top - show navbar
             setIsVisible(true);
@@ -49,7 +50,7 @@ const Navbar = () => {
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]); // ✅ Removed isHomePage dependency
+  }, [lastScrollY]);
 
   // Lock body scroll when mobile menu open
   useEffect(() => {
@@ -63,12 +64,17 @@ const Navbar = () => {
     };
   }, [isMenuOpen]);
 
+  // Menu Data with BADGE property added
   const menuItems = {
     packages: [
       { label: "Coworking Space", href: "/coworking-space" },
       { label: "Business Address", href: "/business-address" },
       { label: "Amenities", href: "/amenities" },
-      { label: "Program", href: "/program" },
+      {
+        label: "Program",
+        href: "/program",
+        badge: "HOT", // <--- Badge Trigger
+      },
     ],
     community: [
       { label: "Previous Events", href: "/previous-events" },
@@ -159,14 +165,25 @@ const Navbar = () => {
 
                 {activeDropdown === "packages" && (
                   <div className="absolute top-full left-0 pt-2 z-[200] animate-in fade-in slide-in-from-top-2 duration-200">
-                    <div className="min-w-[220px] bg-white rounded-lg shadow-xl border border-gray-100 py-2">
+                    <div className="min-w-[240px] bg-white rounded-lg shadow-xl border border-gray-100 py-2">
                       {menuItems.packages.map((item) => (
                         <Link
                           key={item.href}
                           href={item.href}
-                          className="block px-4 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-green-600 transition-colors"
+                          className="group flex items-center justify-between px-4 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-green-600 transition-colors"
                         >
-                          {item.label}
+                          <span>{item.label}</span>
+
+                          {/* BADGE RENDERING */}
+                          {item.badge && (
+                            <span className="flex items-center gap-1 text-[10px] font-extrabold tracking-wider text-white bg-gradient-to-r from-red-600 to-rose-500 px-2 py-0.5 rounded-full shadow-md shadow-red-200 group-hover:shadow-red-300 transition-all duration-300">
+                              {item.badge}
+                              <Sparkles
+                                size={10}
+                                className="text-yellow-200 animate-pulse"
+                              />
+                            </span>
+                          )}
                         </Link>
                       ))}
                     </div>
@@ -314,7 +331,7 @@ const Navbar = () => {
             </button>
             <div
               className={`overflow-hidden transition-all duration-300 ${
-                mobileDropdown === "packages" ? "max-h-48" : "max-h-0"
+                mobileDropdown === "packages" ? "max-h-52" : "max-h-0"
               }`}
             >
               <div className="pl-4 space-y-1 py-2">
@@ -323,9 +340,17 @@ const Navbar = () => {
                     key={item.href}
                     href={item.href}
                     onClick={closeMobileMenu}
-                    className="block py-2 text-gray-600 hover:text-green-600 transition-colors"
+                    className="flex items-center gap-3 py-2 text-gray-600 hover:text-green-600 transition-colors"
                   >
-                    {item.label}
+                    <span>{item.label}</span>
+
+                    {/* MOBILE BADGE */}
+                    {item.badge && (
+                      <span className="flex items-center gap-1 text-[9px] font-bold text-white bg-gradient-to-r from-red-600 to-rose-500 px-2 py-0.5 rounded-full">
+                        {item.badge}
+                        <Sparkles size={8} className="text-white" />
+                      </span>
+                    )}
                   </Link>
                 ))}
               </div>

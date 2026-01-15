@@ -5,7 +5,7 @@ import { Mail } from "lucide-react";
 import { assets } from "@/assets/asset";
 import { FaFacebook, FaInstagram, FaTiktok } from "react-icons/fa";
 import React from "react";
-import SubscribeForm from "@/components/admin/subscribers/SubscribeForm"; // ✅ Import
+import SubscribeForm from "@/components/admin/subscribers/SubscribeForm";
 
 const Footer = () => {
   return (
@@ -25,7 +25,10 @@ const Footer = () => {
               height={150}
               quality={100}
               priority
-              className="object-contain w-28 sm:w-32"
+              // ✅ TRIK CSS:
+              // 1. invert = Tukar text hitam jadi putih (bulb jadi warna negatif)
+              // 2. hue-rotate-180 = Pusingkan warna bulb balik ke asal
+              className="object-contain w-28 sm:w-32 invert hue-rotate-180 brightness-110"
               draggable={false}
             />
           </div>
@@ -65,7 +68,7 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* ✅ Newsletter - REPLACE with SubscribeForm Component */}
+          {/* Newsletter */}
           <div>
             <SubscribeForm />
           </div>
