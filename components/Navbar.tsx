@@ -124,7 +124,7 @@ const Navbar = () => {
                 quality={100}
                 priority
                 className={`h-auto w-auto transition-all duration-300 ${
-                  isTransparent ? "brightness-0 invert" : ""
+                  isTransparent ? "invert hue-rotate-180 brightness-110" : ""
                 }`}
               />
             </Link>

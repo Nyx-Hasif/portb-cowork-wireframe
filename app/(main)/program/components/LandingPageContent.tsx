@@ -58,21 +58,21 @@ const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
                     size={16}
                     className="text-black flex-shrink-0"
                   />
-                  <span>Professional Guidance Included</span>
+                  <span>Guided with Care by Experienced Practitioners</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle2
                     size={16}
                     className="text-black flex-shrink-0"
                   />
-                  <span>Personalized Daily Progress Tracking</span>
+                  <span>Support That Honours Where You Are Today</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle2
                     size={16}
                     className="text-black flex-shrink-0"
                   />
-                  <span>Exclusive Community Access</span>
+                  <span>A Welcoming Circle of people on Similar Journeys</span>
                 </div>
               </div>
 

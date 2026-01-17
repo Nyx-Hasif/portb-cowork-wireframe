@@ -50,18 +50,22 @@ export const TRAINER_DATA: Record<ProgramType, TrainerData> = {
         id: ProgramType.THERAPY,
         title: "Therapy Mental",
         heroHeader: "REBUILD YOUR INNER BALANCE.",
-        heroSubheader: "Work with Ms.Atirah to navigate life's complexities with resilience.",
+        heroSubheader: "Meet with Ms.Atirah to navigate life's complexities with resilience.",
         trainerName: "Ms. Atirah",
         trainerImage: assets.atirah,
         trainerProfileImage: assets.profile_atirah,
         aboutIntro: "Clinical Psychologist specializing in cognitive behavioral therapy and mindfulness.",
-        aboutBio: "Atirah has dedicated xXx years to helping individuals overcome trauma and anxiety. She believes that mental fitness is as crucial as physical health and requires consistent, guided practice.",
+        aboutBio: " Atirah supports individuals facing anxiety, depression, trauma, OCD, personality disorders, and more. She offers both psychotherapy and psychological assessments, and is passionate about community mental health education through talks and outreach.",
         experience: {
-            years: "XX Years Clinical Experience",
-            description: "Former head of Behavioral Health at the Metropolitan Wellness Center.",
-            background: "Ph.D. in Clinical Psychology from University Kebangsaan Malaysia.Registered clinical psychologist."
+            years: "3 years of Clinical Experience",
+            description: "Clinical Psychologist and Founder, Therapy With Atirah",
+            background: " MSc in Clinical Psychology, Universiti Kebangsaan Malaysia (UKM)"
         },
-        badges: ["Board Certified Therapist", "Mental Health Excellence Award", "Author of 'The Quiet Mind'", "Health Minister Appointee"],
+        badges: [
+            "Certified in Exposure and Response Prevention (ERP)",
+            "Certified Schema Therapist, International Society of Schema Therapy",
+            " Registered Clinical Psychologist (MAHPC(CP)00679)"
+        ],
         gallery: [
             { type: 'video', url: "/videos/theraphy_video_1.mp4", thumbnail: assets.theraphy_video_thumbnail_1 },
             { type: 'image', url: assets.theraphy_thumbnail_1, thumbnail: assets.theraphy_thumbnail_1 },

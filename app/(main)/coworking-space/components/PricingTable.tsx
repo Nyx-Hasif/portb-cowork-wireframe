@@ -287,11 +287,7 @@ const Membership: React.FC = () => {
                   )}
                 </div>
 
-                <div className="absolute bottom-6 right-6 z-10">
-                  <button className="p-4 bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white hover:text-black transition-all cursor-pointer">
-                    <Maximize2 size={20} />
-                  </button>
-                </div>
+              
               </div>
 
               {/* Information Section */}
@@ -456,26 +452,7 @@ const Membership: React.FC = () => {
           </div>
         </div>
 
-        {/* Operational Footer */}
-        <div className="mt-12 flex flex-col md:flex-row justify-between items-center py-8 border-t border-zinc-200">
-          <div className="flex items-center gap-8 mb-8 md:mb-0">
-            <div className="flex items-center gap-4">
-              <Calendar size={16} className="text-zinc-500" />
-              <span className="text-[10px] uppercase tracking-widest text-zinc-500">
-                Sun - Thu: 9AM - 6PM
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              <Clock size={16} className="text-zinc-500" />
-              <span className="text-[10px] uppercase tracking-widest text-zinc-500">
-                24/7 Security Access &amp; CCTV
-              </span>
-            </div>
-          </div>
-          <p className="text-[9px] uppercase tracking-[0.6em] text-zinc-400 italic">
-            Port B &bull; Aesthetic Purpose
-          </p>
-        </div>
+
       </div>
     </section>
   );
