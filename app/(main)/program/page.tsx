@@ -27,7 +27,7 @@ export default function ProgramPage() {
           <div className="absolute inset-0 bg-black/40 group-hover:bg-black/10 group-active:bg-black/10 transition-colors duration-500" />
           <div className="absolute bottom-8 left-8">
             <h2 className="text-3xl sm:text-4xl font-bold text-white uppercase tracking-widest">
-              Her Hour Fitness
+              Her Hour 
             </h2>
             <div className="h-1 w-0 group-hover:w-full group-active:w-full bg-white transition-all duration-500 mt-2" />
           </div>
@@ -48,7 +48,7 @@ export default function ProgramPage() {
           <div className="absolute inset-0 bg-black/40 group-hover:bg-black/10 group-active:bg-black/10 transition-colors duration-500" />
           <div className="absolute bottom-8 left-8">
             <h2 className="text-3xl sm:text-4xl font-bold text-white uppercase tracking-widest">
-              Therapy Mental
+              Healing Circle
             </h2>
             <div className="h-1 w-0 group-hover:w-full group-active:w-full bg-white transition-all duration-500 mt-2" />
           </div>
