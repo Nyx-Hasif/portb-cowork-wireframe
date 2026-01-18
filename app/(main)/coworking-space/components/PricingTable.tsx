@@ -4,14 +4,11 @@ import Image from "next/image";
 import {
   ArrowRight,
   Users,
-  Calendar,
-  Clock,
   FileText, // ✅ Guna icon FileText untuk nampak macam dokumen
   Download, // ✅ Guna icon Download yang jelas
   GraduationCap,
   CheckCircle2,
   Sparkles,
-  Maximize2,
   ChevronDown,
 } from "lucide-react";
 

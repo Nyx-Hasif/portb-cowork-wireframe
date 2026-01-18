@@ -182,23 +182,6 @@ export default function Carousel({ cards }: CarouselProps) {
         </div>
       )}
 
-      {/* Slide indicators (dots) */}
-      {cards.length > 1 && (
-        <div className="flex justify-center gap-2 mt-6">
-          {cards.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrent(index)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                current === index
-                  ? "bg-[#004348] w-8"
-                  : "bg-gray-300 hover:bg-gray-400"
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
