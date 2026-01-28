@@ -32,6 +32,7 @@ import {
   Check,
   Download,
   RefreshCw,
+  BarChart3, 
 } from "lucide-react";
 import {
   getAdminMessages,
@@ -51,6 +52,7 @@ import {
   exportSubscribers,
   type Subscriber,
 } from "@/app/actions/subscriber";
+import InSightAnalytics from "@/components/admin/InSightAnalytics";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
@@ -116,7 +118,8 @@ type SectionType =
   | "previous"
   | "gallery"
   | "inbox"
-  | "subscribers";
+  | "subscribers"
+  | "insight";  
 type InboxFilter = "all" | "unread" | "starred";
 interface StatCardProps {
   icon: LucideIcon;
@@ -1287,6 +1290,7 @@ Terima kasih kerana menghubungi *Port B Coworking Space*
               label: "Subscribers",
               badge: subscriberUnreadCount,
             },
+            { id: "insight", icon: BarChart3, label: "InSight" },
           ].map((item) => (
             <button
               key={item.id}
@@ -1840,7 +1844,7 @@ Terima kasih kerana menghubungi *Port B Coworking Space*
                       activeSection === "upcoming"
                         ? "createUpcoming"
                         : "createPrevious",
-                      true
+                      true,
                     )
                   }
                 />
@@ -1957,7 +1961,7 @@ Terima kasih kerana menghubungi *Port B Coworking Space*
                             onClick={() =>
                               openEdit(
                                 event,
-                                activeSection as "upcoming" | "previous"
+                                activeSection as "upcoming" | "previous",
                               )
                             }
                             className="p-2.5 text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors border border-gray-300"
@@ -2263,14 +2267,14 @@ Terima kasih kerana menghubungi *Port B Coworking Space*
                               <input
                                 type="checkbox"
                                 checked={selectedMessageIds.includes(
-                                  message.id
+                                  message.id,
                                 )}
                                 onChange={(e) => {
                                   e.stopPropagation();
                                   setSelectedMessageIds((prev) =>
                                     prev.includes(message.id)
                                       ? prev.filter((id) => id !== message.id)
-                                      : [...prev, message.id]
+                                      : [...prev, message.id],
                                   );
                                 }}
                                 onClick={(e) => e.stopPropagation()}
@@ -2374,7 +2378,7 @@ Terima kasih kerana menghubungi *Port B Coworking Space*
                                   openWhatsAppReply(
                                     message.phone,
                                     message.name,
-                                    message.message
+                                    message.message,
                                   );
                                 // ✅ Tambah message.message
                                 else toast.error("No phone number");
@@ -2429,7 +2433,7 @@ Terima kasih kerana menghubungi *Port B Coworking Space*
                             setSelectedMessageIds([]);
                           else
                             setSelectedMessageIds(
-                              filteredMessages.map((m) => m.id)
+                              filteredMessages.map((m) => m.id),
                             );
                         }}
                         className="w-5 h-5 rounded border-gray-300"
@@ -2488,8 +2492,8 @@ Terima kasih kerana menghubungi *Port B Coworking Space*
                           subscriberFilter === tab.id
                             ? "bg-white/20 text-white"
                             : tab.id === "new"
-                            ? "bg-red-100 text-red-600"
-                            : "bg-gray-100 text-gray-600"
+                              ? "bg-red-100 text-red-600"
+                              : "bg-gray-100 text-gray-600"
                         }`}
                       >
                         {tab.count}
@@ -2653,7 +2657,7 @@ Terima kasih kerana menghubungi *Port B Coworking Space*
                                   setSelectedSubscriberIds((prev) =>
                                     prev.includes(sub.id)
                                       ? prev.filter((id) => id !== sub.id)
-                                      : [...prev, sub.id]
+                                      : [...prev, sub.id],
                                   );
                                 }}
                                 className="w-5 h-5 rounded border-gray-300"
@@ -2756,7 +2760,7 @@ Terima kasih kerana menghubungi *Port B Coworking Space*
                             setSelectedSubscriberIds([]);
                           else
                             setSelectedSubscriberIds(
-                              filteredSubscribers.map((s) => s.id)
+                              filteredSubscribers.map((s) => s.id),
                             );
                         }}
                         className="w-5 h-5 rounded border-gray-300"
@@ -2770,6 +2774,18 @@ Terima kasih kerana menghubungi *Port B Coworking Space*
                     </span>
                   </div>
                 )}
+              </motion.div>
+            )}
+
+            {/* INSIGHT ANALYTICS SECTION */}
+            {activeSection === "insight" && (
+              <motion.div
+                key="insight"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                <InSightAnalytics />
               </motion.div>
             )}
           </AnimatePresence>
@@ -2844,7 +2860,7 @@ Terima kasih kerana menghubungi *Port B Coworking Space*
                           onClick={() =>
                             toggleStar(
                               selectedMessage.id,
-                              selectedMessage.is_starred
+                              selectedMessage.is_starred,
                             )
                           }
                           className="p-1 hover:bg-white/50 rounded-lg transition-colors"
@@ -2998,7 +3014,7 @@ Terima kasih kerana menghubungi *Port B Coworking Space*
                           openWhatsAppReply(
                             selectedMessage.phone,
                             selectedMessage.name,
-                            selectedMessage.message // ✅ Tambah selectedMessage.message
+                            selectedMessage.message, // ✅ Tambah selectedMessage.message
                           );
                         } else {
                           toast.error("No phone number to reply to");
@@ -3492,7 +3508,7 @@ Terima kasih kerana menghubungi *Port B Coworking Space*
                     value={deleteAllSubscribersConfirmText}
                     onChange={(e) =>
                       setDeleteAllSubscribersConfirmText(
-                        e.target.value.toUpperCase()
+                        e.target.value.toUpperCase(),
                       )
                     }
                     placeholder="DELETE ALL"
