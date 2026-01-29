@@ -127,7 +127,7 @@ const AdminLogin = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@portb.com"
+                  placeholder="Enter email address"
                   className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
                   disabled={isLoading}
                 />
@@ -182,11 +182,11 @@ const AdminLogin = () => {
             </button>
 
             {/* Demo Info */}
-            <div className="mt-4 p-3 bg-gray-100 rounded-lg text-sm text-gray-600">
+            {/* <div className="mt-4 p-3 bg-gray-100 rounded-lg text-sm text-gray-600">
               <p className="font-medium mb-1">Test Credentials:</p>
               <p>Email: admin@portb.com</p>
               <p>Password: portb123456</p>
-            </div>
+            </div> */}
           </form>
         </motion.div>
       </div>
