@@ -1,4 +1,6 @@
 // 📁 components/admin/InSightAnalytics.tsx
+// REPLACE ENTIRE FILE
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -40,6 +42,11 @@ import {
   Info,
   ChevronDown,
 } from "lucide-react";
+
+// ⬇️ TAMBAH IMPORT NI
+import { useRealtimeUsers } from "@/hooks/useRealtimeUsers";
+// ATAU kalau letak dalam admin folder, guna:
+// import { useRealtimeUsers } from "./useRealtimeUsers";
 
 // ============================================
 // TYPES
@@ -204,7 +211,7 @@ const TOOLTIP_CONTENT: Record<
     title: "Realtime Visitors",
     description: "Visitors yang SEDANG berada di website anda sekarang.",
     example: "Active now = dalam 5 minit terakhir",
-    tip: "💡 Refresh untuk update data terkini",
+    tip: "💡 Auto-update setiap 10 saat",
   },
 };
 
@@ -339,7 +346,7 @@ const formatDuration = (seconds: number): string => {
 };
 
 // ============================================
-// TOOLTIP MODAL COMPONENT (ONLY CLOSE WITH BUTTON)
+// TOOLTIP MODAL COMPONENT
 // ============================================
 const TooltipModal = ({
   isOpen,
@@ -365,12 +372,8 @@ const TooltipModal = ({
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      {/* Backdrop - NO onClick here! */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-
-      {/* Modal Content */}
       <div className="relative bg-gray-900 text-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-white/10">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-500/20 rounded-lg">
@@ -385,20 +388,16 @@ const TooltipModal = ({
             <X size={20} />
           </button>
         </div>
-
-        {/* Body */}
         <div className="p-4 space-y-4">
           <p className="text-gray-300 text-sm leading-relaxed">
             {content.description}
           </p>
-
           <div className="bg-white/10 rounded-xl p-3">
             <p className="text-[11px] text-gray-400 uppercase font-bold mb-1.5 tracking-wide">
               📌 Contoh:
             </p>
             <p className="text-sm text-gray-200">{content.example}</p>
           </div>
-
           <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3">
             <p className="text-[11px] text-yellow-400 uppercase font-bold mb-1.5 tracking-wide">
               💡 Tips:
@@ -408,8 +407,6 @@ const TooltipModal = ({
             </p>
           </div>
         </div>
-
-        {/* Footer - Main close button */}
         <div className="p-4 border-t border-white/10">
           <button
             onClick={onClose}
@@ -463,7 +460,7 @@ const InfoButton = ({
 };
 
 // ============================================
-// PERIOD DROPDOWN FOR MOBILE
+// PERIOD DROPDOWN
 // ============================================
 const PeriodSelector = ({
   value,
@@ -481,7 +478,6 @@ const PeriodSelector = ({
 
   return (
     <div className="flex items-center gap-2">
-      {/* Mobile: Dropdown */}
       <div className="relative sm:hidden flex-1">
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -522,7 +518,6 @@ const PeriodSelector = ({
         )}
       </div>
 
-      {/* Desktop: Tab Buttons */}
       <div className="hidden sm:flex bg-gray-100 rounded-xl p-1 gap-1">
         {PERIODS.map((p) => (
           <button
@@ -539,7 +534,6 @@ const PeriodSelector = ({
         ))}
       </div>
 
-      {/* Refresh Button - Always Visible */}
       <button
         onClick={onRefresh}
         disabled={isRefreshing}
@@ -578,14 +572,11 @@ const StatCard = ({
 }) => (
   <div className="bg-white rounded-xl border border-gray-100 p-3 sm:p-4 hover:shadow-md hover:border-gray-200 transition-all duration-300">
     <div className="flex items-start gap-3">
-      {/* Icon - Left side on mobile */}
       <div
         className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl ${iconBg} flex-shrink-0`}
       >
         <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${iconColor}`} />
       </div>
-
-      {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1">
           <p className="text-[11px] sm:text-xs font-medium text-gray-500 truncate">
@@ -718,6 +709,10 @@ export default function InSightAnalytics() {
   const [period, setPeriod] = useState("today");
   const [refreshing, setRefreshing] = useState(false);
 
+  // ⬇️ TAMBAH NI - Auto-refresh realtime users every 10 seconds
+  const { data: realtimeData, loading: realtimeLoading } =
+    useRealtimeUsers(10000);
+
   const fetchData = useCallback(
     async (showRefresh = false) => {
       if (showRefresh) setRefreshing(true);
@@ -813,7 +808,6 @@ export default function InSightAnalytics() {
           </p>
         </div>
 
-        {/* Period Selector */}
         <PeriodSelector
           value={period}
           onChange={setPeriod}
@@ -822,28 +816,34 @@ export default function InSightAnalytics() {
         />
       </div>
 
-      {/* REALTIME BANNER */}
+      {/* ⬇️ REALTIME BANNER - MODIFIED */}
       <div className="bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl sm:rounded-2xl p-4 text-white">
         <div className="flex items-center gap-3">
           <div className="relative flex-shrink-0">
             <div className="w-11 h-11 sm:w-14 sm:h-14 bg-white/20 rounded-xl sm:rounded-2xl flex items-center justify-center">
               <Zap className="w-5 h-5 sm:w-7 sm:h-7" />
             </div>
-            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-yellow-400 rounded-full animate-ping" />
-            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-yellow-400 rounded-full" />
+            {/* Only show pulse if there are active users */}
+            {realtimeData.active_now > 0 && (
+              <>
+                <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-yellow-400 rounded-full animate-ping" />
+                <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-yellow-400 rounded-full" />
+              </>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
+              {/* Use realtimeData from hook instead of data.realtime */}
               <p className="text-lg sm:text-2xl font-bold">
-                {data.realtime.active_now}
+                {realtimeLoading ? "..." : realtimeData.active_now}
               </p>
               <span className="text-sm sm:text-base font-medium">
-                active {data.realtime.active_now === 1 ? "user" : "users"}
+                active {realtimeData.active_now === 1 ? "user" : "users"}
               </span>
               <InfoButton tooltipKey="realtime" variant="light" />
             </div>
             <p className="text-green-100 text-[11px] sm:text-sm">
-              {data.realtime.last_30_min} in 30min • {data.realtime.today} today
+              {realtimeData.last_30_min} in 30min • {realtimeData.today} today
             </p>
           </div>
         </div>
@@ -1217,7 +1217,8 @@ export default function InSightAnalytics() {
 
       {/* FOOTER */}
       <p className="text-center text-[10px] sm:text-xs text-gray-400">
-        Auto refresh 5min • {format(new Date(), "HH:mm")}
+        Auto refresh 5min • Realtime updates every 10s •{" "}
+        {format(new Date(), "HH:mm")}
       </p>
     </div>
   );
