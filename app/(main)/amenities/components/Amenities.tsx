@@ -5,11 +5,9 @@ import {
   Wifi,
   Coffee,
   Droplets,
-  Wind,
   Monitor,
   Wrench,
   MapPin,
-  Users,
   ShieldCheck,
   ArrowUpRight,
 } from "lucide-react";
@@ -40,14 +38,6 @@ const amenities = [
     className: "md:col-span-1 md:row-span-1",
   },
   {
-    icon: <Wind className="w-5 h-5" />,
-    title: "Climate Control",
-    description: "Smart temperature & air purification.",
-    image:
-      "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800&auto=format&fit=crop",
-    className: "md:col-span-1 md:row-span-1",
-  },
-  {
     icon: <Monitor className="w-5 h-5" />,
     title: "Display Tech",
     description: "4K smart screens & wireless casting.",
@@ -57,7 +47,7 @@ const amenities = [
   },
   {
     icon: <Wrench className="w-5 h-5" />,
-    title: "Tech Support",
+    title: "Admin Support",
     description: "On-site help for all your hardware needs.",
     image:
       "https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=800&auto=format&fit=crop",
@@ -72,17 +62,9 @@ const amenities = [
     className: "md:col-span-2 md:row-span-1",
   },
   {
-    icon: <Users className="w-5 h-5" />,
-    title: "Community Events",
-    description: "Networking & creative workshops.",
-    image:
-      "https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=800&auto=format&fit=crop",
-    className: "md:col-span-2 md:row-span-1",
-  },
-  {
     icon: <ShieldCheck className="w-5 h-5" />,
     title: "Security Access",
-    description: "24/7 CCTV & biometric entry.",
+    description: "24/7 CCTV ",
     image:
       "https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=800&auto=format&fit=crop",
     className: "md:col-span-1 md:row-span-1",

@@ -7,43 +7,42 @@ export default function TestimonialCarouselDemo() {
       data={[
         {
           description:
-            "ScrollX UI has completely transformed how I build interfaces. The animations are silky smooth, and the components are modular and responsive.",
+            "The best working space so far in kelantan. You can finish your task peacefully. Go have your lunch at common area with free flow coffee.. 100 extra points..😁",
           image:
-            "https://cdn.pixabay.com/photo/2024/08/01/18/20/anime-8937917_1280.png",
-          name: "Yishabeier",
-          handle: "@Yishabeier",
+            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
+          name: "Maji Rashid",
+          handle: "@MajiRashid",
         },
         {
           description:
-            "I love how ScrollX UI makes my projects look professional with minimal effort. The documentation is clear and the community is super helpful.",
+            "I visit Kota Bharu occasionally. When I'm there, I usually need to work every day. Port B is perfect--better than any coffee shop in the area. Very quiet, clean/modern facilities, solid IT infrastructure (fast/stable internet, stable/plentiful power), free coffee, space to eat lunch, and friendly/accommodating staff.",
           image:
-            "https://cdn.pixabay.com/photo/2023/01/30/21/20/portrait-7756638_1280.jpg",
-          name: "Aoliweiya",
-          handle: "@Aoliweiya",
+            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
+          name: "Carl Gross",
+          handle: "@CarlGross",
         },
         {
           description:
-            "The smooth scrolling animations and intuitive components in ScrollX UI save me hours of development time!",
+            "convenient, not noisy. there is a plug near the fixed desk. happy to work. big table.",
           image:
-            "https://cdn.pixabay.com/photo/2023/06/26/04/38/ai-generated-8088680_1280.jpg",
-          name: "Chen Xi",
-          handle: "@ChenXi",
+            "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop", // Wanita professional berhijab dari Unsplash
+          name: "Amirah Syazwani",
+          handle: "@AmirahSyazwani",
         },
         {
           description:
-            "Using ScrollX UI feels like magic — it’s so easy to create beautiful, interactive UIs without writing complex code.",
+            "The best facilities for work, meetings or small functions. Comfortable, clean and affordable. Recommended for all.",
           image:
-            "https://cdn.pixabay.com/photo/2023/02/07/10/50/ai-generated-7773822_1280.jpg",
-          name: "Sufiya",
-          handle: "@Sufiya",
+            "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
+          name: "Ariff Azami",
+          handle: "@AriffAzami",
         },
         {
-          description:
-            "ScrollX UI’s open-source nature means I can customize components exactly how I want them — plus, the performance is outstanding.",
+          description: "Best. Comfortable place. Fast line. Can repeat again.",
           image:
-            "https://cdn.pixabay.com/photo/2023/06/27/03/15/ai-generated-8091289_1280.jpg",
-          name: "Anuosa",
-          handle: "@Anuosa",
+            "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop", // Lelaki Melayu muda dari Unsplash
+          name: "Mohammad Thaqif Tahir",
+          handle: "@Thaqif",
         },
       ]}
     />

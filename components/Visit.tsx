@@ -89,23 +89,38 @@ const Visit = () => {
                       Address
                     </h4>
                     <p className="text-gray-400">
-                      Jalan Telipot, Kampung Telipot
-                      <br />
-                      15200 Kota Bharu, Kelantan
+                      MEZZANINE FLOOR,PT 178-179,Jalan Hamzah,SEKSYEN 19,15050
+                      Kota Bharu,Kelantan
                     </p>
                   </div>
                 </div>
-
+                
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
-                  <Clock className="w-6 h-6 text-white shrink-0" />
+                  <Clock className="w-6 h-6 text-white shrink-0 sm:mt-1" />
                   <div className="text-center sm:text-left">
-                    <h4 className="text-white font-medium uppercase tracking-widest mb-1">
+                    <h4 className="text-white font-medium uppercase tracking-widest mb-2">
                       Staffed Hours
                     </h4>
-                    <p className="text-gray-400">
-                      Sun-Thu: 9:00 AM – 5:00 PM
-                    </p>
-                   
+
+                    <div className="space-y-2">
+                      {/* Waktu Operasi Utama */}
+                      <div className="flex flex-col sm:flex-row sm:gap-2 items-center sm:items-baseline">
+                        <span className="text-white text-sm font-semibold">
+                          Sun - Thu:
+                        </span>
+                        <span className="text-gray-400">9:00 AM – 6:00 PM</span>
+                      </div>
+
+                      {/* Waktu By Request */}
+                      <div className="flex flex-col sm:flex-row sm:gap-2 items-center sm:items-baseline border-t border-white/10 pt-2">
+                        <span className="text-white text-sm font-semibold">
+                          Fri - Sat:
+                        </span>
+                        <span className="text-gray-400 italic text-sm">
+                          By Request Only
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -115,7 +130,7 @@ const Visit = () => {
                     <h4 className="text-white font-medium uppercase tracking-widest mb-1">
                       Contact
                     </h4>
-                    <p className="text-gray-400">+60 12-345 6789</p>
+                    <p className="text-gray-400">+60 14-3298981</p>
                   </div>
                 </div>
               </motion.div>
@@ -216,21 +231,24 @@ const Visit = () => {
                 ✕
               </button>
 
-              {/* Video Container */}
+              {/* Video Location - walk in */}
               <motion.div
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
                 transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                className="relative w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-6xl aspect-video max-h-[70vh] bg-black rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl ring-1 sm:ring-2 ring-white/20"
+                /* 1. Tukar aspect-video kepada aspect-[9/16] */
+                /* 2. Tukar max-w supaya tidak terlalu lebar untuk video menegak */
+                className="relative w-full max-w-[350px] md:max-w-[400px] aspect-[9/16] max-h-[85vh] bg-black rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl ring-1 sm:ring-2 ring-white/20 mx-auto"
               >
-                <iframe
-                  src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
-                  title="PortB Tour Video"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="w-full h-full"
-                />
+                <video
+                  src="/videos/portb_location.mp4"
+                  controls // User boleh kawal suara & play sendiri
+                  playsInline
+                  className="w-full h-full object-contain"
+                >
+                  Your browser does not support the video tag.
+                </video>
               </motion.div>
 
               {/* Mobile Hint */}
@@ -239,7 +257,7 @@ const Visit = () => {
               </div>
             </motion.div>
           </AnimatePresence>,
-          document.body
+          document.body,
         )}
     </section>
   );

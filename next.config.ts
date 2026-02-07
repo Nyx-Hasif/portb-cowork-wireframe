@@ -8,7 +8,6 @@ const nextConfig = {
         port: "",
         pathname: "/**",
       },
-      // 👇 Tambah baris ini
       {
         protocol: "https",
         hostname: "assets.aceternity.com",
@@ -30,6 +29,12 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'assets.mixkit.co',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.pexels.com',
         port: '',
         pathname: '/**',
       },

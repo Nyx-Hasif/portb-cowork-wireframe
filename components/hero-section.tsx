@@ -91,11 +91,11 @@ export function ImagesSliderDemo() {
             {/* Avatar Stack */}
             <div className="flex -space-x-3 sm:-space-x-4">
               {[
-                "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200",
-                "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=200",
-                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200",
-                "https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?w=200",
-                "https://plus.unsplash.com/premium_photo-1689551670902-19b441a6afde?w=200",
+                "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200", // Asian man
+                "https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?w=200", // Asian woman
+                "https://images.unsplash.com/photo-1558203728-00f45181dd84?w=200", // Asian man casual
+                "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=200", // Asian woman professional
+                "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200", // Asian man smile
               ].map((src, i) => (
                 <div
                   key={i}

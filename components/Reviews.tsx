@@ -83,8 +83,8 @@ const Reviews = () => {
       id: 1,
       videoUrl: "/videos/feedback_1.mp4",
       thumbnail: assets.feedback_thumbnail_1.src,
-      name: "Sarah Santos",
-      role: "Accountant",
+      name: "Maria Shevchenko",
+      role: "Traveler",
       duration: "0:32",
     },
     {
@@ -102,15 +102,6 @@ const Reviews = () => {
       name: "Ameer Zikri",
       role: "University Students",
       duration: "0:37",
-    },
-    {
-      id: 4,
-      videoUrl: "https://www.w3schools.com/html/movie.mp4",
-      thumbnail:
-        "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=500",
-      name: "Maria Santos",
-      role: "Marketing Manager",
-      duration: "1:15",
     },
   ];
 
@@ -190,7 +181,7 @@ const Reviews = () => {
         </div>
 
         {/* Desktop: 4 Videos Grid */}
-        <div className="hidden lg:grid grid-cols-4 gap-6 max-w-7xl mx-auto px-6">
+        <div className="hidden lg:grid grid-cols-3 gap-6 max-w-7xl mx-auto px-6">
           {videoReviews.map((video) => (
             <VideoCard
               key={video.id}
@@ -292,9 +283,9 @@ const VideoCard: React.FC<VideoCardProps> = ({
   };
 
   return (
-    <div className="relative group cursor-pointer">
+    <div className="relative group cursor-pointer ">
       <div
-        className="relative rounded-xl overflow-hidden bg-gray-900 cursor-pointer"
+        className="relative rounded-xl  overflow-hidden bg-gray-900 cursor-pointer"
         onClick={togglePlay}
       >
         {/* Thumbnail Overlay - Show bila tak playing */}
@@ -372,7 +363,7 @@ const VideoCard: React.FC<VideoCardProps> = ({
       </div>
 
       {/* Video Info */}
-      <div className="mt-3">
+      <div className="mt-3 text-center">
         <h4 className="font-semibold text-gray-900">{video.name}</h4>
         <p className="text-sm text-gray-600">{video.role}</p>
       </div>

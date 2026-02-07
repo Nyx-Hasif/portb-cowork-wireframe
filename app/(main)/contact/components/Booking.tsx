@@ -303,14 +303,14 @@ const Booking = () => {
               {
                 icon: "📍",
                 label: "Address",
-                value: "Siti Square, Kota Bharu",
+                value: "MEZZANINE FLOOR,PT 178-179,Jalan Hamzah,SEKSYEN 19,15050 Kota Bharu,Kelantan",
               },
               { icon: "📞", label: "Phone", value: "+6014 329 8981" },
               { icon: "✉️", label: "Email", value: "helloportb@gmail.com" },
               {
                 icon: "⏰",
                 label: "Operating Hours",
-                value: "Sun – Thu (9 AM – 5 PM) • Sat (by request)",
+                value: "Sun – Thu (9 AM – 6 PM) • Fri & Sat  (by request)",
               },
             ].map((c, i) => (
               <motion.div

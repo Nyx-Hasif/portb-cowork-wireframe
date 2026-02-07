@@ -55,14 +55,16 @@ const CTA = () => {
             </span>
           </Link>
 
-          {/* Chat with Us Button */}
-          <Link
-            href="/contact"
+          {/* Chat with Us Button (Direct to WhatsApp) */}
+          <a
+            href="https://wa.me/60143298981?text=Hi%20PortB,%20I%20would%20like%20to%20inquire%20about..."
+            target="_blank"
+            rel="noopener noreferrer"
             className="px-12 py-5 text-sm uppercase tracking-widest font-medium text-white border border-white/20 hover:bg-white/5 hover:border-white/40 transition-all backdrop-blur-sm flex items-center gap-3"
           >
             <MessageCircle className="w-4 h-4" />
             Chat with Us
-          </Link>
+          </a>
         </div>
       </div>
 
