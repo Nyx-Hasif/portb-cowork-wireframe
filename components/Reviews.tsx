@@ -36,46 +36,46 @@ const Reviews = () => {
   // State untuk track video mana yang tengah play
   const [activeVideoId, setActiveVideoId] = useState<number | null>(null);
 
-  const testimonials: Testimonial[] = [
-    {
-      quote:
-        "It was the best of times, it was the worst of times, it was the age of wisdom...",
-      name: "Charles Dickens",
-      title: "A Tale of Two Cities",
-      image:
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200",
-    },
-    {
-      quote:
-        "To be, or not to be, that is the question: Whether 'tis nobler in the mind...",
-      name: "William Shakespeare",
-      title: "Hamlet",
-      image:
-        "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=200",
-    },
-    {
-      quote: "All that we see or seem is but a dream within a dream.",
-      name: "Edgar Allan Poe",
-      title: "A Dream Within a Dream",
-      image:
-        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200",
-    },
-    {
-      quote:
-        "It is a truth universally acknowledged, that a single man in possession of a good fortune...",
-      name: "Jane Austen",
-      title: "Pride and Prejudice",
-      image: "https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?w=200",
-    },
-    {
-      quote:
-        "Call me Ishmael. Some years ago — never mind how long precisely — I thought I would sail about...",
-      name: "Herman Melville",
-      title: "Moby‑Dick",
-      image:
-        "https://plus.unsplash.com/premium_photo-1689551670902-19b441a6afde?w=200",
-    },
-  ];
+ const testimonials: Testimonial[] = [
+   {
+     quote:
+       "The best working space so far in kelantan. You can finish your task peacefully. Go have your lunch at common area with free flow coffee.. 100 extra points..😁",
+     name: "Maji Rashid",
+     title: "Freelance Designer",
+     image:
+       "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200",
+   },
+   {
+     quote:
+       "I visit Kota Bharu occasionally. When I'm there, I usually need to work every day. Port B is perfect--better than any coffee shop in the area. Very quiet, clean/modern facilities, solid IT infrastructure (fast/stable internet, stable/plentiful power), free coffee, space to eat lunch, and friendly/accommodating staff.",
+     name: "Carl Gross",
+     title: "Digital Marketing",
+     image:
+       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200",
+   },
+   {
+     quote:
+       "convenient, not noisy. there is a plug near the fixed desk. happy to work. big table.",
+     name: "Amirah Syazwani",
+     title: "Content Creator",
+     image:
+       "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200",
+   },
+   {
+     quote:
+       "The best facilities for work, meetings or small functions. Comfortable, clean and affordable. Recommended for all.",
+     name: "Ariff Azami",
+     title: "Startup Founder",
+     image:
+       "https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?w=200",
+   },
+   {
+     quote: "Best. Comfortable place. Fast line. Can repeat again.",
+     name: "Mohammad Thaqif Tahir",
+     title: "TNB Officer",
+     image: "https://images.unsplash.com/photo-1558203728-00f45181dd84?w=200",
+   },
+ ];
 
   // Video Reviews Data
   const videoReviews: VideoReview[] = [

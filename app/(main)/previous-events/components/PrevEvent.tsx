@@ -83,7 +83,7 @@ const PrevEvent = () => {
       <section className="bg-[#f9fafb] text-gray-800 py-10">
         <header className="text-center space-y-4 lg:mb-14">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[#004348]">
-            Previous and Upcoming Events
+            Previous Events
           </h1>
           <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             Stay tuned for our upcoming events!
@@ -99,7 +99,7 @@ const PrevEvent = () => {
       {/* Hero */}
       <header className="text-center space-y-4 lg:mb-14 px-4">
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[#004348]">
-          Previous and Upcoming Events
+          Previous Events
         </h1>
         <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
           Discover how our multifunctional conference spaces bring every idea,

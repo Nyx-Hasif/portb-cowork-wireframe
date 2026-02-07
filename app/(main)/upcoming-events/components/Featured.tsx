@@ -113,7 +113,7 @@ const Featured = () => {
           {/* Header for Featured */}
           <header className="text-center mb-12 px-4">
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[#004348]">
-              Featured Events
+              Upcoming Events
             </h1>
             <p className="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Experience our most anticipated gatherings where creativity,

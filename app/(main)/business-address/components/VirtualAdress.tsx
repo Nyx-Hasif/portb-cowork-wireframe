@@ -27,14 +27,7 @@ const features = [
   },
   {
     id: 4,
-    title: "Smart Alerts",
-    desc: "Real-time digital notifications the moment your mail arrives.",
-    icon: <Bell className="w-5 h-5" />,
-    image: "https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=800&auto=format&fit=crop&grayscale=true",
-  },
-  {
-    id: 5,
-    title: "24/7 Shield",
+    title: "24/7 CCTV",
     desc: "Round-the-clock secure access to your business parcels.",
     icon: <Shield className="w-5 h-5" />,
     image: "https://images.unsplash.com/photo-1558002038-1055907df827?q=80&w=800&auto=format&fit=crop&grayscale=true",

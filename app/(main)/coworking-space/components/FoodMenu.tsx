@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
@@ -140,12 +139,6 @@ const FoodMenu: React.FC = () => {
   );
   const [activeCard, setActiveCard] = useState<string | null>(null);
 
-  const tabConfigs = {
-    breakfast: { icon: <Coffee size={14} />, label: "Breakfast" },
-    lunch: { icon: <Sun size={14} />, label: "Lunch" },
-    teatime: { icon: <CloudMoon size={14} />, label: "Tea Time" },
-  };
-
   const handleCardInteraction = (cardId: string) => {
     setActiveCard(activeCard === cardId ? null : cardId);
   };
@@ -196,24 +189,201 @@ const FoodMenu: React.FC = () => {
             </div>
           </div>
 
-          {/* Interactive Tabs */}
-          <div className="flex bg-zinc-900 p-1.5 rounded-sm shadow-xl w-full lg:w-auto">
-            {(["breakfast", "lunch", "teatime"] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`flex-1 cursor-pointer lg:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-[9px] sm:text-[10px] uppercase tracking-wider sm:tracking-widest transition-all duration-500 rounded-sm ${
-                  activeTab === tab
-                    ? "bg-white text-black font-bold shadow-md"
-                    : "text-zinc-400 hover:text-white active:text-white"
+          {/* Interactive Tabs - REDESIGNED (Compact Version) */}
+          <div className="relative w-full lg:w-auto">
+            <div className="relative bg-white border-2 border-zinc-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-full lg:w-auto">
+              {/* Active Indicator Background - Slides behind tabs */}
+              <div
+                className={`absolute top-0 h-full bg-zinc-900 transition-all duration-500 ease-out ${
+                  activeTab === "breakfast"
+                    ? "left-0 w-1/3"
+                    : activeTab === "lunch"
+                    ? "left-1/3 w-1/3"
+                    : "left-2/3 w-1/3"
                 }`}
+              ></div>
+
+              {/* Tabs Container */}
+              <div className="relative flex">
+                {/* Breakfast Tab */}
+                <button
+                  onClick={() => setActiveTab("breakfast")}
+                  className={`group relative flex-1 lg:flex-none px-4 lg:px-6 py-4 transition-all duration-500 cursor-pointer ${
+                    activeTab === "breakfast"
+                      ? "text-white"
+                      : "text-zinc-900 hover:bg-zinc-50"
+                  }`}
+                >
+                  <div className="flex items-center justify-center gap-2.5">
+                    {/* Icon */}
+                    <div
+                      className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-500 ${
+                        activeTab === "breakfast"
+                          ? "border-white bg-white/10"
+                          : "border-zinc-300 group-hover:border-zinc-900"
+                      }`}
+                    >
+                      <Coffee
+                        size={14}
+                        className={
+                          activeTab === "breakfast"
+                            ? "text-white"
+                            : "text-zinc-600 group-hover:text-zinc-900"
+                        }
+                      />
+                    </div>
+                    
+                    {/* Text */}
+                    <div className="flex flex-col items-start">
+                      <span
+                        className={`text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${
+                          activeTab === "breakfast"
+                            ? "text-white"
+                            : "text-zinc-900"
+                        }`}
+                      >
+                        Breakfast
+                      </span>
+                      <span
+                        className={`text-[8px] uppercase tracking-wider transition-all ${
+                          activeTab === "breakfast"
+                            ? "text-white/60"
+                            : "text-zinc-400"
+                        }`}
+                      >
+                        Morning
+                      </span>
+                    </div>
+                  </div>
+                </button>
+
+                {/* Divider */}
+                <div className="relative w-px bg-zinc-200 my-3"></div>
+
+                {/* Lunch Tab */}
+                <button
+                  onClick={() => setActiveTab("lunch")}
+                  className={`group relative flex-1 lg:flex-none px-4 lg:px-6 py-4 transition-all duration-500 cursor-pointer ${
+                    activeTab === "lunch"
+                      ? "text-white"
+                      : "text-zinc-900 hover:bg-zinc-50"
+                  }`}
+                >
+                  <div className="flex items-center justify-center gap-2.5">
+                    {/* Icon */}
+                    <div
+                      className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-500 ${
+                        activeTab === "lunch"
+                          ? "border-white bg-white/10"
+                          : "border-zinc-300 group-hover:border-zinc-900"
+                      }`}
+                    >
+                      <Sun
+                        size={14}
+                        className={
+                          activeTab === "lunch"
+                            ? "text-white"
+                            : "text-zinc-600 group-hover:text-zinc-900"
+                        }
+                      />
+                    </div>
+                    
+                    {/* Text */}
+                    <div className="flex flex-col items-start">
+                      <span
+                        className={`text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${
+                          activeTab === "lunch"
+                            ? "text-white"
+                            : "text-zinc-900"
+                        }`}
+                      >
+                        Lunch
+                      </span>
+                      <span
+                        className={`text-[8px] uppercase tracking-wider transition-all ${
+                          activeTab === "lunch"
+                            ? "text-white/60"
+                            : "text-zinc-400"
+                        }`}
+                      >
+                        Afternoon
+                      </span>
+                    </div>
+                  </div>
+                </button>
+
+                {/* Divider */}
+                <div className="relative w-px bg-zinc-200 my-3"></div>
+
+                {/* Tea Time Tab */}
+                <button
+                  onClick={() => setActiveTab("teatime")}
+                  className={`group relative flex-1 lg:flex-none px-4 lg:px-6 py-4 transition-all duration-500 cursor-pointer ${
+                    activeTab === "teatime"
+                      ? "text-white"
+                      : "text-zinc-900 hover:bg-zinc-50"
+                  }`}
+                >
+                  <div className="flex items-center justify-center gap-2.5">
+                    {/* Icon */}
+                    <div
+                      className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-500 ${
+                        activeTab === "teatime"
+                          ? "border-white bg-white/10"
+                          : "border-zinc-300 group-hover:border-zinc-900"
+                      }`}
+                    >
+                      <CloudMoon
+                        size={14}
+                        className={
+                          activeTab === "teatime"
+                            ? "text-white"
+                            : "text-zinc-600 group-hover:text-zinc-900"
+                        }
+                      />
+                    </div>
+                    
+                    {/* Text */}
+                    <div className="flex flex-col items-start">
+                      <span
+                        className={`text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${
+                          activeTab === "teatime"
+                            ? "text-white"
+                            : "text-zinc-900"
+                        }`}
+                      >
+                        Tea Time
+                      </span>
+                      <span
+                        className={`text-[8px] uppercase tracking-wider transition-all ${
+                          activeTab === "teatime"
+                            ? "text-white/60"
+                            : "text-zinc-400"
+                        }`}
+                      >
+                        Evening
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              {/* Pulse Indicator for Active Tab */}
+              <div
+                className={`absolute -top-1.5 transition-all duration-500 ${
+                  activeTab === "breakfast"
+                    ? "left-1/6"
+                    : activeTab === "lunch"
+                    ? "left-1/2"
+                    : "left-5/6"
+                } -translate-x-1/2`}
               >
-                <span className="hidden sm:inline">{tabConfigs[tab].icon}</span>
-                <span className="whitespace-nowrap">
-                  {tabConfigs[tab].label}
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-900 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-zinc-900"></span>
                 </span>
-              </button>
-            ))}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -242,7 +412,6 @@ const FoodMenu: React.FC = () => {
                     alt={pkg.title}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    // ✅ FIXED: Removed grayscale class. Added scale effect on hover/active only.
                     className={`object-cover transition-all duration-[1.5s] ease-in-out ${
                       isActive
                         ? "scale-105"
@@ -317,9 +486,86 @@ const FoodMenu: React.FC = () => {
             );
           })}
         </div>
+
+        {/* External Food Policy Warning - Red Border (Responsive) */}
+        <div className="mt-16 bg-red-50 border-2 border-red-500 relative overflow-hidden shadow-lg">
+          {/* Top Red Line */}
+          <div className="absolute top-0 left-0 w-full h-1 bg-red-500"></div>
+          
+          {/* Decorative Blur - Hidden on mobile */}
+          <div className="absolute bottom-0 right-0 w-32 h-32 bg-red-100/30 rounded-full blur-3xl pointer-events-none hidden md:block"></div>
+          
+          <div className="relative z-10 p-5 md:p-8">
+            {/* Header Section */}
+            <div className="flex items-start gap-3 md:gap-4 mb-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-red-500 flex items-center justify-center shrink-0">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 md:h-6 md:w-6 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+
+              <div className="flex-1">
+                <h4 className="text-sm md:text-base lg:text-lg font-bold uppercase tracking-[0.1em] md:tracking-[0.15em] text-red-700 mb-2">
+                  External Catering Policy
+                </h4>
+                <p className="text-[10px] md:text-[11px] lg:text-xs text-red-600 leading-relaxed mb-3">
+                  Bringing <span className="font-bold text-red-700">external catering services or large-scale food setups</span> (buffets, event meals, bulk orders) will incur a{" "}
+                  <span className="font-bold text-red-700">RM100 cleaning service fee</span>. 
+                  This covers deep cleaning, waste management, and maintaining premium hygiene standards.
+                </p>
+                <p className="text-[9px] md:text-[10px] text-emerald-700 leading-relaxed bg-emerald-50 px-3 py-2 border-l-2 border-emerald-500">
+                  ✓ Personal meals, snacks, coffee & light refreshments are{" "}
+                  <span className="font-bold">welcome anytime</span> at no extra charge!
+                </p>
+              </div>
+            </div>
+
+            {/* Divider - Hidden on mobile */}
+            <div className="hidden md:block w-full h-px bg-red-200 my-4"></div>
+
+            {/* CTA Section */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-5 md:mt-0">
+              {/* Left Side - Optional Text (hidden on small mobile) */}
+              <div className="hidden sm:block">
+                <p className="text-[9px] md:text-[10px] uppercase tracking-wider text-red-500 font-medium">
+                  💡 Planning an event?
+                </p>
+              </div>
+
+              {/* Right Side - CTA Badge */}
+              <div className="w-full sm:w-auto">
+                <div className="flex items-center justify-between sm:justify-center gap-3 px-4 md:px-6 py-3 md:py-4 bg-white border-2 border-red-500 shadow-md">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9px] md:text-[10px] uppercase tracking-wider font-bold text-red-500">
+                      Smart Choice:
+                    </span>
+                    <span className="text-[10px] md:text-[11px] uppercase tracking-wide text-zinc-700 font-medium">
+                      Our catering packages
+                    </span>
+                  </div>
+                  <span className="text-[10px] md:text-[11px] uppercase tracking-wide text-red-600 font-bold whitespace-nowrap">
+                    — No fees!
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
 };
 
 export default FoodMenu;
+  

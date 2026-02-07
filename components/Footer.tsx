@@ -78,14 +78,14 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-5 pt-5">
           {/* Copyright */}
           <p className="text-sm text-gray-500 text-center md:text-left">
-            © 2025 PortB. All rights reserved.
+            © 2026 PortB. All rights reserved.
           </p>
 
           {/* Social media icons */}
           <div className="flex flex-wrap justify-center md:justify-end items-center gap-4">
             {/* Facebook */}
             <Link
-              href="https://facebook.com/portb"
+              href="https://www.facebook.com/portb.kotabharu"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Facebook"
@@ -96,7 +96,7 @@ const Footer = () => {
 
             {/* TikTok */}
             <Link
-              href="https://tiktok.com/@portb"
+              href="https://www.tiktok.com/@portbspace"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="TikTok"
@@ -107,7 +107,7 @@ const Footer = () => {
 
             {/* Instagram */}
             <Link
-              href="https://instagram.com/portb"
+              href="https://www.instagram.com/portb.space/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
@@ -118,7 +118,7 @@ const Footer = () => {
 
             {/* Threads */}
             <Link
-              href="https://threads.net/@portb"
+              href="https://www.threads.com/@portb.space"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Threads"
