@@ -95,7 +95,9 @@ import theraphy_benefit_1 from "./theraphy_benefit_1.png";
 import theraphy_benefit_2 from "./theraphy_benefit_2.png";
 import theraphy_benefit_3 from "./theraphy_benefit_3.png";
 import cta_portb_bg from "./cta_portb_bg.png";
-
+import meeting_room_v2 from "./meeting_room_v2.png";
+import event_space_v2 from "./event_space_v2.png";
+import event_space_training from "./event_space_training.png";
 
 
 /* ---- Gallery images ---- */
@@ -273,6 +275,9 @@ export const assets = {
   theraphy_benefit_2,
   theraphy_benefit_3,
   cta_portb_bg,
+  meeting_room_v2,
+  event_space_v2,
+  event_space_training,
 
 
 };

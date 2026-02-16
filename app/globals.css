@@ -361,3 +361,88 @@ button:active,
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+
+
+
+/* =================✅ Diamond shimmer animation (pricingTable.tsx) ============================*/
+/* ✅ Premium Aurora Glow Effect - Moderate */
+@keyframes aurora-sweep {
+  0% {
+    background-position: 0% 50%;
+    box-shadow: 
+      0 0 15px -8px rgba(251, 191, 36, 0.08),
+      inset 0 0 20px -12px rgba(251, 191, 36, 0.03);
+  }
+  50% {
+    background-position: 100% 50%;
+    box-shadow: 
+      0 0 30px -8px rgba(251, 191, 36, 0.15),
+      inset 0 0 35px -12px rgba(251, 191, 36, 0.06);
+  }
+  100% {
+    background-position: 0% 50%;
+    box-shadow: 
+      0 0 15px -8px rgba(251, 191, 36, 0.08),
+      inset 0 0 20px -12px rgba(251, 191, 36, 0.03);
+  }
+}
+
+@keyframes border-pulse {
+  0%, 100% {
+    border-color: rgba(251, 191, 36, 0.15);
+  }
+  50% {
+    border-color: rgba(251, 191, 36, 0.4);
+  }
+}
+
+@keyframes shimmer-slide {
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+  100% {
+    transform: translateX(200%) skewX(-15deg);
+  }
+}
+
+.premium-glow {
+  background: linear-gradient(
+    135deg,
+    rgba(251, 191, 36, 0.04) 0%,
+    rgba(252, 211, 77, 0.08) 20%,
+    rgba(251, 191, 36, 0.03) 40%,
+    rgba(253, 224, 110, 0.1) 60%,
+    rgba(251, 191, 36, 0.04) 80%,
+    rgba(252, 211, 77, 0.06) 100%
+  );
+  background-size: 300% 300%;
+  animation: aurora-sweep 3s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(251, 191, 36, 0.08) 40%,
+    rgba(252, 211, 77, 0.15) 50%,
+    rgba(251, 191, 36, 0.08) 60%,
+    transparent 100%
+  );
+  width: 60%;
+  animation: shimmer-slide 5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.border-breathe {
+  animation: border-pulse 2.5s ease-in-out infinite;
+}

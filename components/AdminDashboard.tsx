@@ -91,6 +91,7 @@ interface UpcomingEvent {
   image_url?: string;
   created_at?: string;
   updated_at?: string;
+  register_url?: string;
 }
 interface PreviousEvent {
   id: number;
@@ -273,6 +274,7 @@ Terima kasih kerana menghubungi *Port B Coworking Space*
       time: "",
       guests: "",
       is_featured: false,
+      register_url: "", // ✅ TAMBAH
     },
     previous: { title: "", description: "", category: "", icon_name: "" },
     gallery: { year: "", alt_text: "" },
@@ -848,6 +850,7 @@ Terima kasih kerana menghubungi *Port B Coworking Space*
         time: "",
         guests: "",
         is_featured: false,
+        register_url: "",
       },
     }));
   };
@@ -1000,6 +1003,7 @@ Terima kasih kerana menghubungi *Port B Coworking Space*
           time: item.time || "",
           guests: item.guests || "",
           is_featured: item.is_featured || false,
+          register_url: (item as UpcomingEvent).register_url || "",
         },
       }));
     else if (type === "previous" && "icon_name" in item)
@@ -3122,8 +3126,7 @@ Terima kasih kerana menghubungi *Port B Coworking Space*
                         />
                         <textarea
                           placeholder="Description"
-                          rows={4}
-                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 outline-none text-sm resize-none"
+                          className="w-full px-4 py-3.5 rounded-xl border border-gray-300 outline-none text-sm resize-y min-h-[120px] sm:min-h-[180px] lg:min-h-[250px] max-h-[500px] focus:border-black transition-colors"
                           value={forms.upcoming.description}
                           onChange={(e) =>
                             setForms((prev) => ({
@@ -3214,6 +3217,67 @@ Terima kasih kerana menghubungi *Port B Coworking Space*
                             Featured Event
                           </span>
                         </label>
+
+                        {/* Registration Link */}
+                        <div className="space-y-1.5">
+                          <input
+                            type="text"
+                            placeholder="Registration Link (e.g. forms.google.com/...)"
+                            className="w-full px-4 py-3.5 rounded-xl border border-gray-300 outline-none text-sm focus:border-black transition-colors"
+                            value={forms.upcoming.register_url}
+                            onChange={(e) =>
+                              setForms((prev) => ({
+                                ...prev,
+                                upcoming: {
+                                  ...prev.upcoming,
+                                  register_url: e.target.value,
+                                },
+                              }))
+                            }
+                            onBlur={(e) => {
+                              const value = e.target.value.trim();
+                              if (
+                                value &&
+                                !value.startsWith("http://") &&
+                                !value.startsWith("https://")
+                              ) {
+                                setForms((prev) => ({
+                                  ...prev,
+                                  upcoming: {
+                                    ...prev.upcoming,
+                                    register_url: "https://" + value,
+                                  },
+                                }));
+                              }
+                            }}
+                          />
+                          <p className="text-xs text-gray-400 px-1">
+                            Paste your URL or link.
+                          </p>
+                          {forms.upcoming.register_url && (
+                            <a
+                              href={forms.upcoming.register_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:underline px-1"
+                            >
+                              🔗 Preview link
+                              <svg
+                                className="w-3 h-3"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                />
+                              </svg>
+                            </a>
+                          )}
+                        </div>
                       </>
                     )}
 
@@ -3340,40 +3404,156 @@ Terima kasih kerana menghubungi *Port B Coworking Space*
             {modals.preview && previewEvent && (
               <motion.div
                 variants={modalVariants}
-                className="bg-white w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-gray-200"
+                className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-gray-200"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="relative h-64 w-full bg-gray-100 border-b border-gray-200">
+                {/* Image — original ratio, no crop */}
+                <div className="relative w-full flex-shrink-0 bg-gray-950">
                   {previewEvent.image_url ? (
-                    <Image
-                      src={previewEvent.image_url}
-                      alt=""
-                      fill
-                      className="object-cover"
-                    />
+                    <div className="relative w-full aspect-[16/10]">
+                      <Image
+                        src={previewEvent.image_url}
+                        alt=""
+                        fill
+                        className="object-contain"
+                        quality={95}
+                        priority
+                      />
+                    </div>
                   ) : (
-                    <div className="h-full flex items-center justify-center text-gray-400">
-                      No Image
+                    <div className="w-full aspect-[16/10] flex items-center justify-center text-gray-500 bg-gray-100">
+                      <div className="text-center">
+                        <ImageIcon
+                          size={40}
+                          className="mx-auto mb-2 text-gray-300"
+                        />
+                        <p className="text-sm">No Image</p>
+                      </div>
                     </div>
                   )}
+
+                  {/* Close button */}
                   <button
                     onClick={() => toggleModal("preview", false)}
-                    className="absolute top-4 right-4 p-2 bg-white/80 backdrop-blur rounded-full hover:bg-white shadow-sm border border-gray-200"
+                    className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white rounded-full transition-colors"
                   >
                     <X size={20} />
                   </button>
+
+                  {/* Badges overlay */}
+                  {"is_featured" in previewEvent &&
+                    previewEvent.is_featured && (
+                      <span className="absolute top-4 left-4 px-3 py-1 bg-black text-white text-xs uppercase font-bold rounded-lg shadow-lg">
+                        ⭐ Featured
+                      </span>
+                    )}
                 </div>
-                <div className="p-8 overflow-y-auto modal-scrollable flex-1">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">
+
+                {/* Content */}
+                <div className="p-6 sm:p-8 overflow-y-auto modal-scrollable flex-1">
+                  {/* Title */}
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
                     {"title" in previewEvent
                       ? previewEvent.title
-                      : `Image ${previewEvent.year}`}
+                      : `Image ${(previewEvent as GalleryImage).year}`}
                   </h2>
-                  {"description" in previewEvent && (
-                    <p className="text-gray-600 text-base leading-relaxed whitespace-pre-wrap">
-                      {previewEvent.description || "No description provided."}
+
+                  {/* Category & Meta */}
+                  {"category" in previewEvent && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-lg border border-gray-200">
+                        {previewEvent.category}
+                      </span>
+                      {"fee" in previewEvent && previewEvent.fee && (
+                        <span className="px-3 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-lg border border-green-200">
+                          {previewEvent.fee}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Date & Time for Upcoming */}
+                  {"date" in previewEvent && (
+                    <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-600">
+                      {previewEvent.date && (
+                        <div className="flex items-center gap-2">
+                          <Calendar size={16} className="text-gray-400" />
+                          <span className="font-medium">
+                            {previewEvent.date}
+                          </span>
+                        </div>
+                      )}
+                      {"time" in previewEvent && previewEvent.time && (
+                        <div className="flex items-center gap-2">
+                          <Clock size={16} className="text-gray-400" />
+                          <span className="font-medium">
+                            {previewEvent.time}
+                          </span>
+                        </div>
+                      )}
+                      {"guests" in previewEvent && previewEvent.guests && (
+                        <div className="flex items-center gap-2">
+                          <Users size={16} className="text-gray-400" />
+                          <span className="font-medium">
+                            {previewEvent.guests}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Year for Gallery */}
+                  {"year" in previewEvent && (
+                    <p className="text-sm text-gray-500 mb-4">
+                      Year:{" "}
+                      <span className="font-bold">{previewEvent.year}</span>
                     </p>
                   )}
+
+                  {/* Description */}
+                  {"description" in previewEvent && (
+                    <div>
+                      <p className="text-xs text-gray-400 uppercase font-bold mb-2 tracking-wide">
+                        Description
+                      </p>
+                      <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <p className="text-gray-700 text-[15px] leading-relaxed whitespace-pre-wrap break-words">
+                          {previewEvent.description ||
+                            "No description provided."}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Alt text for Gallery */}
+                  {"alt_text" in previewEvent && previewEvent.alt_text && (
+                    <div className="mt-4">
+                      <p className="text-xs text-gray-400 uppercase font-bold mb-2 tracking-wide">
+                        Alt Text
+                      </p>
+                      <p className="text-gray-600 text-sm">
+                        {previewEvent.alt_text}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Register URL for Upcoming */}
+                  {"register_url" in previewEvent &&
+                    previewEvent.register_url && (
+                      <div className="mt-4 p-3 bg-blue-50 rounded-xl border border-blue-200">
+                        <p className="text-xs text-blue-500 uppercase font-bold mb-1 tracking-wide">
+                          Registration Link
+                        </p>
+                        <a
+                          href={previewEvent.register_url as string}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:underline break-all"
+                        >
+                          🔗 {previewEvent.register_url as string}
+                        </a>
+                      </div>
+                    )}
                 </div>
               </motion.div>
             )}

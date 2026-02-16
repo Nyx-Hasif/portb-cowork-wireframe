@@ -9,7 +9,7 @@ import { StaticImageData } from "next/image";
 type SpaceCardData = {
   category: string;
   title: string;
-  src: string;
+  src: string | StaticImageData;
   modalImage?: string | StaticImageData;
   description?: string;
   features?: string[];
@@ -74,13 +74,24 @@ const SpaceCard = ({
 
   const features = card.features || [];
 
+  // Convert StaticImageData to string if needed
+  const cardForModal = {
+    ...card,
+    src: typeof card.src === "string" ? card.src : card.src.src,
+    modalImage: card.modalImage
+      ? typeof card.modalImage === "string"
+        ? card.modalImage
+        : card.modalImage.src
+      : undefined,
+  };
+
   return (
     <>
       {/* ✅ Modal will render to body via Portal */}
       <AppleModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        card={card}
+        card={cardForModal}
       />
 
       {/* Card */}

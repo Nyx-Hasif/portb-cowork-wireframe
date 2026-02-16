@@ -1,12 +1,10 @@
-// AppleModal.tsx
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
+import { X, ArrowRight } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-// ❌ REMOVE THIS - don't need outside click
-// import { useOutsideClick } from "@/hooks/use-outside-click";
 import Image, { StaticImageData } from "next/image";
+import { useRouter } from "next/navigation";
 
 type CardProps = {
   src: string;
@@ -16,6 +14,15 @@ type CardProps = {
   description?: string;
   modalImage?: string | StaticImageData;
   features?: string[];
+};
+
+// ✅ MAPPING: category dari contentData → URL slug
+const CATEGORY_TO_SLUG: Record<string, string> = {
+  "Common Area": "common-area",
+  "Fixed Desk": "fixed-desk",
+  "Meeting Room": "meeting-room",
+  "Green Area": "green-area",
+  "Event Space": "event-space",
 };
 
 export default function AppleModal({
@@ -29,15 +36,12 @@ export default function AppleModal({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // ❌ REMOVE THIS LINE
-  // useOutsideClick(containerRef, onClose);
-
-  // ESC key handler - KEEP THIS (good UX)
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -46,7 +50,6 @@ export default function AppleModal({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [onClose]);
 
-  // Lock body scroll
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -57,6 +60,16 @@ export default function AppleModal({
       document.body.style.overflow = "unset";
     };
   }, [isOpen]);
+
+  // ✅ Handle "Book This Space" — redirect ke /coworking-space?space=xxx
+  const handleBookSpace = () => {
+    const slug = CATEGORY_TO_SLUG[card.category];
+
+    if (slug) {
+      onClose();
+      router.push(`/coworking-space?space=${slug}`);
+    }
+  };
 
   if (!mounted) return null;
   if (!isOpen) return null;
@@ -71,10 +84,8 @@ export default function AppleModal({
         className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 md:p-8"
         style={{ margin: 0 }}
       >
-        {/* ✅ Backdrop - Remove onClick */}
         <div className="absolute inset-0 bg-gray-900/85 backdrop-blur-md" />
 
-        {/* Modal Container */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -83,7 +94,6 @@ export default function AppleModal({
           ref={containerRef}
           className="relative z-10 w-full max-w-3xl bg-neutral-900 rounded-xl sm:rounded-2xl overflow-hidden border border-white/10 shadow-2xl max-h-[90vh] overflow-y-auto"
         >
-          {/* Close Button */}
           <button
             className="sticky cursor-pointer top-4 right-4 ml-auto mr-4 z-20 flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-red-500/90 hover:bg-red-600 transition-all border border-white/10 shadow-lg"
             onClick={onClose}
@@ -92,7 +102,6 @@ export default function AppleModal({
             <X className="h-5 w-5 text-white" />
           </button>
 
-          {/* Image Section */}
           <div className="relative w-full h-48 sm:h-56 md:h-72 -mt-14">
             <Image
               src={card.modalImage || card.src}
@@ -105,7 +114,6 @@ export default function AppleModal({
             <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/30 to-transparent" />
           </div>
 
-          {/* Text Content */}
           <div className="p-5 sm:p-6 md:p-8 -mt-6 sm:-mt-8 relative">
             <span className="inline-block text-xs sm:text-sm uppercase tracking-wider text-amber-400 font-semibold mb-2 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/20">
               {card.category}
@@ -135,13 +143,21 @@ export default function AppleModal({
               </div>
             )}
 
-            <button className="w-full py-3 sm:py-3.5 bg-white text-black text-sm sm:text-base font-semibold rounded-lg hover:bg-gray-100 active:scale-98 transition-all shadow-md">
+            {/* ✅ Book This Space — now redirects to /coworking-space */}
+            <button
+              onClick={handleBookSpace}
+              className="w-full py-3 sm:py-3.5 bg-white text-black text-sm sm:text-base font-semibold rounded-lg hover:bg-gray-100 active:scale-95 transition-all shadow-md cursor-pointer group flex items-center justify-center gap-2"
+            >
               Book This Space
+              <ArrowRight
+                size={16}
+                className="group-hover:translate-x-1 transition-transform"
+              />
             </button>
           </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>,
-    document.body
+    document.body,
   );
 }

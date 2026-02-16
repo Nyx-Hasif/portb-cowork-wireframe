@@ -1,14 +1,16 @@
-import React from 'react'
-import PricingTable from './components/PricingTable'
-import FoodMenu from './components/FoodMenu'
+import React, { Suspense } from "react";
+import PricingTable from "./components/PricingTable";
+import FoodMenu from "./components/FoodMenu";
 
 const CoworkingPage = () => {
   return (
     <div>
-      <PricingTable />
+      <Suspense fallback={null}>
+        <PricingTable />
+      </Suspense>
       <FoodMenu />
     </div>
-  )
-}
+  );
+};
 
-export default CoworkingPage
+export default CoworkingPage;

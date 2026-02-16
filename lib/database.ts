@@ -118,6 +118,7 @@ export async function createUpcomingEvent(eventData: {
     time?: string
     guests?: string
     image_url?: string
+    register_url?: string  
 }) {
     const { data, error } = await supabase
         .from('upcoming_events')
@@ -145,6 +146,7 @@ export async function updateUpcomingEvent(
         time: string
         guests: string
         image_url: string
+        register_url?: string 
     }>
 ) {
     const { data, error } = await supabase

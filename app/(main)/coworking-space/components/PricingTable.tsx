@@ -1,6 +1,7 @@
 "use client";
-import React, { useState } from "react";
-import Image from "next/image";
+import React, { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
+import Image, { StaticImageData } from "next/image";
 import {
   ArrowRight,
   Users,
@@ -10,8 +11,9 @@ import {
   CheckCircle2,
   Sparkles,
   ChevronDown,
-  Briefcase, // ✅ Icon untuk BNI & Space Rental tab
+  Briefcase,
 } from "lucide-react";
+import { assets } from "@/assets/asset";
 
 interface Rate {
   period: string;
@@ -22,15 +24,15 @@ interface RateItem {
   id: string;
   title: string;
   subtitle: string;
-  image: string;
+  image: string | StaticImageData;
   description: string;
   capacity: string;
   tier: string;
   standardRates: Rate[];
   studentRates?: Rate[];
-  bniRates?: Rate[]; // ✅ NEW: BNI rates
+  bniRates?: Rate[];
   isStudentFriendly?: boolean;
-  isBniFriendly?: boolean; // ✅ NEW: BNI availability
+  isBniFriendly?: boolean;
 }
 
 const personalPackages: RateItem[] = [
@@ -41,11 +43,10 @@ const personalPackages: RateItem[] = [
     tier: "Tier 01",
     capacity: "Hot Desking",
     isStudentFriendly: true,
-    isBniFriendly: true, // ✅ BNI available
+    isBniFriendly: true,
     description:
       "Access to our vibrant open-plan lounge. Perfect for digital nomads and students who thrive in a dynamic, social environment.",
-    image:
-      "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1200&auto=format&fit=crop",
+    image: assets.common_area,
     standardRates: [
       { period: "Daily", price: "25" },
       { period: "Weekly", price: "125" },
@@ -68,11 +69,10 @@ const personalPackages: RateItem[] = [
     subtitle: "Dedicated Anchor",
     tier: "Tier 02",
     capacity: "Solo Professional",
-    isBniFriendly: true, // ✅ BNI available
+    isBniFriendly: true,
     description:
       "Your own permanent desk in a quiet zone. Includes a lockable pedestal and ergonomic chair for consistent productivity.",
-    image:
-      "https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=1200&auto=format&fit=crop",
+    image: assets.fixed_desk,
     standardRates: [
       { period: "Daily", price: "35" },
       { period: "Weekly", price: "150" },
@@ -92,12 +92,11 @@ const rentalPackages: RateItem[] = [
     title: "Meeting Room",
     subtitle: "Executive Suite",
     tier: "Space A",
-    capacity: "10-15 Pax",
-    isBniFriendly: true, // ✅ BNI available
+    capacity: "10 Pax",
+    isBniFriendly: true,
     description:
       "Fully equipped with 4K displays and soundproofing. Ideal for board meetings, client presentations, and team huddles.",
-    image:
-      "https://images.unsplash.com/photo-1431540015161-0bf868a2d407?q=80&w=1200&auto=format&fit=crop",
+    image: assets.meeting_room_v2,
     standardRates: [
       { period: "Hourly", price: "100" },
       { period: "4 Hours", price: "300" },
@@ -114,12 +113,11 @@ const rentalPackages: RateItem[] = [
     title: "The Green Area",
     subtitle: "Biophilic Lounge",
     tier: "Space B",
-    capacity: "10-15 Pax",
-    isBniFriendly: true, // ✅ BNI available
+    capacity: "10 Pax",
+    isBniFriendly: true,
     description:
       "A lush, light-filled space designed for creative brainstorming and informal networking. Nature meets productivity.",
-    image:
-      "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?q=80&w=1200&auto=format&fit=crop",
+    image: assets.green_area,
     standardRates: [
       { period: "Hourly", price: "100" },
       { period: "4 Hours", price: "300" },
@@ -136,12 +134,11 @@ const rentalPackages: RateItem[] = [
     title: "Event Space",
     subtitle: "Grand Hall",
     tier: "Space C",
-    capacity: "25-35 Pax",
-    isBniFriendly: true, // ✅ BNI available
+    capacity: "40 Pax",
+    isBniFriendly: true,
     description:
       "A versatile open hall for workshops, seminars, and corporate launches. Features modular furniture and stage setup.",
-    image:
-      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1200&auto=format&fit=crop",
+    image: assets.event_space_v2,
     standardRates: [
       { period: "Hourly", price: "200" },
       { period: "4 Hours", price: "500" },
@@ -159,80 +156,129 @@ const inclusions = [
   "Surau Access",
   "Fiber Internet",
   "Pantry Access",
-  "Mineral Water",
+  "Filtered Water",
   "Unlimited Coffee",
 ];
 
+// ✅ MAPPING: URL slug → tab + package id
+const SLUG_TO_PRICING: Record<
+  string,
+  { tab: "personal" | "space"; packageId: string }
+> = {
+  "common-area": { tab: "personal", packageId: "p1" },
+  "fixed-desk": { tab: "personal", packageId: "p2" },
+  "meeting-room": { tab: "space", packageId: "r1" },
+  "green-area": { tab: "space", packageId: "r2" },
+  "event-space": { tab: "space", packageId: "r3" },
+};
+
 const Membership: React.FC = () => {
+  const searchParams = useSearchParams();
+
   const [activeMainTab, setActiveMainTab] = useState<"personal" | "space">(
     "personal",
   );
+  const [highlightedPackage, setHighlightedPackage] = useState<string | null>(
+    null,
+  );
+  const packageRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // ✅ Track untuk Common Area: standard / student / bni
   const [commonAreaTrack, setCommonAreaTrack] = useState<
     "standard" | "student" | "bni"
   >("standard");
-
-  // ✅ Track untuk Fixed Desk: standard / bni
   const [fixedDeskTrack, setFixedDeskTrack] = useState<"standard" | "bni">(
     "standard",
   );
-
-  // ✅ Track untuk Meeting Room: standard / bni
   const [meetingRoomTrack, setMeetingRoomTrack] = useState<"standard" | "bni">(
     "standard",
   );
-
-  // ✅ Track untuk Green Area: standard / bni
   const [greenAreaTrack, setGreenAreaTrack] = useState<"standard" | "bni">(
     "standard",
   );
-
-  // ✅ Track untuk Event Space: standard / bni
   const [eventSpaceTrack, setEventSpaceTrack] = useState<"standard" | "bni">(
     "standard",
   );
 
+  // ✅ Handle redirect from SpacesGallery
+  useEffect(() => {
+    const spaceParam = searchParams.get("space");
+
+    if (!spaceParam || !SLUG_TO_PRICING[spaceParam]) return;
+
+    const { tab, packageId } = SLUG_TO_PRICING[spaceParam];
+
+    // Step 1: Switch tab
+    setActiveMainTab(tab);
+
+    // Step 2: Poll until element exists, then scroll + highlight
+    let attempts = 0;
+    const maxAttempts = 30;
+
+    const interval = setInterval(() => {
+      attempts++;
+      const el = packageRefs.current[packageId];
+
+      if (el) {
+        clearInterval(interval);
+
+        // Scroll to center of viewport
+        const rect = el.getBoundingClientRect();
+        const top =
+          window.scrollY + rect.top - window.innerHeight / 2 + rect.height / 2;
+
+        window.scrollTo({
+          top: Math.max(0, top),
+          behavior: "smooth",
+        });
+
+        // Highlight
+        setHighlightedPackage(packageId);
+
+        // Remove highlight after 30 seconds
+        setTimeout(() => {
+          setHighlightedPackage(null);
+        }, 30000);
+
+        // Clean URL
+        window.history.replaceState({}, "", "/coworking-space");
+      }
+
+      if (attempts >= maxAttempts) {
+        clearInterval(interval);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [searchParams]);
+
   const currentPackages =
     activeMainTab === "personal" ? personalPackages : rentalPackages;
 
-  // ✅ Function untuk get rates based on track
   const getRatesForPackage = (pkg: RateItem) => {
     if (pkg.id === "p1") {
-      // Common Area
       if (commonAreaTrack === "student") return pkg.studentRates;
       if (commonAreaTrack === "bni") return pkg.bniRates;
       return pkg.standardRates;
     }
-
     if (pkg.id === "p2") {
-      // Fixed Desk
       if (fixedDeskTrack === "bni") return pkg.bniRates;
       return pkg.standardRates;
     }
-
     if (pkg.id === "r1") {
-      // Meeting Room
       if (meetingRoomTrack === "bni") return pkg.bniRates;
       return pkg.standardRates;
     }
-
     if (pkg.id === "r2") {
-      // Green Area
       if (greenAreaTrack === "bni") return pkg.bniRates;
       return pkg.standardRates;
     }
-
     if (pkg.id === "r3") {
-      // Event Space
       if (eventSpaceTrack === "bni") return pkg.bniRates;
       return pkg.standardRates;
     }
-
     return pkg.standardRates;
   };
 
-  // ✅ Function untuk check active track
   const getActiveTrack = (pkg: RateItem) => {
     if (pkg.id === "p1") return commonAreaTrack;
     if (pkg.id === "p2") return fixedDeskTrack;
@@ -260,7 +306,6 @@ const Membership: React.FC = () => {
             </h2>
 
             <div className="flex flex-wrap gap-4 items-center">
-              {/* Brochure Download */}
               <a
                 href="/brochure/PortB_Latest_Brochure.pdf"
                 download="PortB_Latest_Brochure.pdf"
@@ -268,7 +313,6 @@ const Membership: React.FC = () => {
                 className="group relative flex items-center justify-between gap-5 pr-4 pl-1.5 py-1.5 bg-white border border-zinc-200 hover:border-zinc-900 hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)] transition-all duration-500 cursor-pointer rounded-sm overflow-hidden"
               >
                 <div className="absolute inset-0 bg-zinc-50 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500 ease-out z-0"></div>
-
                 <div className="flex items-center gap-4 relative z-10">
                   <div className="h-12 w-12 bg-zinc-50 flex items-center justify-center border border-zinc-100 group-hover:bg-white group-hover:border-zinc-300 transition-colors duration-500">
                     <FileText
@@ -276,7 +320,6 @@ const Membership: React.FC = () => {
                       className="text-zinc-400 group-hover:text-zinc-900 transition-colors"
                     />
                   </div>
-
                   <div className="flex flex-col">
                     <span className="text-[10px] uppercase font-bold text-zinc-900 tracking-widest group-hover:translate-x-1 transition-transform duration-300">
                       Full Brochure
@@ -286,7 +329,6 @@ const Membership: React.FC = () => {
                     </span>
                   </div>
                 </div>
-
                 <div className="relative z-10 pl-4 border-l border-zinc-100 group-hover:border-zinc-300 transition-colors">
                   <div className="h-8 w-8 rounded-full bg-zinc-100 flex items-center justify-center group-hover:bg-zinc-900 transition-all duration-300 group-hover:scale-110">
                     <Download
@@ -297,7 +339,6 @@ const Membership: React.FC = () => {
                 </div>
               </a>
 
-              {/* Updated Badge */}
               <div className="flex items-center gap-3 px-6 py-4 border border-zinc-200 bg-white text-[9px] uppercase tracking-widest text-zinc-600 font-bold shadow-sm">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -308,10 +349,9 @@ const Membership: React.FC = () => {
             </div>
           </div>
 
-          {/* Main Tab Switcher - REDESIGNED (Compact Version) */}
+          {/* Main Tab Switcher */}
           <div className="relative w-full lg:w-auto">
             <div className="relative bg-white border-2 border-zinc-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-full lg:w-auto">
-              {/* Active Indicator Background - Slides behind tabs */}
               <div
                 className={`absolute top-0 h-full bg-zinc-900 transition-all duration-500 ease-out ${
                   activeMainTab === "personal"
@@ -320,7 +360,6 @@ const Membership: React.FC = () => {
                 }`}
               ></div>
 
-              {/* Tabs Container */}
               <div className="relative flex">
                 <button
                   onClick={() => setActiveMainTab("personal")}
@@ -331,7 +370,6 @@ const Membership: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-center justify-center gap-3">
-                    {/* Icon */}
                     <div
                       className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-500 ${
                         activeMainTab === "personal"
@@ -348,8 +386,6 @@ const Membership: React.FC = () => {
                         }
                       />
                     </div>
-
-                    {/* Text */}
                     <div className="flex flex-col items-start">
                       <span
                         className={`text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${
@@ -373,7 +409,6 @@ const Membership: React.FC = () => {
                   </div>
                 </button>
 
-                {/* Divider */}
                 <div className="relative w-px bg-zinc-200 my-3"></div>
 
                 <button
@@ -385,7 +420,6 @@ const Membership: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-center justify-center gap-3">
-                    {/* Icon */}
                     <div
                       className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-500 ${
                         activeMainTab === "space"
@@ -402,8 +436,6 @@ const Membership: React.FC = () => {
                         }
                       />
                     </div>
-
-                    {/* Text */}
                     <div className="flex flex-col items-start">
                       <span
                         className={`text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${
@@ -428,7 +460,6 @@ const Membership: React.FC = () => {
                 </button>
               </div>
 
-              {/* Pulse Indicator for Active Tab */}
               <div
                 className={`absolute -top-1.5 transition-all duration-500 ${
                   activeMainTab === "personal" ? "left-1/4" : "left-3/4"
@@ -448,13 +479,42 @@ const Membership: React.FC = () => {
           {currentPackages.map((pkg, idx) => {
             const activeTrack = getActiveTrack(pkg);
             const displayRates = getRatesForPackage(pkg);
+            const isHighlighted = highlightedPackage === pkg.id;
 
+            // ✅ Rate switcher highlight class
+          const rateSwitcherClass = isHighlighted
+            ? "bg-amber-100/50 border-amber-400/40 shadow-[0_4px_30px_-4px_rgba(251,191,36,0.25)] ring-1 ring-amber-300/40 rounded-lg border-breathe"
+            : "bg-zinc-100 border-zinc-300 shadow-md";
+           
+
+            // ✅ REPLACE with this function
+            const getUnselectedClass = (
+              type: "standard" | "student" | "bni",
+            ) => {
+              if (!isHighlighted) return "text-zinc-500 hover:bg-zinc-200";
+
+              switch (type) {
+                case "standard":
+                  return "animate-pulse bg-gradient-to-r from-amber-100/60 to-yellow-100/40 text-amber-800 border border-amber-300/40 shadow-[0_0_16px_rgba(217,175,90,0.15)] rounded-sm";
+                case "student":
+                  return "animate-pulse bg-gradient-to-r from-blue-100/80 to-indigo-100/60 text-blue-700 border border-blue-400/50 shadow-[0_0_16px_rgba(59,130,246,0.25)] rounded-sm";
+                case "bni":
+                  return "animate-pulse bg-gradient-to-r from-red-100/80 to-rose-100/60 text-red-700 border border-red-400/50 shadow-[0_0_16px_rgba(239,68,68,0.25)] rounded-sm";
+              }
+            };
             return (
               <div
                 key={pkg.id}
+                ref={(el) => {
+                  packageRefs.current[pkg.id] = el;
+                }}
                 className={`flex flex-col ${
                   idx % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"
-                } gap-8 lg:gap-12 animate-fadeUp`}
+                } gap-8 lg:gap-12 animate-fadeUp transition-all duration-1000 ${
+                  isHighlighted
+                    ? "ring-2 ring-amber-400/40 ring-offset-8 ring-offset-zinc-50 p-5 rounded-2xl border-2 border-amber-400/30 border-breathe premium-glow"
+                    : "ring-0 ring-transparent ring-offset-0 shadow-none scale-100 p-0 rounded-none border-transparent"
+                }`}
                 style={{ animationDelay: `${idx * 200}ms` }}
               >
                 {/* Image Container */}
@@ -467,9 +527,7 @@ const Membership: React.FC = () => {
                     className="object-cover transition-all duration-[2s] group-hover:scale-105"
                     priority={idx === 0}
                   />
-
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60"></div>
-
                   <div className="absolute top-6 left-6 flex flex-col gap-2 z-10">
                     <span className="text-[9px] uppercase tracking-[0.4em] bg-white text-black px-4 py-2 font-bold self-start shadow-md">
                       {pkg.tier}
@@ -477,15 +535,11 @@ const Membership: React.FC = () => {
                     <span className="text-[9px] uppercase tracking-[0.2em] bg-black/60 backdrop-blur-md text-white/90 px-4 py-2 self-start border border-white/10 flex items-center gap-2">
                       <Users size={12} /> {pkg.capacity}
                     </span>
-
-                    {/* ✅ Student Tag (only Common Area) */}
                     {pkg.isStudentFriendly && (
                       <span className="text-[9px] uppercase tracking-[0.3em] bg-blue-600 text-white px-4 py-2 self-start flex items-center gap-2 font-bold shadow-2xl animate-pulse">
                         <GraduationCap size={14} /> Student Price Available
                       </span>
                     )}
-
-                    {/* ✅ BNI Tag (all categories) */}
                     {pkg.isBniFriendly && (
                       <span className="text-[9px] uppercase tracking-[0.3em] bg-red-600 text-white px-4 py-2 self-start flex items-center gap-2 font-bold shadow-2xl animate-pulse">
                         <Briefcase size={14} /> BNI Member Rate Available
@@ -502,8 +556,6 @@ const Membership: React.FC = () => {
                         <span className="text-[10px] uppercase tracking-[0.6em] text-zinc-500 block">
                           {pkg.subtitle}
                         </span>
-
-                        {/* ✅ Show active promo indicator */}
                         {activeTrack === "student" && (
                           <div className="flex items-center gap-2 text-blue-600">
                             <Sparkles size={10} />
@@ -512,7 +564,6 @@ const Membership: React.FC = () => {
                             </span>
                           </div>
                         )}
-
                         {activeTrack === "bni" && (
                           <div className="flex items-center gap-2 text-red-600">
                             <Sparkles size={10} />
@@ -523,21 +574,36 @@ const Membership: React.FC = () => {
                         )}
                       </div>
 
-                      {/* ✅ Rate Switcher - Different for each package */}
+                      {/* ✅ Rate Switcher with highlight */}
                       <div className="flex flex-col w-full lg:w-auto items-start lg:items-end gap-2">
-                        <span className="text-[9px] uppercase tracking-widest text-zinc-400 font-bold flex items-center gap-1 animate-pulse">
+                        {/* ✅ Select Rate label — highlight when redirected */}
+                        <span
+                          className={`text-[9px] uppercase tracking-widest font-bold flex items-center gap-1.5 transition-all duration-700 ${
+                            isHighlighted
+                              ? "text-amber-700 scale-105 bg-amber-100/70 px-3 py-1.5 rounded-full border border-amber-400/40 shadow-[0_2px_16px_rgba(251,191,36,0.2)]"
+                              : "text-zinc-400 animate-pulse"
+                          }`}
+                        >
+                          {isHighlighted && (
+                            <Sparkles
+                              size={10}
+                              className="animate-spin text-amber-500"
+                            />
+                          )}
                           Select Rate <ChevronDown size={10} />
                         </span>
 
-                        {/* Common Area - 3 options */}
+                        {/* ✅ Common Area - 3 options */}
                         {pkg.id === "p1" && (
-                          <div className="flex w-full lg:w-auto p-1.5 bg-zinc-100 border border-zinc-300 rounded-md shadow-md">
+                          <div
+                            className={`flex w-full lg:w-auto p-1.5 border rounded-md transition-all duration-700 ${rateSwitcherClass}`}
+                          >
                             <button
                               onClick={() => setCommonAreaTrack("standard")}
                               className={`flex-1 lg:flex-none justify-center px-3 md:px-4 py-3 text-[10px] uppercase tracking-widest transition-all rounded-sm cursor-pointer flex items-center gap-2 ${
                                 commonAreaTrack === "standard"
                                   ? "bg-zinc-900 text-white font-bold shadow-sm"
-                                  : "text-zinc-500 hover:bg-zinc-200 hover:text-black"
+                                  : getUnselectedClass("standard")
                               }`}
                             >
                               Standard
@@ -547,7 +613,7 @@ const Membership: React.FC = () => {
                               className={`flex-1 lg:flex-none justify-center px-3 md:px-4 py-3 text-[10px] uppercase tracking-widest transition-all rounded-sm flex items-center gap-2 cursor-pointer ${
                                 commonAreaTrack === "student"
                                   ? "bg-blue-600 text-white font-bold shadow-sm"
-                                  : "text-zinc-500 hover:bg-zinc-200 hover:text-blue-600"
+                                  : getUnselectedClass("student")
                               }`}
                             >
                               <GraduationCap size={14} />
@@ -557,7 +623,7 @@ const Membership: React.FC = () => {
                               className={`flex-1 lg:flex-none justify-center px-3 md:px-4 py-3 text-[10px] uppercase tracking-widest transition-all rounded-sm flex items-center gap-2 cursor-pointer ${
                                 commonAreaTrack === "bni"
                                   ? "bg-red-600 text-white font-bold shadow-sm"
-                                  : "text-zinc-500 hover:bg-zinc-200 hover:text-red-600"
+                                  : getUnselectedClass("bni")
                               }`}
                             >
                               <Briefcase size={14} />
@@ -565,15 +631,17 @@ const Membership: React.FC = () => {
                           </div>
                         )}
 
-                        {/* Fixed Desk - 2 options */}
+                        {/* ✅ Fixed Desk - 2 options */}
                         {pkg.id === "p2" && (
-                          <div className="flex w-full lg:w-auto p-1.5 bg-zinc-100 border border-zinc-300 rounded-md shadow-md">
+                          <div
+                            className={`flex w-full lg:w-auto p-1.5 border rounded-md transition-all duration-700 ${rateSwitcherClass}`}
+                          >
                             <button
                               onClick={() => setFixedDeskTrack("standard")}
                               className={`flex-1 lg:flex-none justify-center px-4 md:px-6 py-3 text-[10px] uppercase tracking-widest transition-all rounded-sm cursor-pointer flex items-center gap-2 ${
                                 fixedDeskTrack === "standard"
                                   ? "bg-zinc-900 text-white font-bold shadow-sm"
-                                  : "text-zinc-500 hover:bg-zinc-200 hover:text-black"
+                                  : getUnselectedClass("standard")
                               }`}
                             >
                               Standard
@@ -583,7 +651,7 @@ const Membership: React.FC = () => {
                               className={`flex-1 lg:flex-none justify-center px-4 md:px-6 py-3 text-[10px] uppercase tracking-widest transition-all rounded-sm flex items-center gap-2 cursor-pointer ${
                                 fixedDeskTrack === "bni"
                                   ? "bg-red-600 text-white font-bold shadow-sm"
-                                  : "text-zinc-500 hover:bg-zinc-200 hover:text-red-600"
+                                  : getUnselectedClass("bni")
                               }`}
                             >
                               BNI <Briefcase size={14} />
@@ -591,15 +659,17 @@ const Membership: React.FC = () => {
                           </div>
                         )}
 
-                        {/* Meeting Room - 2 options */}
+                        {/* ✅ Meeting Room - 2 options */}
                         {pkg.id === "r1" && (
-                          <div className="flex w-full lg:w-auto p-1.5 bg-zinc-100 border border-zinc-300 rounded-md shadow-md">
+                          <div
+                            className={`flex w-full lg:w-auto p-1.5 border rounded-md transition-all duration-700 ${rateSwitcherClass}`}
+                          >
                             <button
                               onClick={() => setMeetingRoomTrack("standard")}
                               className={`flex-1 lg:flex-none justify-center px-4 md:px-6 py-3 text-[10px] uppercase tracking-widest transition-all rounded-sm cursor-pointer flex items-center gap-2 ${
                                 meetingRoomTrack === "standard"
                                   ? "bg-zinc-900 text-white font-bold shadow-sm"
-                                  : "text-zinc-500 hover:bg-zinc-200 hover:text-black"
+                                  : getUnselectedClass("standard")
                               }`}
                             >
                               Standard
@@ -609,7 +679,7 @@ const Membership: React.FC = () => {
                               className={`flex-1 lg:flex-none justify-center px-4 md:px-6 py-3 text-[10px] uppercase tracking-widest transition-all rounded-sm flex items-center gap-2 cursor-pointer ${
                                 meetingRoomTrack === "bni"
                                   ? "bg-red-600 text-white font-bold shadow-sm"
-                                  : "text-zinc-500 hover:bg-zinc-200 hover:text-red-600"
+                                  : getUnselectedClass("bni")
                               }`}
                             >
                               BNI <Briefcase size={14} />
@@ -617,15 +687,16 @@ const Membership: React.FC = () => {
                           </div>
                         )}
 
-                        {/* Green Area - 2 options */}
                         {pkg.id === "r2" && (
-                          <div className="flex w-full lg:w-auto p-1.5 bg-zinc-100 border border-zinc-300 rounded-md shadow-md">
+                          <div
+                            className={`flex w-full lg:w-auto p-1.5 border rounded-md transition-all duration-700 ${rateSwitcherClass}`}
+                          >
                             <button
                               onClick={() => setGreenAreaTrack("standard")}
                               className={`flex-1 lg:flex-none justify-center px-4 md:px-6 py-3 text-[10px] uppercase tracking-widest transition-all rounded-sm cursor-pointer flex items-center gap-2 ${
                                 greenAreaTrack === "standard"
                                   ? "bg-zinc-900 text-white font-bold shadow-sm"
-                                  : "text-zinc-500 hover:bg-zinc-200 hover:text-black"
+                                  : getUnselectedClass("standard")
                               }`}
                             >
                               Standard
@@ -635,7 +706,7 @@ const Membership: React.FC = () => {
                               className={`flex-1 lg:flex-none justify-center px-4 md:px-6 py-3 text-[10px] uppercase tracking-widest transition-all rounded-sm flex items-center gap-2 cursor-pointer ${
                                 greenAreaTrack === "bni"
                                   ? "bg-red-600 text-white font-bold shadow-sm"
-                                  : "text-zinc-500 hover:bg-zinc-200 hover:text-red-600"
+                                  : getUnselectedClass("bni")
                               }`}
                             >
                               BNI <Briefcase size={14} />
@@ -643,15 +714,17 @@ const Membership: React.FC = () => {
                           </div>
                         )}
 
-                        {/* Event Space - 2 options */}
+                        {/* ✅ Event Space - 2 options */}
                         {pkg.id === "r3" && (
-                          <div className="flex w-full lg:w-auto p-1.5 bg-zinc-100 border border-zinc-300 rounded-md shadow-md">
+                          <div
+                            className={`flex w-full lg:w-auto p-1.5 border rounded-md transition-all duration-700 ${rateSwitcherClass}`}
+                          >
                             <button
                               onClick={() => setEventSpaceTrack("standard")}
                               className={`flex-1 lg:flex-none justify-center px-4 md:px-6 py-3 text-[10px] uppercase tracking-widest transition-all rounded-sm cursor-pointer flex items-center gap-2 ${
                                 eventSpaceTrack === "standard"
                                   ? "bg-zinc-900 text-white font-bold shadow-sm"
-                                  : "text-zinc-500 hover:bg-zinc-200 hover:text-black"
+                                  : getUnselectedClass("standard")
                               }`}
                             >
                               Standard
@@ -661,7 +734,7 @@ const Membership: React.FC = () => {
                               className={`flex-1 lg:flex-none justify-center px-4 md:px-6 py-3 text-[10px] uppercase tracking-widest transition-all rounded-sm flex items-center gap-2 cursor-pointer ${
                                 eventSpaceTrack === "bni"
                                   ? "bg-red-600 text-white font-bold shadow-sm"
-                                  : "text-zinc-500 hover:bg-zinc-200 hover:text-red-600"
+                                  : getUnselectedClass("bni")
                               }`}
                             >
                               BNI <Briefcase size={14} />
@@ -692,7 +765,6 @@ const Membership: React.FC = () => {
                               : "border-zinc-200 bg-white hover:border-zinc-400 hover:shadow-lg"
                         }`}
                       >
-                        {/* Corner Badge */}
                         {activeTrack === "student" && (
                           <div className="absolute top-0 right-0 w-8 h-8 flex items-center justify-center">
                             <div className="absolute top-0 right-0 border-t-[32px] border-l-[32px] border-t-blue-500 border-l-transparent"></div>
@@ -702,7 +774,6 @@ const Membership: React.FC = () => {
                             />
                           </div>
                         )}
-
                         {activeTrack === "bni" && (
                           <div className="absolute top-0 right-0 w-8 h-8 flex items-center justify-center">
                             <div className="absolute top-0 right-0 border-t-[32px] border-l-[32px] border-t-red-500 border-l-transparent"></div>
@@ -712,7 +783,6 @@ const Membership: React.FC = () => {
                             />
                           </div>
                         )}
-
                         <div className="flex justify-between items-start mb-2">
                           <span
                             className={`text-[9px] uppercase tracking-widest ${
@@ -754,7 +824,6 @@ const Membership: React.FC = () => {
                     ))}
                   </div>
 
-                  {/* Requirement Notice */}
                   {activeTrack === "student" && (
                     <div className="flex items-center gap-3 mb-6 px-4 py-3 bg-blue-50 border border-blue-200">
                       <CheckCircle2 size={14} className="text-blue-600" />
@@ -763,7 +832,6 @@ const Membership: React.FC = () => {
                       </p>
                     </div>
                   )}
-
                   {activeTrack === "bni" && (
                     <div className="flex items-center gap-3 mb-6 px-4 py-3 bg-red-50 border border-red-200">
                       <CheckCircle2 size={14} className="text-red-600" />
@@ -784,7 +852,7 @@ const Membership: React.FC = () => {
           })}
         </div>
 
-        {/* Standard Facilities Inclusion Bar */}
+        {/* Standard Facilities */}
         <div className="mt-16 p-8 md:p-10 bg-zinc-900 border border-zinc-800 relative overflow-hidden group shadow-xl">
           <div className="absolute top-0 right-0 w-1/3 h-full bg-white/[0.03] skew-x-12 translate-x-1/2"></div>
           <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-8">
