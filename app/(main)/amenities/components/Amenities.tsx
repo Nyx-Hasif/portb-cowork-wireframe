@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   ArrowUpRight,
 } from "lucide-react";
+import { assets } from "@/assets/asset";
 
 const amenities = [
   {
@@ -18,7 +19,7 @@ const amenities = [
     title: "High-Speed WiFi",
     description: "Enterprise-grade fiber with redundant failover.",
     image:
-      "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?q=80&w=800&auto=format&fit=crop",
+      assets.amenities_wifi.src,
     className: "md:col-span-2 md:row-span-1",
   },
   {
@@ -26,7 +27,7 @@ const amenities = [
     title: "Refreshments",
     description: "Artisan coffee and curated snacks.",
     image:
-      "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=800&auto=format&fit=crop",
+      assets.amenities_coffee.src,
     className: "md:col-span-1 md:row-span-1",
   },
   {
@@ -34,7 +35,7 @@ const amenities = [
     title: "Surau & WC",
     description: "Clean, minimalist facilities for comfort.",
     image:
-      "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800&auto=format&fit=crop",
+      assets.amenities_surau_tandas.src,
     className: "md:col-span-1 md:row-span-1",
   },
   {
@@ -42,7 +43,7 @@ const amenities = [
     title: "Display Tech",
     description: "4K smart screens & wireless casting.",
     image:
-      "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=800&auto=format&fit=crop",
+      assets.amenities_display.src,
     className: "md:col-span-1 md:row-span-1",
   },
   {
@@ -50,7 +51,7 @@ const amenities = [
     title: "Admin Support",
     description: "On-site help for all your hardware needs.",
     image:
-      "https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=800&auto=format&fit=crop",
+      assets.amenities_admin.src,
     className: "md:col-span-1 md:row-span-1",
   },
   {
@@ -58,7 +59,7 @@ const amenities = [
     title: "Prime Location",
     description: "Heart of the city, easily accessible.",
     image:
-      "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=800&auto=format&fit=crop",
+      assets.amenities_prime_location.src,
     className: "md:col-span-2 md:row-span-1",
   },
   {
@@ -66,7 +67,7 @@ const amenities = [
     title: "Security Access",
     description: "24/7 CCTV ",
     image:
-      "https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=800&auto=format&fit=crop",
+     assets.amenities_cctv.src,
     className: "md:col-span-1 md:row-span-1",
   },
 ];

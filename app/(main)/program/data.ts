@@ -3,7 +3,7 @@
 import { assets } from '@/assets/asset';
 import { ProgramType, TrainerData } from '@/types/types';
 
-export const TRAINER_DATA: Record<ProgramType, TrainerData> = {
+export const TRAINER_DATA: Record<string, TrainerData> = {
     [ProgramType.YOGA]: {
         id: ProgramType.YOGA,
         title: "Yoga Fitness",
@@ -13,7 +13,7 @@ export const TRAINER_DATA: Record<ProgramType, TrainerData> = {
         trainerImage: assets.july_lai,
         trainerProfileImage: assets.profile_july_lai,
         aboutIntro: "Professional Yoga Instructor with 10+ years of practice in Malaysia.",
-        aboutBio: "July Lai believes yoga is more than exercise.It’s a sustainable way to care for your body and mind. Her classes create a safe, calm space for women to start slowly, move with intention, and grow at their own rhythm without pressure or spiritual elements.",
+        aboutBio: "July Lai believes yoga is more than exercise.It's a sustainable way to care for your body and mind. Her classes create a safe, calm space for women to start slowly, move with intention, and grow at their own rhythm without pressure or spiritual elements.",
         experience: {
             years: "10+ Years Teaching Beginner-Friendly Yoga",
             description: "Specialized in posture alignment, breath awareness, and slow, intentional movement for women of all levels.",
@@ -21,7 +21,7 @@ export const TRAINER_DATA: Record<ProgramType, TrainerData> = {
         },
         badges: ["10+ Years Local Teaching Experience", "Beginner-Friendly Certified", "Muslim-Friendly Approach", "Body-Respectful Movement Philosophy"],
         gallery: [
-             { type: 'video', url: "/videos/yoga_video_1.mp4", thumbnail: assets.yoga_video_thumbnail_1 },
+            { type: 'video', url: "/videos/yoga_video_1.mp4", thumbnail: assets.yoga_video_thumbnail_1 },
             { type: 'image', url: assets.portb_yoga_1, thumbnail: assets.portb_yoga_1 },
             { type: 'image', url: assets.portb_yoga_2, thumbnail: assets.portb_yoga_2 },
             { type: 'image', url: assets.portb_yoga_3, thumbnail: assets.portb_yoga_3 },
@@ -29,6 +29,7 @@ export const TRAINER_DATA: Record<ProgramType, TrainerData> = {
             { type: 'image', url: assets.portb_yoga_5, thumbnail: assets.portb_yoga_5 },
             { type: 'image', url: assets.portb_yoga_6, thumbnail: assets.portb_yoga_6 },
             { type: 'image', url: assets.portb_yoga_7, thumbnail: assets.portb_yoga_7 },
+            { type: 'image', url: assets.program_chapters, thumbnail: assets.program_chapters },
         ],
         benefits: [
             { title: "Increased Flexibility", description: "Improve your range of motion and reduce the risk of injury through targeted stretching.", imageUrl: assets.yoga_benefit_1 },
@@ -44,46 +45,61 @@ export const TRAINER_DATA: Record<ProgramType, TrainerData> = {
             { question: "What should i prepare?", answer: "Exercise mat, wear comfortable clothing, water bottle and towel if needed." },
             { question: "What if i have injury? Can i still join?", answer: "Please declare any injuries or conditions and check with your respective doctors before joining the session. The instructor will offer modifications where needed." },
         ],
-        ctaBg: "https://images.unsplash.com/photo-1510894347713-fc3ed6fdf539?auto=format&fit=crop&q=80&w=1920"
-    },
-    [ProgramType.THERAPY]: {
-        id: ProgramType.THERAPY,
-        title: "Therapy Mental",
-        heroHeader: "REBUILD YOUR INNER BALANCE.",
-        heroSubheader: "Meet with Ms.Atirah to navigate life's complexities with resilience.",
-        trainerName: "Ms. Atirah",
-        trainerImage: assets.atirah,
-        trainerProfileImage: assets.profile_atirah,
-        aboutIntro: "Clinical Psychologist specializing in cognitive behavioral therapy and mindfulness.",
-        aboutBio: " Atirah supports individuals facing anxiety, depression, trauma, OCD, personality disorders, and more. She offers both psychotherapy and psychological assessments, and is passionate about community mental health education through talks and outreach.",
-        experience: {
-            years: "3 years of Clinical Experience",
-            description: "Clinical Psychologist and Founder, Therapy With Atirah",
-            background: " MSc in Clinical Psychology, Universiti Kebangsaan Malaysia (UKM)"
+        ctaBg: "https://images.unsplash.com/photo-1510894347713-fc3ed6fdf539?auto=format&fit=crop&q=80&w=1920",
+        ctaLinks: {
+            registerUrl: "https://forms.gle/N5hky22GS97T9rAe7",
+            chatUrl: "https://wa.me/60143298981?text=Hi%2C%20saya%20berminat%20dengan%20Her%20Hour%20Yoga%20program",
         },
-        badges: [
-            "Certified in Exposure and Response Prevention (ERP)",
-            "Certified Schema Therapist, International Society of Schema Therapy",
-            " Registered Clinical Psychologist (MAHPC(CP)00679)"
+        ctaHeadline: "Your Body Has Been Waiting For This",
+        ctaDescription: "One class is all it takes to feel the difference. No experience needed, no judgment just you, your mat, and a room full of women cheering each other on.",
+        ctaSocialProof: [
+            "Women-Only Sessions",
+            "Beginner Friendly",
+            "Trial Available",
+            "Guided by 10+ Year Expert",
         ],
-        gallery: [
-            { type: 'video', url: "/videos/theraphy_video_1.mp4", thumbnail: assets.theraphy_video_thumbnail_1 },
-            { type: 'image', url: assets.theraphy_thumbnail_1, thumbnail: assets.theraphy_thumbnail_1 },
-            { type: 'image', url: assets.theraphy_thumbnail_2, thumbnail: assets.theraphy_thumbnail_2 },
-            { type: 'image', url: assets.theraphy_thumbnail_3, thumbnail: assets.theraphy_thumbnail_3 },
-            { type: 'image', url: assets.theraphy_thumbnail_4, thumbnail: assets.theraphy_thumbnail_4 },
-           
-        ],
-        benefits: [
-            { title: "Emotional Resilience", description: "Develop tools to handle life's ups and downs with grace and stability.", imageUrl: assets.theraphy_benefit_1 },
-            { title: "Improved Focus", description: "Learn mindfulness techniques to stay present and productive in high-pressure roles.", imageUrl: assets.theraphy_benefit_2 },
-            { title: "Trauma Healing", description: "A safe space to process and move past historical obstacles with professional care.", imageUrl: assets.theraphy_benefit_3 }
-        ],
-        faqs: [
-            { question: "Why Join this programs?", answer: "Our mental therapy program offers structured, science-backed pathways to emotional stability and self-discovery." },
-            { question: "Who Should Apply?", answer: "Individuals feeling overwhelmed by stress, navigating major life changes, or seeking to improve their emotional intelligence." },
-            { question: "Program of Focus", answer: "A hybrid of CBT and contemplative psychology designed for modern lifestyles." }
-        ],
-        ctaBg: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1920"
-    }
+
+        // ✅ Testimonial Video
+        testimonial: {
+            videoUrl: "/videos/testimony_herhour.mp4",
+            thumbnail: assets.testimony_thumbnail,  // tukar dengan thumbnail testimonial sebenar
+            participantName: "Sofia",                   // tukar nama sebenar
+            participantTitle: "Her Hour Participant",
+            quote: "I never thought yoga was for me until I joined Her Hour. The environment is so warm and welcoming, and I finally feel comfortable moving at my own pace.",
+        },
+        socialLinks: {
+            instagram: "https://www.instagram.com/julylai.yogainstructor/",
+            facebook: "https://www.facebook.com/julylai.yogainstructor",
+            threads: "https://www.threads.com/@julylai.yogainstructor?xmt=AQF0AB4oamMTZVCXJMUMCQVoEhsim57fOUjuDNVgxn63x9g",
+        },
+    },
+
+    // [ProgramType.CURIOUS_READER]: {
+    //     id: ProgramType.CURIOUS_READER,
+    //     title: "Curious Reader Club",
+    //     heroHeader: "EXPAND YOUR MIND THROUGH READING.",
+    //     heroSubheader: "Join a community of curious minds exploring books that inspire growth and meaningful conversations.",
+    //     trainerName: "TBA",
+    //     trainerImage: assets.program_curious_club,
+    //     trainerProfileImage: assets.program_curious_club,
+    //     aboutIntro: "A guided reading community for women who want to grow through books.",
+    //     aboutBio: "Coming soon – more details will be announced.",
+    //     experience: {
+    //         years: "Coming Soon",
+    //         description: "Details to be announced",
+    //         background: "Details to be announced"
+    //     },
+    //     badges: ["Community-Based", "Women Only", "Growth-Focused"],
+    //     gallery: [],
+    //     benefits: [
+    //         { title: "Mental Stimulation", description: "Keep your mind sharp and engaged through regular reading and discussion.", imageUrl: assets.program_curious_club },
+    //         { title: "Community Connection", description: "Build meaningful friendships with like-minded women.", imageUrl: assets.program_curious_club },
+    //         { title: "Personal Growth", description: "Discover new perspectives that challenge and inspire you.", imageUrl: assets.program_curious_club }
+    //     ],
+    //     faqs: [
+    //         { question: "When will this program start?", answer: "Coming soon! Follow our socials for updates." },
+    //         { question: "Is this women only?", answer: "Yes, this program is designed exclusively for women." },
+    //     ],
+    //     ctaBg: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&q=80&w=1920"
+    // },
 };

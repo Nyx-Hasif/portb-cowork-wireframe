@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ProgramType } from "@/types/types";
+import { assets } from "@/assets/asset";
 
 export default function ProgramPage() {
   return (
@@ -12,14 +13,14 @@ export default function ProgramPage() {
       </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl">
-        {/* Yoga Card */}
+        {/* Her Hour - ACTIVE ✅ */}
         <Link
           href={`/program/${ProgramType.YOGA}`}
           className="group relative h-80 sm:h-96 cursor-pointer overflow-hidden border-2 border-black transition-all md:hover:scale-[1.02] active:scale-[0.98] duration-500"
         >
           <Image
-            src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=800"
-            alt="Yoga"
+            src={assets.program_herhour}
+            alt="Her Hour"
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover grayscale group-hover:grayscale-0 group-active:grayscale-0 transition-all duration-700"
@@ -27,36 +28,41 @@ export default function ProgramPage() {
           <div className="absolute inset-0 bg-black/40 group-hover:bg-black/10 group-active:bg-black/10 transition-colors duration-500" />
           <div className="absolute bottom-8 left-8">
             <h2 className="text-3xl sm:text-4xl font-bold text-white uppercase tracking-widest">
-              Her Hour 
+              Her Hour
             </h2>
             <div className="h-1 w-0 group-hover:w-full group-active:w-full bg-white transition-all duration-500 mt-2" />
           </div>
         </Link>
 
-        {/* Therapy Card */}
-        <Link
-          href={`/program/${ProgramType.THERAPY}`}
-          className="group relative h-80 sm:h-96 cursor-pointer overflow-hidden border-2 border-black transition-all md:hover:scale-[1.02] active:scale-[0.98] duration-500"
-        >
+        {/* Curious Reader Club - COMING SOON 🚫 */}
+        <div className="group relative h-80 sm:h-96 overflow-hidden border-2 border-black/30 cursor-not-allowed select-none">
           <Image
-            src="https://images.unsplash.com/photo-1747276361323-0c9b1fe43109?auto=format&fit=crop&q=80&w=800"
-            alt="Mental Therapy"
+            src={assets.program_curious_club}
+            alt="curious reader club"
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover grayscale group-hover:grayscale-0 group-active:grayscale-0 transition-all duration-700"
+            className="object-cover grayscale"
           />
-          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/10 group-active:bg-black/10 transition-colors duration-500" />
-          <div className="absolute bottom-8 left-8">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white uppercase tracking-widest">
-              Healing Circle
-            </h2>
-            <div className="h-1 w-0 group-hover:w-full group-active:w-full bg-white transition-all duration-500 mt-2" />
+          {/* Overlay gelap kekal - tak boleh interact */}
+          <div className="absolute inset-0 bg-black/60" />
+
+          {/* Coming Soon badge */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="bg-white/90 text-black text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] px-4 py-2 mb-4">
+              Coming Soon
+            </span>
           </div>
-        </Link>
+
+          <div className="absolute bottom-8 left-8">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white/50 uppercase tracking-widest">
+              {""}
+            </h2>
+          </div>
+        </div>
       </div>
 
       <p className="mt-12 text-[10px] sm:text-xs text-gray-500 uppercase tracking-[0.3em] font-semibold text-center">
-        Professional Guidance • Group Sessions Only • Walk-in
+        Professional Guidance • Group Sessions Only
       </p>
     </div>
   );

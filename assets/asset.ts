@@ -73,6 +73,7 @@ import feedback_thumbnail_2 from "./feedback_thumbnail_2.png";
 import feedback_thumbnail_3 from "./feedback_thumbnail_3.png";
 import july_lai from "./july_lai.png";
 import profile_july_lai from "./profile_july_lai.png";
+import yoga_video_thumbnail_1 from "./yoga_video_thumbnail_1.png";
 import portb_yoga_1 from "./portb_yoga_1.png";
 import portb_yoga_2 from "./portb_yoga_2.png";
 import portb_yoga_3 from "./portb_yoga_3.png";
@@ -80,24 +81,24 @@ import portb_yoga_4 from "./portb_yoga_4.png";
 import portb_yoga_5 from "./portb_yoga_5.png";
 import portb_yoga_6 from "./portb_yoga_6.png";
 import portb_yoga_7 from "./portb_yoga_7.png";
-import atirah from "./atirah.png";
-import profile_atirah from "./profile_atirah.png";
-import theraphy_video_thumbnail_1 from "./theraphy_video_thumbnail_1.png";
-import theraphy_thumbnail_1 from "./theraphy_thumbnail_1.png";
-import theraphy_thumbnail_2 from "./theraphy_thumbnail_2.png";
-import theraphy_thumbnail_3 from "./theraphy_thumbnail_3.png";
-import theraphy_thumbnail_4 from "./theraphy_thumbnail_4.png";
-import yoga_video_thumbnail_1 from "./yoga_video_thumbnail_1.png";
 import yoga_benefit_1 from "./yoga_benefit_1.png";
 import yoga_benefit_2 from "./yoga_benefit_2.png";
 import yoga_benefit_3 from "./yoga_benefit_3.png";
-import theraphy_benefit_1 from "./theraphy_benefit_1.png";
-import theraphy_benefit_2 from "./theraphy_benefit_2.png";
-import theraphy_benefit_3 from "./theraphy_benefit_3.png";
 import cta_portb_bg from "./cta_portb_bg.png";
 import meeting_room_v2 from "./meeting_room_v2.png";
 import event_space_v2 from "./event_space_v2.png";
 import event_space_training from "./event_space_training.png";
+import amenities_wifi from "./amenities_wifi.png";
+import amenities_coffee from "./amenities_coffee.png";
+import amenities_surau_tandas from "./amenities_surau_tandas.png";
+import amenities_display from "./amenities_display.png";
+import amenities_admin from "./amenities_admin.png";
+import amenities_prime_location from "./amenities_prime_location.png";
+import amenities_cctv from "./amenities_cctv.png";
+import program_curious_club from "./program_curious_club.png";
+import program_herhour from "./program_herhour.png";
+import testimony_thumbnail from "./testimony_thumbnail.png";
+import program_chapters from "./program_chapters.png";
 
 
 /* ---- Gallery images ---- */
@@ -260,24 +261,25 @@ export const assets = {
   portb_yoga_5,
   portb_yoga_6,
   portb_yoga_7,
-  atirah,
-  profile_atirah,
-  theraphy_video_thumbnail_1,
-  theraphy_thumbnail_1,
-  theraphy_thumbnail_2,
-  theraphy_thumbnail_3,
-  theraphy_thumbnail_4,
   yoga_video_thumbnail_1,
   yoga_benefit_1,
   yoga_benefit_2,
   yoga_benefit_3,
-  theraphy_benefit_1,
-  theraphy_benefit_2,
-  theraphy_benefit_3,
   cta_portb_bg,
   meeting_room_v2,
   event_space_v2,
   event_space_training,
+  amenities_wifi,
+  amenities_coffee,
+  amenities_surau_tandas,
+  amenities_display,
+  amenities_admin,
+  amenities_prime_location,
+  amenities_cctv,
+  program_curious_club,
+  program_herhour,
+  testimony_thumbnail,
+  program_chapters,
 
 
 };
