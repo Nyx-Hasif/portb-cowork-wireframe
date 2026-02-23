@@ -1,4 +1,5 @@
 // 📁 app/api/analytics/track/route.ts
+// REPLACE ENTIRE FILE
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
@@ -27,7 +28,7 @@ function parseUserAgent(ua: string) {
         ua.includes("Edg") ? "Edge" :
             ua.includes("Chrome") ? "Chrome" :
                 ua.includes("Firefox") ? "Firefox" :
-                    ua.includes("Safari") ? "Safari" : "Other";
+                    ua.includes("Safari") && !ua.includes("Chrome") ? "Safari" : "Other";
 
     const os =
         ua.includes("Windows") ? "Windows" :
@@ -43,31 +44,49 @@ function parseUserAgent(ua: string) {
     return { browser, os, device };
 }
 
-function parseTrafficSource(referrer: string): string {
+function parseTrafficSource(referrer: string, currentHost?: string): string {
     if (!referrer) return "direct";
     try {
         const host = new URL(referrer).hostname.toLowerCase();
-        if (host.includes("google") || host.includes("bing") || host.includes("yahoo") || host.includes("duckduckgo")) return "organic";
-        if (host.includes("facebook") || host.includes("instagram") || host.includes("twitter") || host.includes("linkedin") || host.includes("tiktok") || host.includes("youtube")) return "social";
-        if (host.includes("mail") || host.includes("outlook")) return "email";
+
+        // Same domain = direct (internal navigation)
+        if (currentHost && host === currentHost) return "direct";
+
+        if (/google|bing|yahoo|duckduckgo|baidu/.test(host)) return "organic";
+        if (/facebook|instagram|twitter|linkedin|tiktok|youtube|reddit|pinterest/.test(host)) return "social";
+        if (/mail|outlook|gmail/.test(host)) return "email";
         return "referral";
     } catch {
         return "direct";
     }
 }
 
-async function getGeoFromIP(ip: string): Promise<{ country: string; countryCode: string }> {
-    if (ip === "unknown" || ip.startsWith("127.") || ip.startsWith("192.168") || ip.startsWith("10.")) {
-        return { country: "Local", countryCode: "XX" };
+function getReferrerDomain(referrer: string): string | null {
+    if (!referrer) return null;
+    try {
+        return new URL(referrer).hostname;
+    } catch {
+        return null;
+    }
+}
+
+async function getGeoFromIP(ip: string): Promise<{ country: string; countryCode: string; city: string | null; region: string | null }> {
+    if (ip === "unknown" || ip.startsWith("127.") || ip.startsWith("192.168") || ip.startsWith("10.") || ip === "::1") {
+        return { country: "Local", countryCode: "XX", city: null, region: null };
     }
     try {
-        const res = await fetch(`http://ip-api.com/json/${ip}?fields=country,countryCode`, {
+        const res = await fetch(`http://ip-api.com/json/${ip}?fields=country,countryCode,city,regionName`, {
             signal: AbortSignal.timeout(2000),
         });
         const data = await res.json();
-        return { country: data.country || "Unknown", countryCode: data.countryCode || "XX" };
+        return {
+            country: data.country || "Unknown",
+            countryCode: data.countryCode || "XX",
+            city: data.city || null,
+            region: data.regionName || null,
+        };
     } catch {
-        return { country: "Unknown", countryCode: "XX" };
+        return { country: "Unknown", countryCode: "XX", city: null, region: null };
     }
 }
 
@@ -87,7 +106,6 @@ export async function POST(request: NextRequest) {
             userAgent = "",
             screenWidth,
             screenHeight,
-            language,
             timezone,
         } = body;
 
@@ -101,7 +119,8 @@ export async function POST(request: NextRequest) {
 
         const ip = await getClientIP();
         const { browser, os, device } = parseUserAgent(userAgent);
-        const trafficSource = parseTrafficSource(referrer || "");
+        const referrerDomain = getReferrerDomain(referrer || "");
+        const trafficSource = parseTrafficSource(referrer || "", request.nextUrl.hostname);
         const geo = await getGeoFromIP(ip);
 
         let sessionId = existingSessionId;
@@ -114,21 +133,26 @@ export async function POST(request: NextRequest) {
         if (existingSessionId) {
             const { data: existingSession } = await supabase
                 .from("analytics_sessions")
-                .select("session_id, is_active")
+                .select("session_id, is_active, started_at")
                 .eq("session_id", existingSessionId)
                 .single();
 
             if (!existingSession) {
+                // Session not found in DB, need new one
                 sessionId = null;
             } else {
+                // Session exists - update heartbeat and page count
                 await supabase.rpc("update_session_heartbeat", {
                     p_session_id: existingSessionId,
                     p_page: page,
                 });
 
-                await supabase.rpc("increment_page_count", {
-                    p_session_id: existingSessionId,
-                });
+                // Only increment page count for NEW page views (not heartbeats)
+                if (event === "pageview") {
+                    await supabase.rpc("increment_page_count", {
+                        p_session_id: existingSessionId,
+                    });
+                }
             }
         }
 
@@ -139,21 +163,13 @@ export async function POST(request: NextRequest) {
             isNewSession = true;
             sessionId = `s_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
+            // Check if this visitor has ANY previous sessions (ever)
             const { count } = await supabase
                 .from("analytics_sessions")
                 .select("*", { count: "exact", head: true })
                 .eq("visitor_id", visitorId);
 
             isNewVisitor = (count || 0) === 0;
-
-            let referrerDomain: string | null = null;
-            if (referrer) {
-                try {
-                    referrerDomain = new URL(referrer).hostname;
-                } catch {
-                    referrerDomain = null;
-                }
-            }
 
             const { error: sessionError } = await supabase
                 .from("analytics_sessions")
@@ -179,7 +195,7 @@ export async function POST(request: NextRequest) {
                 });
 
             if (sessionError) {
-                console.error("[Track] Session error:", sessionError);
+                console.error("[Track] Session insert error:", sessionError);
                 return NextResponse.json(
                     { success: false, error: sessionError.message },
                     { status: 500 }
@@ -203,18 +219,20 @@ export async function POST(request: NextRequest) {
                     device_type: device,
                     browser,
                     os,
-                    screen_width: screenWidth,
-                    screen_height: screenHeight,
+                    screen_width: screenWidth || null,
+                    screen_height: screenHeight || null,
                     country: geo.country,
                     country_code: geo.countryCode,
-                    timezone,
-                    language,
-                    referrer,
+                    city: geo.city,
+                    region: geo.region,
+                    timezone: timezone || null,
+                    referrer: referrer || null,
+                    referrer_domain: referrerDomain,
                     traffic_source: trafficSource,
                 });
 
             if (pvError) {
-                console.error("[Track] Pageview error:", pvError);
+                console.error("[Track] Pageview insert error:", pvError);
             }
         }
 

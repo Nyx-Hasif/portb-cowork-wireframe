@@ -15,6 +15,8 @@ import {
   PieChart,
   Pie,
   Cell,
+  BarChart,
+  Bar,
 } from "recharts";
 import { format, parseISO } from "date-fns";
 import {
@@ -41,16 +43,41 @@ import {
   X,
   Info,
   ChevronDown,
+  ChevronUp,
+  ExternalLink,
+  Target,
+  ArrowRight,
 } from "lucide-react";
 
-// ⬇️ TAMBAH IMPORT NI
 import { useRealtimeUsers } from "@/hooks/useRealtimeUsers";
-// ATAU kalau letak dalam admin folder, guna:
-// import { useRealtimeUsers } from "./useRealtimeUsers";
 
 // ============================================
 // TYPES
 // ============================================
+interface TrackedPageAnalytics {
+  page_path: string;
+  total_views: number;
+  unique_visitors: number;
+  new_visitors: number;
+  avg_duration: number;
+  bounce_rate: number;
+  traffic_sources: Array<{
+    source: string;
+    visitors: number;
+    percentage: number;
+  }>;
+  referrers: Array<{ domain: string; visitors: number; views: number }>;
+  devices: Array<{ device: string; visitors: number; percentage: number }>;
+  countries: Array<{ country: string; country_code: string; visitors: number }>;
+  daily_views: Array<{ date: string; views: number; visitors: number }>;
+}
+
+interface TrackedPage {
+  path: string;
+  label: string;
+  analytics: TrackedPageAnalytics | null;
+}
+
 interface AnalyticsData {
   period: string;
   dateRange: { start: string; end: string };
@@ -78,6 +105,8 @@ interface AnalyticsData {
     page_title: string;
     views: number;
     unique_visitors: number;
+    avg_duration: number;
+    bounce_rate: number;
   }>;
   devices: Array<{
     device: string;
@@ -119,6 +148,7 @@ interface AnalyticsData {
     today: number;
     active_pages: Array<{ page: string; visitors: number }>;
   };
+  trackedPages: TrackedPage[];
 }
 
 // ============================================
@@ -131,7 +161,7 @@ const TOOLTIP_CONTENT: Record<
   totalVisitors: {
     title: "Total Visitors",
     description: "Jumlah orang UNIK yang melawat website anda.",
-    example: "Jika 1 orang visit 10 kali = tetap dikira 1 visitor (anti-spam!)",
+    example: "Jika 1 orang visit 10 kali = tetap dikira 1 visitor",
     tip: "✅ Lebih tinggi = lebih bagus!",
   },
   pageViews: {
@@ -148,21 +178,20 @@ const TOOLTIP_CONTENT: Record<
   },
   bounceRate: {
     title: "Bounce Rate",
-    description:
-      "Peratus visitor yang KELUAR selepas lihat 1 page sahaja (tanpa explore page lain).",
+    description: "Peratus visitor yang KELUAR selepas lihat 1 page sahaja.",
     example: "100 visitors, 40 orang keluar terus = 40% bounce rate",
     tip: "✅ Rendah (<40%) = Bagus!\n⚠️ Sederhana (40-60%) = Okay\n❌ Tinggi (>70%) = Perlu improve",
   },
   trafficDirect: {
     title: "Direct Traffic",
     description: "Visitor yang taip URL terus dalam browser.",
-    example: "Orang taip 'portb.com' direct tanpa click dari mana-mana",
+    example: "Orang taip URL direct tanpa click dari mana-mana",
     tip: "💡 Menunjukkan brand awareness yang kuat!",
   },
   trafficOrganic: {
     title: "Organic Search",
     description: "Visitor dari Google, Bing, atau search engine lain.",
-    example: "Orang search 'coworking space KL' → click website anda",
+    example: "Orang search keyword → click website anda",
     tip: "💡 Tinggi = SEO anda bagus!",
   },
   trafficReferral: {
@@ -210,8 +239,16 @@ const TOOLTIP_CONTENT: Record<
   realtime: {
     title: "Realtime Visitors",
     description: "Visitors yang SEDANG berada di website anda sekarang.",
-    example: "Active now = dalam 5 minit terakhir",
+    example: "Active now = dalam 1 minit terakhir",
     tip: "💡 Auto-update setiap 10 saat",
+  },
+  trackedPage: {
+    title: "Tracked Page",
+    description:
+      "Page yang anda monitor khas — contohnya link yang anda share di social media.",
+    example:
+      "/program/herhour — track berapa orang click dari link yang anda share",
+    tip: "💡 Boleh lihat dari mana visitor datang (social, direct, dll)",
   },
 };
 
@@ -360,9 +397,7 @@ const TooltipModal = ({
   const content = TOOLTIP_CONTENT[tooltipKey];
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    }
+    if (isOpen) document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "";
     };
@@ -372,7 +407,10 @@ const TooltipModal = ({
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative bg-gray-900 text-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between p-4 border-b border-white/10">
           <div className="flex items-center gap-3">
@@ -431,7 +469,6 @@ const InfoButton = ({
   variant?: "default" | "light";
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-
   return (
     <>
       <button
@@ -449,7 +486,6 @@ const InfoButton = ({
       >
         <HelpCircle size={14} />
       </button>
-
       <TooltipModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
@@ -460,7 +496,7 @@ const InfoButton = ({
 };
 
 // ============================================
-// PERIOD DROPDOWN
+// PERIOD SELECTOR
 // ============================================
 const PeriodSelector = ({
   value,
@@ -489,7 +525,6 @@ const PeriodSelector = ({
             className={`transition-transform ${isOpen ? "rotate-180" : ""}`}
           />
         </button>
-
         {isOpen && (
           <>
             <div
@@ -504,11 +539,7 @@ const PeriodSelector = ({
                     onChange(p.value);
                     setIsOpen(false);
                   }}
-                  className={`w-full px-4 py-2.5 text-left text-sm font-medium transition-colors ${
-                    value === p.value
-                      ? "bg-blue-50 text-blue-600"
-                      : "text-gray-700 hover:bg-gray-50"
-                  }`}
+                  className={`w-full px-4 py-2.5 text-left text-sm font-medium transition-colors ${value === p.value ? "bg-blue-50 text-blue-600" : "text-gray-700 hover:bg-gray-50"}`}
                 >
                   {p.label}
                 </button>
@@ -517,28 +548,21 @@ const PeriodSelector = ({
           </>
         )}
       </div>
-
       <div className="hidden sm:flex bg-gray-100 rounded-xl p-1 gap-1">
         {PERIODS.map((p) => (
           <button
             key={p.value}
             onClick={() => onChange(p.value)}
-            className={`px-3 py-2 text-sm font-medium rounded-lg transition-all ${
-              value === p.value
-                ? "bg-white text-blue-600 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
+            className={`px-3 py-2 text-sm font-medium rounded-lg transition-all ${value === p.value ? "bg-white text-blue-600 shadow-sm" : "text-gray-600 hover:text-gray-900"}`}
           >
             {p.shortLabel}
           </button>
         ))}
       </div>
-
       <button
         onClick={onRefresh}
         disabled={isRefreshing}
         className="p-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors flex-shrink-0 disabled:opacity-50"
-        aria-label="Refresh"
       >
         <RefreshCw
           className={`w-5 h-5 text-gray-600 ${isRefreshing ? "animate-spin" : ""}`}
@@ -549,7 +573,7 @@ const PeriodSelector = ({
 };
 
 // ============================================
-// STAT CARD COMPONENT
+// STAT CARD
 // ============================================
 const StatCard = ({
   title,
@@ -613,7 +637,7 @@ const StatCard = ({
 );
 
 // ============================================
-// SECTION TITLE COMPONENT
+// SECTION TITLE
 // ============================================
 const SectionTitle = ({
   emoji,
@@ -634,7 +658,7 @@ const SectionTitle = ({
 );
 
 // ============================================
-// PROGRESS BAR COMPONENT
+// PROGRESS BAR
 // ============================================
 const ProgressBar = ({
   value,
@@ -680,7 +704,6 @@ const TrafficSourceItem = ({
   };
 }) => {
   const Icon = config.icon;
-
   return (
     <div className="flex items-center justify-between py-1">
       <div className="flex items-center gap-1.5 sm:gap-2">
@@ -700,6 +723,367 @@ const TrafficSourceItem = ({
 };
 
 // ============================================
+// TRACKED PAGE CARD COMPONENT (UPDATED - No bounce rate, no tooltip)
+// ============================================
+const TrackedPageCard = ({ page }: { page: TrackedPage }) => {
+    const [expanded, setExpanded] = useState(false);
+    const analytics = page.analytics;
+
+    if (!analytics) return null;
+
+    const chartData = analytics.daily_views?.map((item: { date: string; views: number; visitors: number }) => ({
+        ...item,
+        dateFormatted: format(parseISO(item.date), "MMM dd"),
+    })) || [];
+
+    return (
+        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300">
+            {/* Header - Always visible */}
+            <div
+                className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => setExpanded(!expanded)}
+            >
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
+                            <Target className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-gray-900 text-sm sm:text-base">{page.label}</h4>
+                            <p className="text-[10px] sm:text-xs text-gray-500 flex items-center gap-1">
+                                <ExternalLink size={10} />
+                                {page.path}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        {/* Quick stats */}
+                        <div className="hidden sm:flex items-center gap-4">
+                            <div className="text-center">
+                                <p className="text-lg font-bold text-gray-900">{analytics.total_views}</p>
+                                <p className="text-[10px] text-gray-500">Views</p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-lg font-bold text-blue-600">{analytics.unique_visitors}</p>
+                                <p className="text-[10px] text-gray-500">Visitors</p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-lg font-bold text-green-600">{formatDuration(analytics.avg_duration)}</p>
+                                <p className="text-[10px] text-gray-500">Avg Time</p>
+                            </div>
+                        </div>
+
+                        {expanded ? <ChevronUp size={20} className="text-gray-400" /> : <ChevronDown size={20} className="text-gray-400" />}
+                    </div>
+                </div>
+
+                {/* Mobile quick stats */}
+                <div className="sm:hidden grid grid-cols-3 gap-2 mt-3">
+                    <div className="text-center p-2 bg-gray-50 rounded-lg">
+                        <p className="text-sm font-bold text-gray-900">{analytics.total_views}</p>
+                        <p className="text-[9px] text-gray-500">Views</p>
+                    </div>
+                    <div className="text-center p-2 bg-blue-50 rounded-lg">
+                        <p className="text-sm font-bold text-blue-600">{analytics.unique_visitors}</p>
+                        <p className="text-[9px] text-gray-500">Visitors</p>
+                    </div>
+                    <div className="text-center p-2 bg-green-50 rounded-lg">
+                        <p className="text-sm font-bold text-green-600">{formatDuration(analytics.avg_duration)}</p>
+                        <p className="text-[9px] text-gray-500">Avg Time</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Expanded Detail */}
+            {expanded && (
+                <div className="border-t border-gray-100 p-4 space-y-5">
+                    {/* Stats Row - 3 columns only (no bounce rate) */}
+                    <div className="grid grid-cols-3 gap-3">
+                        <div className="p-3 bg-blue-50 rounded-xl text-center">
+                            <Eye className="w-4 h-4 text-blue-500 mx-auto mb-1" />
+                            <p className="text-lg font-bold text-blue-700">{analytics.total_views}</p>
+                            <p className="text-[10px] text-blue-500">Total Views</p>
+                        </div>
+                        <div className="p-3 bg-green-50 rounded-xl text-center">
+                            <Users className="w-4 h-4 text-green-500 mx-auto mb-1" />
+                            <p className="text-lg font-bold text-green-700">{analytics.unique_visitors}</p>
+                            <p className="text-[10px] text-green-500">Unique Visitors</p>
+                        </div>
+                        <div className="p-3 bg-purple-50 rounded-xl text-center">
+                            <Clock className="w-4 h-4 text-purple-500 mx-auto mb-1" />
+                            <p className="text-lg font-bold text-purple-700">{formatDuration(analytics.avg_duration)}</p>
+                            <p className="text-[10px] text-purple-500">Avg Duration</p>
+                        </div>
+                    </div>
+
+                    {/* Daily Trend Chart */}
+                    {chartData.length > 0 && (
+                        <div>
+                            <p className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
+                                <BarChart3 size={12} /> Daily Views Trend
+                            </p>
+                            <ResponsiveContainer width="100%" height={150}>
+                                <BarChart data={chartData}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
+                                    <XAxis dataKey="dateFormatted" stroke="#9CA3AF" fontSize={9} tickLine={false} axisLine={false} />
+                                    <YAxis stroke="#9CA3AF" fontSize={9} tickLine={false} axisLine={false} width={25} />
+                                    <RechartsTooltip
+                                        contentStyle={{ backgroundColor: "#FFF", border: "1px solid #E5E7EB", borderRadius: "8px", fontSize: "11px" }}
+                                    />
+                                    <Bar dataKey="views" name="Views" fill={COLORS.purple} radius={[4, 4, 0, 0]} />
+                                    <Bar dataKey="visitors" name="Visitors" fill={COLORS.primary} radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    )}
+
+                    {/* Traffic Sources & Referrers */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Traffic Sources for this page */}
+                        {analytics.traffic_sources && analytics.traffic_sources.length > 0 && (
+                            <div>
+                                <p className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
+                                    <Globe size={12} /> Traffic Sources
+                                </p>
+                                <div className="space-y-1.5">
+                                    {analytics.traffic_sources.map((source: { source: string; visitors: number; percentage: number }) => {
+                                        const config = TRAFFIC_CONFIG[source.source] || TRAFFIC_CONFIG.unknown;
+                                        const Icon = config.icon;
+                                        return (
+                                            <div key={source.source} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: config.color }} />
+                                                    <Icon className="w-3 h-3 text-gray-400" />
+                                                    <span className="text-xs text-gray-700">{config.label}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xs text-gray-500">{source.visitors}</span>
+                                                    <span className="text-xs font-bold text-gray-900">{source.percentage}%</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Referrer Domains */}
+                        {analytics.referrers && analytics.referrers.length > 0 && (
+                            <div>
+                                <p className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
+                                    <ArrowRight size={12} /> Referrer Domains
+                                </p>
+                                <div className="space-y-1.5">
+                                    {analytics.referrers.map((ref: { domain: string; visitors: number; views: number }) => (
+                                        <div key={ref.domain} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                                            <span className="text-xs text-gray-700 truncate flex-1">{ref.domain}</span>
+                                            <div className="flex items-center gap-2 ml-2">
+                                                <span className="text-xs text-gray-500">{ref.visitors} visitors</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Devices & Countries */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Devices */}
+                        {analytics.devices && analytics.devices.length > 0 && (
+                            <div>
+                                <p className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
+                                    <Monitor size={12} /> Devices
+                                </p>
+                                <div className="flex gap-2">
+                                    {analytics.devices.map((device: { device: string; visitors: number; percentage: number }) => {
+                                        const config = DEVICE_CONFIG[device.device] || DEVICE_CONFIG.unknown;
+                                        const DeviceIcon = config.icon;
+                                        return (
+                                            <div key={device.device} className="flex-1 p-2 bg-gray-50 rounded-lg text-center">
+                                                <DeviceIcon className={`w-4 h-4 mx-auto mb-1 ${config.color}`} />
+                                                <p className="text-sm font-bold text-gray-900">{device.percentage}%</p>
+                                                <p className="text-[9px] text-gray-500 capitalize">{device.device}</p>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Countries */}
+                        {analytics.countries && analytics.countries.length > 0 && (
+                            <div>
+                                <p className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
+                                    <Globe size={12} /> Countries
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                    {analytics.countries.map((country: { country: string; country_code: string; visitors: number }) => (
+                                        <div key={country.country_code} className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 rounded-lg">
+                                            <span className="text-sm">{COUNTRY_FLAGS[country.country_code] || "🌍"}</span>
+                                            <span className="text-xs text-gray-700">{country.country}</span>
+                                            <span className="text-xs font-bold text-gray-900">{country.visitors}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+// ============================================
+// ALL PAGES TABLE (NEW!)
+// ============================================
+const AllPagesTable = ({
+  pages,
+}: {
+  pages: Array<{
+    page: string;
+    page_title: string;
+    views: number;
+    unique_visitors: number;
+    avg_duration: number;
+    bounce_rate: number;
+  }>;
+}) => {
+  const [showAll, setShowAll] = useState(false);
+  const TOP_COUNT = 5;
+
+  const displayPages = showAll ? pages : pages.slice(0, TOP_COUNT);
+  const maxViews = pages[0]?.views || 1;
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-5">
+      <SectionTitle emoji="📄" title={`All Pages (${pages.length})`} />
+
+      {pages.length > 0 ? (
+        <>
+          {/* Table Header */}
+          <div className="hidden sm:grid sm:grid-cols-12 gap-2 pb-2 mb-2 border-b border-gray-100 text-[10px] uppercase tracking-wider font-semibold text-gray-400">
+            <div className="col-span-1">#</div>
+            <div className="col-span-5">Page</div>
+            <div className="col-span-2 text-right">Views</div>
+            <div className="col-span-2 text-right">Visitors</div>
+            <div className="col-span-2 text-right">Bounce</div>
+          </div>
+
+          {/* Table Body */}
+          <div className="space-y-1.5">
+            {displayPages.map((page, idx) => {
+              const isTop = idx < 3;
+              return (
+                <div
+                  key={page.page}
+                  className={`group rounded-lg transition-colors ${isTop && !showAll ? "bg-blue-50/50" : "hover:bg-gray-50"}`}
+                >
+                  {/* Desktop Row */}
+                  <div className="hidden sm:grid sm:grid-cols-12 gap-2 items-center py-2 px-2">
+                    <div className="col-span-1">
+                      <span
+                        className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold ${isTop ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-500"}`}
+                      >
+                        {idx + 1}
+                      </span>
+                    </div>
+                    <div className="col-span-5">
+                      <p className="text-xs font-medium text-gray-900 truncate">
+                        {page.page === "/" ? "🏠 Home" : page.page}
+                      </p>
+                      {page.page_title && page.page_title !== page.page && (
+                        <p className="text-[10px] text-gray-400 truncate">
+                          {page.page_title}
+                        </p>
+                      )}
+                    </div>
+                    <div className="col-span-2 text-right">
+                      <span className="text-xs font-bold text-gray-900">
+                        {page.views.toLocaleString()}
+                      </span>
+                      <div className="mt-1">
+                        <ProgressBar
+                          value={page.views}
+                          maxValue={maxViews}
+                          color={isTop ? COLORS.primary : "#D1D5DB"}
+                        />
+                      </div>
+                    </div>
+                    <div className="col-span-2 text-right">
+                      <span className="text-xs font-semibold text-blue-600">
+                        {page.unique_visitors}
+                      </span>
+                    </div>
+                    <div className="col-span-2 text-right">
+                      <span
+                        className={`text-xs font-semibold ${page.bounce_rate > 70 ? "text-red-500" : page.bounce_rate > 40 ? "text-yellow-600" : "text-green-600"}`}
+                      >
+                        {page.bounce_rate}%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Mobile Row */}
+                  <div className="sm:hidden py-2 px-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span
+                        className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${isTop ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-600"}`}
+                      >
+                        {idx + 1}
+                      </span>
+                      <p className="flex-1 text-xs font-medium text-gray-900 truncate">
+                        {page.page === "/" ? "🏠 Home" : page.page}
+                      </p>
+                      <span className="text-xs font-bold text-gray-700">
+                        {page.views}
+                      </span>
+                    </div>
+                    <div className="ml-7">
+                      <ProgressBar
+                        value={page.views}
+                        maxValue={maxViews}
+                        color={isTop ? COLORS.primary : "#D1D5DB"}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Show More/Less Button */}
+          {pages.length > TOP_COUNT && (
+            <button
+              onClick={() => setShowAll(!showAll)}
+              className="w-full mt-3 py-2.5 text-xs font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-xl transition-colors flex items-center justify-center gap-1.5"
+            >
+              {showAll ? (
+                <>
+                  <ChevronUp size={14} />
+                  Show Top {TOP_COUNT} Only
+                </>
+              ) : (
+                <>
+                  <ChevronDown size={14} />
+                  Show All {pages.length} Pages
+                </>
+              )}
+            </button>
+          )}
+        </>
+      ) : (
+        <div className="h-[120px] flex items-center justify-center text-gray-400 text-xs">
+          No data
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ============================================
 // MAIN COMPONENT
 // ============================================
 export default function InSightAnalytics() {
@@ -709,7 +1093,6 @@ export default function InSightAnalytics() {
   const [period, setPeriod] = useState("today");
   const [refreshing, setRefreshing] = useState(false);
 
-  // ⬇️ TAMBAH NI - Auto-refresh realtime users every 10 seconds
   const { data: realtimeData, loading: realtimeLoading } =
     useRealtimeUsers(10000);
 
@@ -741,7 +1124,6 @@ export default function InSightAnalytics() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
   useEffect(() => {
     const interval = setInterval(() => fetchData(true), 5 * 60 * 1000);
     return () => clearInterval(interval);
@@ -755,9 +1137,7 @@ export default function InSightAnalytics() {
       pageViews: Number(item.page_views),
     })) || [];
 
-  // ============================================
-  // LOADING STATE
-  // ============================================
+  // Loading State
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[300px] sm:min-h-[400px]">
@@ -769,9 +1149,7 @@ export default function InSightAnalytics() {
     );
   }
 
-  // ============================================
-  // ERROR STATE
-  // ============================================
+  // Error State
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[300px] sm:min-h-[400px] px-4">
@@ -807,7 +1185,6 @@ export default function InSightAnalytics() {
             Real-time website statistics
           </p>
         </div>
-
         <PeriodSelector
           value={period}
           onChange={setPeriod}
@@ -816,14 +1193,13 @@ export default function InSightAnalytics() {
         />
       </div>
 
-      {/* ⬇️ REALTIME BANNER - MODIFIED */}
+      {/* REALTIME BANNER */}
       <div className="bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl sm:rounded-2xl p-4 text-white">
         <div className="flex items-center gap-3">
           <div className="relative flex-shrink-0">
             <div className="w-11 h-11 sm:w-14 sm:h-14 bg-white/20 rounded-xl sm:rounded-2xl flex items-center justify-center">
               <Zap className="w-5 h-5 sm:w-7 sm:h-7" />
             </div>
-            {/* Only show pulse if there are active users */}
             {realtimeData.active_now > 0 && (
               <>
                 <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-yellow-400 rounded-full animate-ping" />
@@ -833,7 +1209,6 @@ export default function InSightAnalytics() {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
-              {/* Use realtimeData from hook instead of data.realtime */}
               <p className="text-lg sm:text-2xl font-bold">
                 {realtimeLoading ? "..." : realtimeData.active_now}
               </p>
@@ -890,6 +1265,23 @@ export default function InSightAnalytics() {
           tooltipKey="bounceRate"
         />
       </div>
+      
+      {/* TRACKED PAGES SECTION */}
+      {data.trackedPages && data.trackedPages.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-3 sm:mb-4">
+            <span className="text-base sm:text-lg">🎯</span>
+            <h3 className="text-sm sm:text-base font-semibold text-gray-900">
+              Tracked Pages
+            </h3>
+          </div>
+          <div className="space-y-3">
+            {data.trackedPages.map((page) => (
+              <TrackedPageCard key={page.path} page={page} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* CHARTS ROW */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -1035,47 +1427,10 @@ export default function InSightAnalytics() {
         </div>
       </div>
 
-      {/* TOP PAGES & TRAFFIC SOURCES */}
+      {/* TOP PAGES (FULL) & TRAFFIC SOURCES */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Top Pages */}
-        <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-5">
-          <SectionTitle emoji="📄" title="Top Pages" />
-          {data.topPages.length > 0 ? (
-            <div className="space-y-2">
-              {data.topPages.slice(0, 5).map((page, idx) => {
-                const maxViews = data.topPages[0]?.views || 1;
-                return (
-                  <div key={page.page}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span
-                        className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${idx < 3 ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-600"}`}
-                      >
-                        {idx + 1}
-                      </span>
-                      <p className="flex-1 text-xs font-medium text-gray-900 truncate">
-                        {page.page === "/" ? "🏠 Home" : page.page}
-                      </p>
-                      <span className="text-xs font-bold text-gray-700">
-                        {page.views.toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="ml-7">
-                      <ProgressBar
-                        value={page.views}
-                        maxValue={maxViews}
-                        color={idx < 3 ? COLORS.primary : "#D1D5DB"}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="h-[120px] flex items-center justify-center text-gray-400 text-xs">
-              No data
-            </div>
-          )}
-        </div>
+        {/* All Pages Table */}
+        <AllPagesTable pages={data.topPages} />
 
         {/* Traffic Sources */}
         <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-5">
@@ -1134,11 +1489,7 @@ export default function InSightAnalytics() {
             {data.countries.slice(0, 8).map((country, idx) => (
               <div
                 key={country.country_code}
-                className={`p-2 sm:p-3 rounded-lg text-center ${
-                  idx === 0
-                    ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white"
-                    : "bg-gray-50"
-                }`}
+                className={`p-2 sm:p-3 rounded-lg text-center ${idx === 0 ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white" : "bg-gray-50"}`}
               >
                 <div className="text-lg sm:text-2xl">
                   {COUNTRY_FLAGS[country.country_code] || "🌍"}
@@ -1165,7 +1516,7 @@ export default function InSightAnalytics() {
       </div>
 
       {/* VIDEO ANALYTICS */}
-      {data.videos.length > 0 && (
+      {data.videos && data.videos.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-5">
           <SectionTitle
             emoji="🎬"

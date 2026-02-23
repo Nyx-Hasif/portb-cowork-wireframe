@@ -1,14 +1,24 @@
 // 📁 app/api/analytics/route.ts
+
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
-// Use service role for admin reads
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
 type Period = "today" | "yesterday" | "7days" | "14days" | "30days" | "3months" | "6months" | "1year";
+
+// ============================================
+// TRACKED PAGES - Add pages you want to monitor specifically
+// ============================================
+const TRACKED_PAGES = [
+    { path: "/program/herhour", label: "HerHour Program" },
+    // Add more pages here as needed:
+    // { path: "/program/another", label: "Another Program" },
+    // { path: "/about", label: "About Page" },
+];
 
 function getDateRange(period: Period): { start: Date; end: Date } {
     const now = new Date();
@@ -76,6 +86,8 @@ export async function GET(request: NextRequest) {
             countriesResult,
             videoResult,
             realtimeResult,
+            // Tracked pages results
+            ...trackedPagesResults
         ] = await Promise.all([
             supabase.rpc("get_analytics_overview", {
                 start_date: startISO,
@@ -88,7 +100,7 @@ export async function GET(request: NextRequest) {
             supabase.rpc("get_top_pages", {
                 start_date: startISO,
                 end_date: endISO,
-                limit_count: 10,
+                limit_count: 100, // Show ALL pages
             }),
             supabase.rpc("get_device_analytics", {
                 start_date: startISO,
@@ -113,7 +125,21 @@ export async function GET(request: NextRequest) {
                 end_date: endISO,
             }),
             supabase.rpc("get_realtime_analytics"),
+            // Fetch detail for each tracked page
+            ...TRACKED_PAGES.map((page) =>
+                supabase.rpc("get_page_detail_analytics", {
+                    start_date: startISO,
+                    end_date: endISO,
+                    target_page: page.path,
+                })
+            ),
         ]);
+
+        // Build tracked pages data
+        const trackedPagesData = TRACKED_PAGES.map((page, index) => ({
+            ...page,
+            analytics: trackedPagesResults[index]?.data || null,
+        }));
 
         // Calculate percentage changes
         const overview = overviewResult.data || {};
@@ -171,6 +197,7 @@ export async function GET(request: NextRequest) {
                     today: 0,
                     active_pages: [],
                 },
+                trackedPages: trackedPagesData,
             },
         });
     } catch (error) {

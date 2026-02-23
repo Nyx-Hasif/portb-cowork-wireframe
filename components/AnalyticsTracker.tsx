@@ -1,4 +1,4 @@
-// 📁 components/analytics/AnalyticsTracker.tsx
+// 📁 components/AnalyticsTracker.tsx
 // REPLACE EXISTING FILE
 
 "use client";
