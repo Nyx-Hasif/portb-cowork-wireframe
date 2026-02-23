@@ -1,3 +1,4 @@
+// components/Membership.tsx
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
@@ -14,6 +15,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import { assets } from "@/assets/asset";
+import BookingModal from "./BookingModal";
 
 interface Rate {
   period: string;
@@ -160,7 +162,6 @@ const inclusions = [
   "Unlimited Coffee",
 ];
 
-// ✅ MAPPING: URL slug → tab + package id
 const SLUG_TO_PRICING: Record<
   string,
   { tab: "personal" | "space"; packageId: string }
@@ -171,6 +172,8 @@ const SLUG_TO_PRICING: Record<
   "green-area": { tab: "space", packageId: "r2" },
   "event-space": { tab: "space", packageId: "r3" },
 };
+
+const WHATSAPP_NUMBER = "60143298981";
 
 const Membership: React.FC = () => {
   const searchParams = useSearchParams();
@@ -199,7 +202,26 @@ const Membership: React.FC = () => {
     "standard",
   );
 
-  // ✅ Handle redirect from SpacesGallery
+  // ─── 1. Update bookingModal state — tambah packageImage ───
+  const [bookingModal, setBookingModal] = useState<{
+    isOpen: boolean;
+    packageTitle: string;
+    packageTier: string;
+    packageCapacity: string;
+    packageImage: string | StaticImageData;
+    activeTrack: "standard" | "student" | "bni";
+    rates: { period: string; price: string }[];
+  }>({
+    isOpen: false,
+    packageTitle: "",
+    packageTier: "",
+    packageCapacity: "",
+    packageImage: "",
+    activeTrack: "standard",
+    rates: [],
+  });
+
+  // ─── Handle redirect from SpacesGallery ─────────────────
   useEffect(() => {
     const spaceParam = searchParams.get("space");
 
@@ -207,10 +229,8 @@ const Membership: React.FC = () => {
 
     const { tab, packageId } = SLUG_TO_PRICING[spaceParam];
 
-    // Step 1: Switch tab
     setActiveMainTab(tab);
 
-    // Step 2: Poll until element exists, then scroll + highlight
     let attempts = 0;
     const maxAttempts = 30;
 
@@ -221,7 +241,6 @@ const Membership: React.FC = () => {
       if (el) {
         clearInterval(interval);
 
-        // Scroll to center of viewport
         const rect = el.getBoundingClientRect();
         const top =
           window.scrollY + rect.top - window.innerHeight / 2 + rect.height / 2;
@@ -231,15 +250,12 @@ const Membership: React.FC = () => {
           behavior: "smooth",
         });
 
-        // Highlight
         setHighlightedPackage(packageId);
 
-        // Remove highlight after 30 seconds
         setTimeout(() => {
           setHighlightedPackage(null);
         }, 30000);
 
-        // Clean URL
         window.history.replaceState({}, "", "/coworking-space");
       }
 
@@ -286,6 +302,22 @@ const Membership: React.FC = () => {
     if (pkg.id === "r2") return greenAreaTrack;
     if (pkg.id === "r3") return eventSpaceTrack;
     return "standard";
+  };
+
+  // ─── 2. Update openBookingModal — pass image ─────────────
+  const openBookingModal = (pkg: RateItem) => {
+    const track = getActiveTrack(pkg);
+    const rates = getRatesForPackage(pkg) || pkg.standardRates;
+
+    setBookingModal({
+      isOpen: true,
+      packageTitle: pkg.title,
+      packageTier: pkg.tier,
+      packageCapacity: pkg.capacity,
+      packageImage: pkg.image,
+      activeTrack: track as "standard" | "student" | "bni",
+      rates: rates,
+    });
   };
 
   return (
@@ -481,13 +513,10 @@ const Membership: React.FC = () => {
             const displayRates = getRatesForPackage(pkg);
             const isHighlighted = highlightedPackage === pkg.id;
 
-            // ✅ Rate switcher highlight class
-          const rateSwitcherClass = isHighlighted
-            ? "bg-amber-100/50 border-amber-400/40 shadow-[0_4px_30px_-4px_rgba(251,191,36,0.25)] ring-1 ring-amber-300/40 rounded-lg border-breathe"
-            : "bg-zinc-100 border-zinc-300 shadow-md";
-           
+            const rateSwitcherClass = isHighlighted
+              ? "bg-amber-100/50 border-amber-400/40 shadow-[0_4px_30px_-4px_rgba(251,191,36,0.25)] ring-1 ring-amber-300/40 rounded-lg border-breathe"
+              : "bg-zinc-100 border-zinc-300 shadow-md";
 
-            // ✅ REPLACE with this function
             const getUnselectedClass = (
               type: "standard" | "student" | "bni",
             ) => {
@@ -502,6 +531,7 @@ const Membership: React.FC = () => {
                   return "animate-pulse bg-gradient-to-r from-red-100/80 to-rose-100/60 text-red-700 border border-red-400/50 shadow-[0_0_16px_rgba(239,68,68,0.25)] rounded-sm";
               }
             };
+
             return (
               <div
                 key={pkg.id}
@@ -574,9 +604,8 @@ const Membership: React.FC = () => {
                         )}
                       </div>
 
-                      {/* ✅ Rate Switcher with highlight */}
+                      {/* Rate Switcher */}
                       <div className="flex flex-col w-full lg:w-auto items-start lg:items-end gap-2">
-                        {/* ✅ Select Rate label — highlight when redirected */}
                         <span
                           className={`text-[9px] uppercase tracking-widest font-bold flex items-center gap-1.5 transition-all duration-700 ${
                             isHighlighted
@@ -593,7 +622,7 @@ const Membership: React.FC = () => {
                           Select Rate <ChevronDown size={10} />
                         </span>
 
-                        {/* ✅ Common Area - 3 options */}
+                        {/* Common Area - 3 options */}
                         {pkg.id === "p1" && (
                           <div
                             className={`flex w-full lg:w-auto p-1.5 border rounded-md transition-all duration-700 ${rateSwitcherClass}`}
@@ -631,7 +660,7 @@ const Membership: React.FC = () => {
                           </div>
                         )}
 
-                        {/* ✅ Fixed Desk - 2 options */}
+                        {/* Fixed Desk - 2 options */}
                         {pkg.id === "p2" && (
                           <div
                             className={`flex w-full lg:w-auto p-1.5 border rounded-md transition-all duration-700 ${rateSwitcherClass}`}
@@ -659,7 +688,7 @@ const Membership: React.FC = () => {
                           </div>
                         )}
 
-                        {/* ✅ Meeting Room - 2 options */}
+                        {/* Meeting Room - 2 options */}
                         {pkg.id === "r1" && (
                           <div
                             className={`flex w-full lg:w-auto p-1.5 border rounded-md transition-all duration-700 ${rateSwitcherClass}`}
@@ -687,6 +716,7 @@ const Membership: React.FC = () => {
                           </div>
                         )}
 
+                        {/* Green Area - 2 options */}
                         {pkg.id === "r2" && (
                           <div
                             className={`flex w-full lg:w-auto p-1.5 border rounded-md transition-all duration-700 ${rateSwitcherClass}`}
@@ -714,7 +744,7 @@ const Membership: React.FC = () => {
                           </div>
                         )}
 
-                        {/* ✅ Event Space - 2 options */}
+                        {/* Event Space - 2 options */}
                         {pkg.id === "r3" && (
                           <div
                             className={`flex w-full lg:w-auto p-1.5 border rounded-md transition-all duration-700 ${rateSwitcherClass}`}
@@ -842,8 +872,15 @@ const Membership: React.FC = () => {
                   )}
 
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <button className="w-full px-8 py-5 bg-zinc-900 text-white text-[10px] uppercase tracking-[0.5em] font-bold hover:bg-black transition-all flex items-center justify-center gap-4 shadow-lg cursor-pointer">
-                      Reserve Space <ArrowRight size={14} />
+                    <button
+                      onClick={() => openBookingModal(pkg)}
+                      className="w-full px-8 py-5 bg-zinc-900 text-white text-[10px] uppercase tracking-[0.5em] font-bold hover:bg-black transition-all flex items-center justify-center gap-4 shadow-lg cursor-pointer group"
+                    >
+                      Reserve Space
+                      <ArrowRight
+                        size={14}
+                        className="group-hover:translate-x-1 transition-transform"
+                      />
                     </button>
                   </div>
                 </div>
@@ -877,8 +914,21 @@ const Membership: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* ─── Booking Modal ─────────────────────────────────── */}
+      <BookingModal
+        isOpen={bookingModal.isOpen}
+        onClose={() => setBookingModal((prev) => ({ ...prev, isOpen: false }))}
+        packageTitle={bookingModal.packageTitle}
+        packageTier={bookingModal.packageTier}
+        packageCapacity={bookingModal.packageCapacity}
+        packageImage={bookingModal.packageImage}
+        activeTrack={bookingModal.activeTrack}
+        rates={bookingModal.rates}
+        whatsappNumber={WHATSAPP_NUMBER}
+      />
     </section>
   );
-};
+};;;
 
 export default Membership;

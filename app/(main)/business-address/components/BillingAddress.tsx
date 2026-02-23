@@ -16,6 +16,16 @@ const addOns = [
 ];
 
 const BillingAddress: React.FC = () => {
+  // GANTI DENGAN NOMOR WHATSAPP ANDA (format: 60123456789)
+  const whatsappNumber = "60123456789";
+
+  const handleInitializePlan = () => {
+    const message = `Hi, saya berminat untuk Annual Access Plan (RM365/year). Boleh share lebih details?`;
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
   return (
     <section className="py-20 bg-zinc-50 border-t border-zinc-200">
       <div className="max-w-7xl mx-auto px-6">
@@ -106,8 +116,11 @@ const BillingAddress: React.FC = () => {
                 ))}
               </ul>
 
-              {/* Button: Black bg on White card */}
-              <button className="w-full group/btn py-5 bg-zinc-900 text-white text-[10px] uppercase tracking-[0.5em] font-bold hover:bg-black transition-all duration-500 flex items-center justify-center gap-4 shadow-lg hover:shadow-xl hover:-translate-y-1">
+              {/* Button: WhatsApp Redirect */}
+              <button
+                onClick={handleInitializePlan}
+                className="w-full group/btn py-5 bg-zinc-900 text-white text-[10px] uppercase tracking-[0.5em] font-bold hover:bg-black transition-all duration-500 flex items-center justify-center gap-4 shadow-lg hover:shadow-xl hover:-translate-y-1"
+              >
                 Initialize Plan{" "}
                 <ArrowRight
                   size={14}
@@ -147,8 +160,6 @@ const BillingAddress: React.FC = () => {
             </div>
           </div>
         </div>
-
-   
       </div>
     </section>
   );

@@ -2,7 +2,7 @@ import StatsCount from "@/components/ui/statscount";
 
 const stats = [
   {
-    value: 5,
+    value: 4.9,
     suffix: "",
     label: "Google Review Rating",
     showDecimal: true,

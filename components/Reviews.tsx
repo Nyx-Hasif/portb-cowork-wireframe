@@ -103,6 +103,14 @@ const Reviews = () => {
       role: "University Students",
       duration: "0:37",
     },
+    {
+      id: 4,
+      videoUrl: "/videos/feedback_4.mp4",
+      thumbnail: assets.feedback_thumbnail_4.src,
+      name: "Batini Idris",
+      role: "Entrepreneur",
+      duration: "0:40",
+    },
   ];
 
   return (
@@ -181,7 +189,7 @@ const Reviews = () => {
         </div>
 
         {/* Desktop: 4 Videos Grid */}
-        <div className="hidden lg:grid grid-cols-3 gap-6 max-w-7xl mx-auto px-6">
+        <div className="hidden lg:grid grid-cols-4 gap-6 max-w-7xl mx-auto px-6">
           {videoReviews.map((video) => (
             <VideoCard
               key={video.id}

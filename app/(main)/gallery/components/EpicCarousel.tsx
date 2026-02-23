@@ -6,11 +6,11 @@ import { GrLinkPrevious, GrLinkNext } from "react-icons/gr";
 
 const EpicCarousel = () => {
   const cards = [
-    { id: 1, image: assets.coffee_session, title: "Coffee Session" },
+    { id: 1, image: assets.coffee_session, title: "Mini Conference" },
     { id: 2, image: assets.event_session, title: "Event Session" },
-    { id: 3, image: assets.night_pitch, title: "Night Session" },
+    { id: 3, image: assets.night_pitch, title: "Community Talk" },
     { id: 4, image: assets.codekids, title: "Class Session" },
-    { id: 5, image: assets.workshop_session, title: "Workshop Session" },
+    { id: 5, image: assets.workshop_session, title: "Coffee Session" },
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);

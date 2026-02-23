@@ -71,6 +71,7 @@ import sogno_signature from "./sogno_signature.png";
 import feedback_thumbnail_1 from "./feedback_thumbnail_1.png";
 import feedback_thumbnail_2 from "./feedback_thumbnail_2.png";
 import feedback_thumbnail_3 from "./feedback_thumbnail_3.png";
+import feedback_thumbnail_4 from "./feedback_thumbnail_4.png";
 import july_lai from "./july_lai.png";
 import profile_july_lai from "./profile_july_lai.png";
 import yoga_video_thumbnail_1 from "./yoga_video_thumbnail_1.png";
@@ -252,6 +253,7 @@ export const assets = {
   feedback_thumbnail_1,
   feedback_thumbnail_2,
   feedback_thumbnail_3,
+  feedback_thumbnail_4,
   july_lai,
   profile_july_lai,
   portb_yoga_1,

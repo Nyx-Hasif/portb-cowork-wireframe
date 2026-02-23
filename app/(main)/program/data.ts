@@ -48,7 +48,7 @@ export const TRAINER_DATA: Record<string, TrainerData> = {
         ctaBg: "https://images.unsplash.com/photo-1510894347713-fc3ed6fdf539?auto=format&fit=crop&q=80&w=1920",
         ctaLinks: {
             registerUrl: "https://forms.gle/N5hky22GS97T9rAe7",
-            chatUrl: "https://wa.me/60143298981?text=Hi%2C%20saya%20berminat%20dengan%20Her%20Hour%20Yoga%20program",
+            chatUrl: "https://wa.me/60143298981?text=Hi%2C%20saya%20berminat%20dengan%20Her%20Hour%20program",
         },
         ctaHeadline: "Your Body Has Been Waiting For This",
         ctaDescription: "One class is all it takes to feel the difference. No experience needed, no judgment just you, your mat, and a room full of women cheering each other on.",
