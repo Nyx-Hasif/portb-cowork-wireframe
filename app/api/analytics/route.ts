@@ -1,4 +1,5 @@
 // 📁 app/api/analytics/route.ts
+// REPLACE ENTIRE FILE
 
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
@@ -8,19 +9,15 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-type Period = "today" | "yesterday" | "7days" | "14days" | "30days" | "3months" | "6months" | "1year";
+type Period = "alltime" | "today" | "yesterday" | "7days" | "14days" | "30days" | "3months" | "6months" | "1year";
 
-// ============================================
-// TRACKED PAGES - Add pages you want to monitor specifically
-// ============================================
 const TRACKED_PAGES = [
     { path: "/program/herhour", label: "HerHour Program" },
-    // Add more pages here as needed:
-    // { path: "/program/another", label: "Another Program" },
-    // { path: "/about", label: "About Page" },
 ];
 
-function getDateRange(period: Period): { start: Date; end: Date } {
+function getDateRange(period: Period): { start: Date; end: Date } | null {
+    if (period === "alltime") return null;
+
     const now = new Date();
     const end = new Date(now);
     const start = new Date(now);
@@ -69,13 +66,93 @@ function getDateRange(period: Period): { start: Date; end: Date } {
 export async function GET(request: NextRequest) {
     try {
         const searchParams = request.nextUrl.searchParams;
-        const period = (searchParams.get("period") || "7days") as Period;
+        const period = (searchParams.get("period") || "alltime") as Period;
 
-        const { start, end } = getDateRange(period);
-        const startISO = start.toISOString();
-        const endISO = end.toISOString();
+        // ============================================
+        // ALL TIME MODE
+        // ============================================
+        if (period === "alltime") {
+            const [
+                alltimeStats,
+                alltimeDaily,
+                alltimeDevices,
+                alltimeTraffic,
+                alltimeCountries,
+                alltimePages,
+                recentSessions,
+                realtimeResult,
+                ...trackedResults
+            ] = await Promise.all([
+                supabase.rpc("get_alltime_stats"),
+                supabase.rpc("get_alltime_daily"),
+                supabase.rpc("get_alltime_devices"),
+                supabase.rpc("get_alltime_traffic"),
+                supabase.rpc("get_alltime_countries", { limit_count: 8 }),
+                supabase.rpc("get_alltime_pages", { limit_count: 100 }),
+                supabase.rpc("get_recent_sessions", { limit_count: 30 }),
+                supabase.rpc("get_realtime_analytics"),
+                ...TRACKED_PAGES.map((page) =>
+                    supabase.rpc("get_page_detail_analytics", {
+                        start_date: "2020-01-01T00:00:00.000Z",
+                        end_date: new Date().toISOString(),
+                        target_page: page.path,
+                    })
+                ),
+            ]);
 
-        // Fetch all analytics data in parallel
+            const stats = alltimeStats.data || {};
+            const trackedPagesData = TRACKED_PAGES.map((page, i) => ({
+                ...page,
+                analytics: trackedResults[i]?.data || null,
+            }));
+
+            return NextResponse.json({
+                success: true,
+                data: {
+                    period: "alltime",
+                    isAllTime: true,
+                    dateRange: {
+                        start: stats.first_visit || new Date().toISOString(),
+                        end: new Date().toISOString(),
+                    },
+                    overview: {
+                        totalVisitors: stats.total_visitors || 0,
+                        newVisitors: stats.total_new_visitors || 0,
+                        returningVisitors: (stats.total_visitors || 0) - (stats.total_new_visitors || 0),
+                        totalSessions: stats.total_sessions || 0,
+                        totalPageViews: stats.total_page_views || 0,
+                        pagesPerSession: stats.avg_pages_per_session || 0,
+                        avgSessionDuration: stats.avg_session_duration || 0,
+                        bounceRate: stats.bounce_rate || 0,
+                        visitorChange: 0,
+                        pageViewChange: 0,
+                        daysTracking: stats.days_tracking || 1,
+                        avgDailyVisitors: stats.avg_daily_visitors || 0,
+                        firstVisit: stats.first_visit || null,
+                    },
+                    daily: alltimeDaily.data || [],
+                    topPages: alltimePages.data || [],
+                    devices: alltimeDevices.data || [],
+                    browsers: [],
+                    trafficSources: alltimeTraffic.data || [],
+                    countries: alltimeCountries.data || [],
+                    videos: [],
+                    realtime: realtimeResult.data || {
+                        active_now: 0, last_30_min: 0, last_hour: 0, today: 0, active_pages: [],
+                    },
+                    recentSessions: recentSessions.data || [],
+                    trackedPages: trackedPagesData,
+                },
+            });
+        }
+
+        // ============================================
+        // PERIOD MODE
+        // ============================================
+        const dateRange = getDateRange(period)!;
+        const startISO = dateRange.start.toISOString();
+        const endISO = dateRange.end.toISOString();
+
         const [
             overviewResult,
             dailyResult,
@@ -86,46 +163,19 @@ export async function GET(request: NextRequest) {
             countriesResult,
             videoResult,
             realtimeResult,
-            // Tracked pages results
+            recentSessions,
             ...trackedPagesResults
         ] = await Promise.all([
-            supabase.rpc("get_analytics_overview", {
-                start_date: startISO,
-                end_date: endISO,
-            }),
-            supabase.rpc("get_daily_analytics", {
-                start_date: startISO,
-                end_date: endISO,
-            }),
-            supabase.rpc("get_top_pages", {
-                start_date: startISO,
-                end_date: endISO,
-                limit_count: 100, // Show ALL pages
-            }),
-            supabase.rpc("get_device_analytics", {
-                start_date: startISO,
-                end_date: endISO,
-            }),
-            supabase.rpc("get_browser_analytics", {
-                start_date: startISO,
-                end_date: endISO,
-                limit_count: 5,
-            }),
-            supabase.rpc("get_traffic_sources", {
-                start_date: startISO,
-                end_date: endISO,
-            }),
-            supabase.rpc("get_top_countries", {
-                start_date: startISO,
-                end_date: endISO,
-                limit_count: 8,
-            }),
-            supabase.rpc("get_video_analytics", {
-                start_date: startISO,
-                end_date: endISO,
-            }),
+            supabase.rpc("get_analytics_overview", { start_date: startISO, end_date: endISO }),
+            supabase.rpc("get_daily_analytics", { start_date: startISO, end_date: endISO }),
+            supabase.rpc("get_top_pages", { start_date: startISO, end_date: endISO, limit_count: 100 }),
+            supabase.rpc("get_device_analytics", { start_date: startISO, end_date: endISO }),
+            supabase.rpc("get_browser_analytics", { start_date: startISO, end_date: endISO, limit_count: 5 }),
+            supabase.rpc("get_traffic_sources", { start_date: startISO, end_date: endISO }),
+            supabase.rpc("get_top_countries", { start_date: startISO, end_date: endISO, limit_count: 8 }),
+            supabase.rpc("get_video_analytics", { start_date: startISO, end_date: endISO }),
             supabase.rpc("get_realtime_analytics"),
-            // Fetch detail for each tracked page
+            supabase.rpc("get_recent_sessions", { limit_count: 20 }),
             ...TRACKED_PAGES.map((page) =>
                 supabase.rpc("get_page_detail_analytics", {
                     start_date: startISO,
@@ -135,42 +185,32 @@ export async function GET(request: NextRequest) {
             ),
         ]);
 
-        // Build tracked pages data
         const trackedPagesData = TRACKED_PAGES.map((page, index) => ({
             ...page,
             analytics: trackedPagesResults[index]?.data || null,
         }));
 
-        // Calculate percentage changes
         const overview = overviewResult.data || {};
         const prevVisitors = overview.prev_visitors || 0;
         const currentVisitors = overview.total_visitors || 0;
 
-        const visitorChange =
-            prevVisitors > 0
-                ? (((currentVisitors - prevVisitors) / prevVisitors) * 100).toFixed(1)
-                : currentVisitors > 0
-                    ? "100"
-                    : "0";
+        const visitorChange = prevVisitors > 0
+            ? (((currentVisitors - prevVisitors) / prevVisitors) * 100).toFixed(1)
+            : currentVisitors > 0 ? "100" : "0";
 
         const prevPageViews = overview.prev_page_views || 0;
         const currentPageViews = overview.total_page_views || 0;
 
-        const pageViewChange =
-            prevPageViews > 0
-                ? (((currentPageViews - prevPageViews) / prevPageViews) * 100).toFixed(1)
-                : currentPageViews > 0
-                    ? "100"
-                    : "0";
+        const pageViewChange = prevPageViews > 0
+            ? (((currentPageViews - prevPageViews) / prevPageViews) * 100).toFixed(1)
+            : currentPageViews > 0 ? "100" : "0";
 
         return NextResponse.json({
             success: true,
             data: {
                 period,
-                dateRange: {
-                    start: startISO,
-                    end: endISO,
-                },
+                isAllTime: false,
+                dateRange: { start: startISO, end: endISO },
                 overview: {
                     totalVisitors: overview.total_visitors || 0,
                     newVisitors: overview.new_visitors || 0,
@@ -191,12 +231,9 @@ export async function GET(request: NextRequest) {
                 countries: countriesResult.data || [],
                 videos: videoResult.data || [],
                 realtime: realtimeResult.data || {
-                    active_now: 0,
-                    last_30_min: 0,
-                    last_hour: 0,
-                    today: 0,
-                    active_pages: [],
+                    active_now: 0, last_30_min: 0, last_hour: 0, today: 0, active_pages: [],
                 },
+                recentSessions: recentSessions.data || [],
                 trackedPages: trackedPagesData,
             },
         });
