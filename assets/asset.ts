@@ -100,6 +100,11 @@ import program_curious_club from "./program_curious_club.png";
 import program_herhour from "./program_herhour.png";
 import testimony_thumbnail from "./testimony_thumbnail.png";
 import program_chapters from "./program_chapters.png";
+import profile_amirah from "./profile_amirah.png";
+import profile_ariff from "./profile_ariff.png";
+import profile_thaqif from "./profile_thaqif.png";
+import profile_maji from "./profile_maji.png";
+import profile_carl from "./profile_carl.png";
 
 
 /* ---- Gallery images ---- */
@@ -282,6 +287,11 @@ export const assets = {
   program_herhour,
   testimony_thumbnail,
   program_chapters,
+  profile_amirah,
+  profile_ariff,
+  profile_thaqif,
+  profile_maji,
+  profile_carl,
 
 
 };

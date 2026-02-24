@@ -43,7 +43,7 @@ const Reviews = () => {
      name: "Maji Rashid",
      title: "Freelance Designer",
      image:
-       "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200",
+       assets.profile_maji.src,
    },
    {
      quote:
@@ -51,7 +51,7 @@ const Reviews = () => {
      name: "Carl Gross",
      title: "Digital Marketing",
      image:
-       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200",
+       assets.profile_carl.src,
    },
    {
      quote:
@@ -59,7 +59,7 @@ const Reviews = () => {
      name: "Amirah Syazwani",
      title: "Content Creator",
      image:
-       "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200",
+       assets.profile_amirah.src,
    },
    {
      quote:
@@ -67,13 +67,13 @@ const Reviews = () => {
      name: "Ariff Azami",
      title: "Startup Founder",
      image:
-       "https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?w=200",
+       assets.profile_ariff.src,
    },
    {
      quote: "Best. Comfortable place. Fast line. Can repeat again.",
      name: "Mohammad Thaqif Tahir",
      title: "TNB Officer",
-     image: "https://images.unsplash.com/photo-1558203728-00f45181dd84?w=200",
+     image: assets.profile_thaqif.src,
    },
  ];
 

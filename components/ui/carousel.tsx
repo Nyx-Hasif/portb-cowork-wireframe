@@ -1,10 +1,8 @@
-// components/ui/carousel.tsx
 "use client";
 import { IconArrowNarrowRight } from "@tabler/icons-react";
 import { useState, useRef, useId, useCallback } from "react";
 import Image, { StaticImageData } from "next/image";
 
-// Accept both StaticImageData and string URL
 export interface CardData {
   id: number;
   icon: React.ReactNode;
@@ -38,7 +36,6 @@ const Slide = ({ card, index, current, handleSlideClick }: SlideProps) => {
     >
       <div className="max-w-2xl mx-auto">
         <div className="group relative bg-white rounded-xl shadow-[0_3px_15px_rgba(0,0,0,0.08)] overflow-hidden transition-transform duration-300 hover:-translate-y-2">
-          {/* Image */}
           <div className="relative w-full h-72 overflow-hidden">
             {hasValidImage ? (
               <Image
@@ -56,7 +53,6 @@ const Slide = ({ card, index, current, handleSlideClick }: SlideProps) => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
           </div>
 
-          {/* Content */}
           <div className="p-8 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               {card.icon}
@@ -128,12 +124,11 @@ export default function Carousel({ cards }: CarouselProps) {
         setCurrent(index);
       }
     },
-    [current]
+    [current],
   );
 
   const id = useId();
 
-  // Handle empty cards
   if (!cards || cards.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-500">
@@ -143,31 +138,33 @@ export default function Carousel({ cards }: CarouselProps) {
   }
 
   return (
-    // ⭐ Added: overflow-hidden to contain carousel
     <div
-      className="relative w-full mx-auto overflow-hidden"
+      className="relative w-full mx-auto"
       aria-labelledby={`carousel-heading-${id}`}
     >
-      <ul
-        className="flex transition-transform duration-700 ease-in-out"
-        style={{
-          transform: `translateX(-${current * 100}%)`,
-        }}
-      >
-        {cards.map((card, index) => (
-          <Slide
-            key={card.id}
-            card={card}
-            index={index}
-            current={current}
-            handleSlideClick={handleSlideClick}
-          />
-        ))}
-      </ul>
+      {/* Slides wrapper — overflow-hidden only here, not on the whole container */}
+      <div className="overflow-hidden">
+        <ul
+          className="flex transition-transform duration-700 ease-in-out"
+          style={{
+            transform: `translateX(-${current * 100}%)`,
+          }}
+        >
+          {cards.map((card, index) => (
+            <Slide
+              key={card.id}
+              card={card}
+              index={index}
+              current={current}
+              handleSlideClick={handleSlideClick}
+            />
+          ))}
+        </ul>
+      </div>
 
-      {/* Navigation buttons */}
+      {/* Navigation buttons — outside overflow-hidden, with bottom padding for shadow/border room */}
       {cards.length > 1 && (
-        <div className="flex justify-center w-full mt-12">
+        <div className="flex justify-center w-full mt-12 pb-4">
           <CarouselControl
             type="previous"
             title="Go to previous slide"
@@ -181,7 +178,6 @@ export default function Carousel({ cards }: CarouselProps) {
           />
         </div>
       )}
-
     </div>
   );
 }

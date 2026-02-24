@@ -1,11 +1,9 @@
-// components/Navbar.tsx (or wherever your file is located)
-
 "use client";
 import { assets } from "@/assets/asset";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { ChevronDown, Menu, X, UserCircle, Sparkles } from "lucide-react";
 
 const Navbar = () => {
@@ -19,24 +17,54 @@ const Navbar = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // FIX 1: Check scroll position immediately on mount and after hydration
+  const checkScrollPosition = useCallback(() => {
+    if (typeof window === "undefined") return;
+
+    const currentScrollY = window.scrollY;
+    setIsScrolled(currentScrollY > 50);
+    setLastScrollY(currentScrollY);
+
+    // Ensure visibility based on scroll position
+    if (currentScrollY < 50) {
+      setIsVisible(true);
+    }
+  }, []);
+
+  // FIX 2: Run immediately on mount and after hydration
+  useEffect(() => {
+    setIsMounted(true);
+
+    // Check immediately without animation frame for initial state
+    checkScrollPosition();
+
+    // Double check after a short delay to ensure hydration is complete
+    const timeoutId = setTimeout(checkScrollPosition, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, [checkScrollPosition]);
 
   // Scroll behavior logic
   useEffect(() => {
+    if (!isMounted) return;
+
     let ticking = false;
+    let rafId: number;
 
     const handleScroll = () => {
       if (!ticking) {
-        window.requestAnimationFrame(() => {
+        rafId = window.requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
 
           // Update scrolled state
           setIsScrolled(currentScrollY > 50);
 
+          // Visibility logic
           if (currentScrollY < lastScrollY || currentScrollY < 50) {
-            // Scrolling up or at top - show navbar
             setIsVisible(true);
           } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-            // Scrolling down - hide navbar
             setIsVisible(false);
             setActiveDropdown(null);
           }
@@ -49,8 +77,16 @@ const Navbar = () => {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
+
+    // FIX 3: Also check on resize in case layout changes
+    window.addEventListener("resize", checkScrollPosition, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", checkScrollPosition);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [lastScrollY, isMounted, checkScrollPosition]);
 
   // Lock body scroll when mobile menu open
   useEffect(() => {
@@ -64,6 +100,11 @@ const Navbar = () => {
     };
   }, [isMenuOpen]);
 
+  // FIX 4: Also check scroll position when route changes
+  useEffect(() => {
+    checkScrollPosition();
+  }, [pathname, checkScrollPosition]);
+
   // Menu Data with BADGE property added
   const menuItems = {
     packages: [
@@ -73,7 +114,7 @@ const Navbar = () => {
       {
         label: "Program",
         href: "/program",
-        badge: "HOT", // <--- Badge Trigger
+        badge: "HOT",
       },
     ],
     community: [
@@ -97,8 +138,38 @@ const Navbar = () => {
     setMobileDropdown(mobileDropdown === menu ? null : menu);
   };
 
-  // Only transparent on home page at top
-  const isTransparent = isHomePage && !isScrolled && !isMenuOpen;
+  // FIX 5: Safer transparent check with mounted state
+  const isTransparent = isHomePage && !isScrolled && !isMenuOpen && isMounted;
+
+  // Prevent hydration mismatch - render white background initially
+  if (!isMounted) {
+    return (
+      <header className="fixed top-0 left-0 right-0 z-[100] bg-white shadow-sm">
+        <div className="mx-auto px-6 md:px-12">
+          <nav className="flex items-center justify-between py-4">
+            <Link href="/" className="flex-shrink-0">
+              <Image
+                src={assets.portb_logo}
+                alt="PortB Cowork"
+                width={120}
+                height={40}
+                quality={100}
+                priority
+                className="h-auto w-auto"
+              />
+            </Link>
+            <div className="hidden md:flex items-center gap-8">
+              <span className="text-gray-800">Home</span>
+              <span className="text-gray-800">Packages</span>
+              <span className="text-gray-800">Community</span>
+              <span className="text-gray-800">Contact us</span>
+            </div>
+            <div className="w-10" />
+          </nav>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <>
@@ -173,8 +244,6 @@ const Navbar = () => {
                           className="group flex items-center justify-between px-4 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-green-600 transition-colors"
                         >
                           <span>{item.label}</span>
-
-                          {/* BADGE RENDERING */}
                           {item.badge && (
                             <span className="flex items-center gap-1 text-[10px] font-extrabold tracking-wider text-white bg-gradient-to-r from-red-600 to-rose-500 px-2 py-0.5 rounded-full shadow-md shadow-red-200 group-hover:shadow-red-300 transition-all duration-300">
                               {item.badge}
@@ -343,8 +412,6 @@ const Navbar = () => {
                     className="flex items-center gap-3 py-2 text-gray-600 hover:text-green-600 transition-colors"
                   >
                     <span>{item.label}</span>
-
-                    {/* MOBILE BADGE */}
                     {item.badge && (
                       <span className="flex items-center gap-1 text-[9px] font-bold text-white bg-gradient-to-r from-red-600 to-rose-500 px-2 py-0.5 rounded-full">
                         {item.badge}

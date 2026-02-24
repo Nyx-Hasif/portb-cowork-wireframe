@@ -16,7 +16,7 @@ import { getPreviousEvents } from "@/lib/database"; // ⭐ Changed: Use getPrevi
 const iconMap: { [key: string]: React.ReactNode } = {
   users: <HiOutlineUserGroup className="w-8 h-8 text-[#004348]" />,
   rocket: <HiOutlineRocketLaunch className="w-8 h-8 text-[#004348]" />,
-  lightbulb: <HiLightBulb className="w-8 h-8 text-[#004348]" />,
+  lightbulb: <HiLightBulb className="w-8 h-8 text-[#166e74]" />,
   presentation: (
     <HiOutlinePresentationChartLine className="w-8 h-8 text-[#004348]" />
   ),
@@ -165,8 +165,7 @@ const PrevEvent = () => {
         </h2>
         <p className="max-w-4xl mx-auto text-lg md:text-xl text-gray-600 leading-relaxed">
           From intimate team sessions to large-scale presentations, our
-          configurable spaces support innovation, collaboration, and success —
-          all with quiet elegance.
+          configurable spaces support innovation, collaboration, and success all with quiet elegance.
         </p>
       </footer>
     </section>
