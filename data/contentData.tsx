@@ -7,7 +7,7 @@ export const spaceStationsData = [
     src: assets.meeting_room_v2,
     modalImage: assets.meeting_room,
     description:
-      "Our fully-equipped meeting rooms come with high-speed WiFi, smart displays, whiteboard walls, and comfortable seating for 4-12 people. Perfect for client presentations, team huddles, workshops, or video conferences.",
+      "Our fully equipped meeting rooms come with high-speed WiFi, smart displays, whiteboard walls, and comfortable seating for 10 people. Perfect for client presentations, team huddles, workshops, or video conferences.",
     features: ["Soundproof", "Air Conditioning", "Whiteboard", "Smart TV"],
   },
   {
@@ -16,7 +16,7 @@ export const spaceStationsData = [
     src: assets.fixed_desk_guests,
     modalImage: assets.fixed_desk,
     description:
-      "Get your own permanent desk in a shared office environment. Enjoy the stability of a fixed workspace with lockable storage, ergonomic chair, and 24/7 access. Perfect for freelancers and remote workers.",
+      "Get your own permanent desk in a shared office environment. Enjoy the stability of a fixed workspace with lockable storage, ergonomic chair. Perfect for freelancers and remote workers.",
     features: [
       "Dedicated Desk",
       "Lockable Drawer",
@@ -46,7 +46,7 @@ export const spaceStationsData = [
     src: assets.green_area_guests,
     modalImage: assets.green_area,
     description:
-      "Our outdoor green space offers a refreshing escape from your desk. Whether you need fresh air for a phone call or want to work under the shade of trees – this is your urban oasis.",
+      "Our indoor green space offers a refreshing escape from your desk. Whether you need fresh air for a phone call or want to work under the shade of trees this is your urban oasis.",
     features: [
       "Natural Light",
       "Grass Carpet",
@@ -60,7 +60,7 @@ export const spaceStationsData = [
     src: assets.event_space_training,
     modalImage: assets.event_space_v2,
     description:
-      "Our outdoor green space offers a refreshing escape from your desk. Whether you need fresh air for a phone call or want to work under the shade of trees – this is your urban oasis.",
+      "Our versatile indoor event space offers a refreshing escape from the ordinary. Whether you need a quiet corner for intimate meetings or want to host gatherings under elegant ambient lighting this is your urban sanctuary.",
     features: [
       "Natural Light",
       "Grass Carpet",

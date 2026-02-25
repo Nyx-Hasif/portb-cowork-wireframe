@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import Image from "next/image"; // 👈 Import Image dari next/image
+import { assets } from "@/assets/asset";
 
 const content = [
   {
@@ -16,7 +17,7 @@ const content = [
   {
     title: "Core Values",
     description:
-      "We believe in adaptability, community, and authenticity — spaces and solutions that grow with your needs.",
+      "We believe in adaptability, community, and authenticity spaces and solutions that grow with your needs.",
   },
 ];
 
@@ -46,7 +47,7 @@ export default function MissionVisionValues() {
             {/* Next.js Image — perlu width & height */}
             <div className="relative z-10 w-full aspect-[3/4]">
               <Image
-                src="https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                src={assets.mission_vision}
                 alt="Minimalist coworking space"
                 fill
                 className="object-cover grayscale"

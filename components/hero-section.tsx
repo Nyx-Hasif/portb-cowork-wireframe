@@ -4,15 +4,16 @@ import React from "react";
 import { ImagesSlider } from "@/components/ui/images-slider";
 import Image from "next/image";
 import { AuroraText } from "./ui/aurora-text";
+import { assets } from "@/assets/asset";
 
 export function ImagesSliderDemo() {
   const images = [
     "/images/hero.png",
-    "https://images.unsplash.com/photo-1758873272000-d3763373f863?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1632",
-    "https://images.unsplash.com/photo-1565728744382-61accd4aa148?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1173",
-    "https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1170",
-    "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1170",
-    "https://images.unsplash.com/photo-1714976326715-96d4a22f8da8?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1632",
+    assets.hero_1.src,
+    assets.hero_2.src,
+    assets.hero_3.src,
+    assets.hero_4.src,
+    assets.hero_5.src,
   ];
 
   return (
@@ -24,7 +25,7 @@ export function ImagesSliderDemo() {
           transition={{ duration: 0.8 }}
           className="relative z-50 flex flex-col items-center justify-center text-center text-white px-4 md:px-6"
         >
-          {/* === MAIN HEADING - ORIGINAL === */}
+          {/* === MAIN HEADING === */}
           <motion.h1
             className="enhanced-aurora-text font-extrabold tracking-tight text-neutral-50 drop-shadow-2xl uppercase"
             style={{
@@ -39,30 +40,38 @@ export function ImagesSliderDemo() {
             <AuroraText>EMPOWERING</AuroraText>
           </motion.h1>
 
-          {/* === SUBTEXT + BUTTON ROW - ORIGINAL === */}
+          {/* === SUBTEXT + BUTTON ROW === */}
+          {/* 
+            FIX: Changed md:flex-row → lg:flex-row
+            Tablet landscape (~1024-1280px) sekarang kekal column layout,
+            hanya desktop (1024px+) sahaja jadi row layout.
+            Ditambah flex-wrap sebagai safety net.
+          */}
           <motion.div
-            className="mt-4 md:mt-6 w-full max-w-5xl flex flex-col md:flex-row items-center justify-center md:justify-between px-4 md:px-6 gap-4 md:gap-6"
+            className="mt-4 md:mt-6 w-full max-w-5xl flex flex-col lg:flex-row flex-wrap items-center justify-center lg:justify-between px-4 md:px-6 gap-4 lg:gap-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.8 }}
           >
-            {/* Subtext */}
-            <div className="flex md:flex-row justify-center md:justify-start gap-2 md:gap-3 text-center md:text-left leading-tight max-w-lg">
-              {["Your", "Work", "Experience", "At", "PortB"].map((word, i) => (
-                <span
-                  key={i}
-                  className="font-light text-white"
-                  style={{
-                    fontSize: "clamp(1.2rem, 3.5vw, 3.2rem)",
-                    letterSpacing: "0.08em",
-                  }}
-                >
-                  {word}
-                </span>
-              ))}
+            {/* Subtext - Added flex-wrap + gap-y for safe wrapping */}
+            <div className="flex flex-wrap justify-center lg:justify-start gap-x-2 gap-y-1 lg:gap-x-3 text-center lg:text-left leading-tight">
+              {["Your", "Work", "Experience", "At", "Port", "B"].map(
+                (word, i) => (
+                  <span
+                    key={i}
+                    className="font-light text-white"
+                    style={{
+                      fontSize: "clamp(1.2rem, 3.5vw, 3.2rem)",
+                      letterSpacing: "0.08em",
+                    }}
+                  >
+                    {word}
+                  </span>
+                ),
+              )}
             </div>
 
-            {/* CTA Button - Updated to Black & White theme */}
+            {/* CTA Button - Added shrink-0 to prevent squishing */}
             <button
               onClick={() => {
                 document.getElementById("next-section")?.scrollIntoView({
@@ -70,7 +79,7 @@ export function ImagesSliderDemo() {
                   block: "start",
                 });
               }}
-              className="bg-white hover:bg-gray-100 text-black font-semibold rounded-full shadow-lg hover:shadow-xl transition-all whitespace-nowrap cursor-pointer hover:scale-105 active:scale-95"
+              className="shrink-0 bg-white hover:bg-gray-100 text-black font-semibold rounded-full shadow-lg hover:shadow-xl transition-all whitespace-nowrap cursor-pointer hover:scale-105 active:scale-95"
               style={{
                 fontSize: "clamp(0.9rem, 1.5vw, 1.2rem)",
                 padding:
@@ -81,7 +90,7 @@ export function ImagesSliderDemo() {
             </button>
           </motion.div>
 
-          {/* === RATINGS & AVATARS - ORIGINAL === */}
+          {/* === RATINGS & AVATARS === */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -91,11 +100,12 @@ export function ImagesSliderDemo() {
             {/* Avatar Stack */}
             <div className="flex -space-x-3 sm:-space-x-4">
               {[
-                "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200", // Asian man
-                "https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?w=200", // Asian woman
-                "https://images.unsplash.com/photo-1558203728-00f45181dd84?w=200", // Asian man casual
-                "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=200", // Asian woman professional
-                "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200", // Asian man smile
+                assets.profile_ariff,
+                assets.profile_thaqif,
+                assets.profile_maji,
+                assets.profile_carl,
+                assets.profile_amirah,
+                assets.profile_july_lai,
               ].map((src, i) => (
                 <div
                   key={i}
@@ -117,7 +127,6 @@ export function ImagesSliderDemo() {
                 </div>
               ))}
 
-              {/* +99 Badge */}
               <div
                 className="relative rounded-full border-2 sm:border-3 border-white bg-black flex items-center justify-center"
                 style={{

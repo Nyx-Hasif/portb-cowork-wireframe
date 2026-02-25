@@ -164,7 +164,7 @@ export default function Carousel({ cards }: CarouselProps) {
 
       {/* Navigation buttons — outside overflow-hidden, with bottom padding for shadow/border room */}
       {cards.length > 1 && (
-        <div className="flex justify-center w-full mt-12 pb-4">
+        <div className="flex justify-center w-full mt-4 pb-4">
           <CarouselControl
             type="previous"
             title="Go to previous slide"

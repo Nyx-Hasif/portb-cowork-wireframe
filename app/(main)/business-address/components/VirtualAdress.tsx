@@ -1,7 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import { MapPin, Mail, Lock, Bell, Shield, ArrowRight } from "lucide-react";
+import { MapPin, Mail, Lock, Shield, ArrowRight } from "lucide-react";
+import { assets } from "@/assets/asset";
 
 const features = [
   {
@@ -9,28 +10,28 @@ const features = [
     title: "Prestigious Address",
     desc: "Establish your presence in the city's premier industrial district.",
     icon: <MapPin className="w-5 h-5" />,
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=800&auto=format&fit=crop&grayscale=true",
+    image: assets.prestigious_address.src,
   },
   {
     id: 2,
     title: "Mail Management",
     desc: "Seamless handling of all your professional correspondence.",
     icon: <Mail className="w-5 h-5" />,
-    image: "https://images.unsplash.com/photo-1510074377623-8cf13fb86c08?q=80&w=800&auto=format&fit=crop&grayscale=true",
+    image: assets.mail_management.src,
   },
   {
     id: 3,
     title: "Private Locking",
     desc: "Your own physical anchor in our space with secure mailboxes.",
     icon: <Lock className="w-5 h-5" />,
-    image: "https://images.unsplash.com/photo-1582139329536-e7284fece509?q=80&w=800&auto=format&fit=crop&grayscale=true",
+    image: assets.private_locker.src,
   },
   {
     id: 4,
     title: "24/7 CCTV",
     desc: "Round-the-clock secure access to your business parcels.",
     icon: <Shield className="w-5 h-5" />,
-    image: "https://images.unsplash.com/photo-1558002038-1055907df827?q=80&w=800&auto=format&fit=crop&grayscale=true",
+    image: assets.security_cctv.src,
   },
 ];
 

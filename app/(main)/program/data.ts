@@ -45,7 +45,7 @@ export const TRAINER_DATA: Record<string, TrainerData> = {
             { question: "What should i prepare?", answer: "Exercise mat, wear comfortable clothing, water bottle and towel if needed." },
             { question: "What if i have injury? Can i still join?", answer: "Please declare any injuries or conditions and check with your respective doctors before joining the session. The instructor will offer modifications where needed." },
         ],
-        ctaBg: "https://images.unsplash.com/photo-1510894347713-fc3ed6fdf539?auto=format&fit=crop&q=80&w=1920",
+        ctaBg: assets.cta_yoga_bg,
         ctaLinks: {
             registerUrl: "https://forms.gle/N5hky22GS97T9rAe7",
             chatUrl: "https://wa.me/60143298981?text=Hi%2C%20saya%20berminat%20dengan%20Her%20Hour%20program",

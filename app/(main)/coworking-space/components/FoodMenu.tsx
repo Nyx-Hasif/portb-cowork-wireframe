@@ -1,14 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import {
-  Coffee,
-  Sun,
-  CloudMoon,
-  Info,
-  Box,
-  Users,
-} from "lucide-react";
+import { Coffee, Sun, CloudMoon, Info, Box, Users } from "lucide-react";
+import { assets } from "@/assets/asset";
 
 interface MenuPackage {
   id: string;
@@ -19,7 +13,6 @@ interface MenuPackage {
   image: string;
   minPax: number;
   setup: string;
-  idealFor: string;
 }
 
 const menuData: Record<"breakfast" | "lunch" | "teatime", MenuPackage[]> = {
@@ -34,11 +27,9 @@ const menuData: Record<"breakfast" | "lunch" | "teatime", MenuPackage[]> = {
         "Cake Slice (2 pcs)",
         "Premium Hot Tea or Coffee",
       ],
-      image:
-        "https://images.unsplash.com/photo-1550507992-eb63ffee0847?q=80&w=800&auto=format&fit=crop",
+      image: assets.sandwich.src,
       minPax: 5,
       setup: "Individual Box / Platter Style",
-      idealFor: "Morning Briefings",
     },
     {
       id: "b2",
@@ -50,11 +41,9 @@ const menuData: Record<"breakfast" | "lunch" | "teatime", MenuPackage[]> = {
         "Cake Slice (2 pcs)",
         "Premium Hot Tea or Coffee",
       ],
-      image:
-        "https://images.unsplash.com/photo-1741243412484-558eb91fe8c7?q=80&w=800&auto=format&fit=crop",
+      image: assets.bihoon.src,
       minPax: 5,
       setup: "Buffet Style / Individual Box",
-      idealFor: "Local Workshops",
     },
   ],
   lunch: [
@@ -70,11 +59,9 @@ const menuData: Record<"breakfast" | "lunch" | "teatime", MenuPackage[]> = {
         "Fresh Fruits (Seasonal)",
         "Premium Air Kordial",
       ],
-      image:
-        "https://images.unsplash.com/photo-1697155406055-2db32d47ca07?q=80&w=800&auto=format&fit=crop",
+      image: assets.biryani.src,
       minPax: 10,
       setup: "Executive Buffet Layout",
-      idealFor: "Corporate Training",
     },
     {
       id: "l2",
@@ -88,11 +75,9 @@ const menuData: Record<"breakfast" | "lunch" | "teatime", MenuPackage[]> = {
         "Fresh Fruits (Seasonal)",
         "Premium Air Kordial",
       ],
-      image:
-        "https://images.unsplash.com/photo-1740993382497-65dba6c7a689?q=80&w=800&auto=format&fit=crop",
+      image: assets.daging_kerutuk.src,
       minPax: 10,
       setup: "Full Buffet Service",
-      idealFor: "VIP Meetings",
     },
     {
       id: "l3",
@@ -105,11 +90,9 @@ const menuData: Record<"breakfast" | "lunch" | "teatime", MenuPackage[]> = {
         "Fresh Fruits (Seasonal)",
         "Premium Air Kordial",
       ],
-      image:
-        "https://images.unsplash.com/photo-1666239308347-4292ea2ff777?q=80&w=800&auto=format&fit=crop",
+      image: assets.nasi_ayam.src,
       minPax: 5,
       setup: "Grab & Go Packed Box",
-      idealFor: "Quick Working Lunches",
     },
   ],
   teatime: [
@@ -124,18 +107,16 @@ const menuData: Record<"breakfast" | "lunch" | "teatime", MenuPackage[]> = {
         "Fresh Sliced Fruits",
         "Hot/Cold Beverage",
       ],
-      image:
-        "https://plus.unsplash.com/premium_photo-1663133727215-bf732c62d681?q=80&w=800&auto=format&fit=crop",
+      image: assets.artisan_dessert.src,
       minPax: 5,
       setup: "Tiered Stand / Individual Box",
-      idealFor: "Networking Sessions",
     },
   ],
 };
 
 const FoodMenu: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"breakfast" | "lunch" | "teatime">(
-    "breakfast"
+    "breakfast",
   );
   const [activeCard, setActiveCard] = useState<string | null>(null);
 
@@ -189,23 +170,20 @@ const FoodMenu: React.FC = () => {
             </div>
           </div>
 
-          {/* Interactive Tabs - REDESIGNED (Compact Version) */}
+          {/* Interactive Tabs */}
           <div className="relative w-full lg:w-auto">
             <div className="relative bg-white border-2 border-zinc-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-full lg:w-auto">
-              {/* Active Indicator Background - Slides behind tabs */}
               <div
                 className={`absolute top-0 h-full bg-zinc-900 transition-all duration-500 ease-out ${
                   activeTab === "breakfast"
                     ? "left-0 w-1/3"
                     : activeTab === "lunch"
-                    ? "left-1/3 w-1/3"
-                    : "left-2/3 w-1/3"
+                      ? "left-1/3 w-1/3"
+                      : "left-2/3 w-1/3"
                 }`}
               ></div>
 
-              {/* Tabs Container */}
               <div className="relative flex">
-                {/* Breakfast Tab */}
                 <button
                   onClick={() => setActiveTab("breakfast")}
                   className={`group relative flex-1 lg:flex-none px-4 lg:px-6 py-4 transition-all duration-500 cursor-pointer ${
@@ -215,7 +193,6 @@ const FoodMenu: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-center justify-center gap-2.5">
-                    {/* Icon */}
                     <div
                       className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-500 ${
                         activeTab === "breakfast"
@@ -232,8 +209,6 @@ const FoodMenu: React.FC = () => {
                         }
                       />
                     </div>
-                    
-                    {/* Text */}
                     <div className="flex flex-col items-start">
                       <span
                         className={`text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${
@@ -257,10 +232,8 @@ const FoodMenu: React.FC = () => {
                   </div>
                 </button>
 
-                {/* Divider */}
                 <div className="relative w-px bg-zinc-200 my-3"></div>
 
-                {/* Lunch Tab */}
                 <button
                   onClick={() => setActiveTab("lunch")}
                   className={`group relative flex-1 lg:flex-none px-4 lg:px-6 py-4 transition-all duration-500 cursor-pointer ${
@@ -270,7 +243,6 @@ const FoodMenu: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-center justify-center gap-2.5">
-                    {/* Icon */}
                     <div
                       className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-500 ${
                         activeTab === "lunch"
@@ -287,14 +259,10 @@ const FoodMenu: React.FC = () => {
                         }
                       />
                     </div>
-                    
-                    {/* Text */}
                     <div className="flex flex-col items-start">
                       <span
                         className={`text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${
-                          activeTab === "lunch"
-                            ? "text-white"
-                            : "text-zinc-900"
+                          activeTab === "lunch" ? "text-white" : "text-zinc-900"
                         }`}
                       >
                         Lunch
@@ -312,10 +280,8 @@ const FoodMenu: React.FC = () => {
                   </div>
                 </button>
 
-                {/* Divider */}
                 <div className="relative w-px bg-zinc-200 my-3"></div>
 
-                {/* Tea Time Tab */}
                 <button
                   onClick={() => setActiveTab("teatime")}
                   className={`group relative flex-1 lg:flex-none px-4 lg:px-6 py-4 transition-all duration-500 cursor-pointer ${
@@ -325,7 +291,6 @@ const FoodMenu: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-center justify-center gap-2.5">
-                    {/* Icon */}
                     <div
                       className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-500 ${
                         activeTab === "teatime"
@@ -342,8 +307,6 @@ const FoodMenu: React.FC = () => {
                         }
                       />
                     </div>
-                    
-                    {/* Text */}
                     <div className="flex flex-col items-start">
                       <span
                         className={`text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${
@@ -368,14 +331,13 @@ const FoodMenu: React.FC = () => {
                 </button>
               </div>
 
-              {/* Pulse Indicator for Active Tab */}
               <div
                 className={`absolute -top-1.5 transition-all duration-500 ${
                   activeTab === "breakfast"
                     ? "left-1/6"
                     : activeTab === "lunch"
-                    ? "left-1/2"
-                    : "left-5/6"
+                      ? "left-1/2"
+                      : "left-5/6"
                 } -translate-x-1/2`}
               >
                 <span className="relative flex h-2 w-2">
@@ -397,7 +359,6 @@ const FoodMenu: React.FC = () => {
                 key={pkg.id}
                 onClick={() => handleCardInteraction(pkg.id)}
                 onTouchStart={() => handleCardInteraction(pkg.id)}
-                // Card Container
                 className={`group flex flex-col animate-fadeUp transition-all duration-500 cursor-pointer relative bg-white border ${
                   isActive
                     ? "border-zinc-400 shadow-xl ring-1 ring-zinc-200"
@@ -413,27 +374,25 @@ const FoodMenu: React.FC = () => {
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     className={`object-cover transition-all duration-[1.5s] ease-in-out ${
-                      isActive
-                        ? "scale-105"
-                        : "group-hover:scale-105"
+                      isActive ? "scale-105" : "group-hover:scale-105"
                     }`}
                     priority={idx === 0}
                   />
-                  
+
                   {/* Price Tag */}
                   <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-4 py-2 shadow-lg border border-white/20">
                     <span className="text-xs font-serif text-zinc-900 font-bold">
-                      RM {pkg.price} <span className="text-zinc-500 font-sans font-normal text-[10px] uppercase">/ Pax</span>
+                      RM {pkg.price}{" "}
+                      <span className="text-zinc-500 font-sans font-normal text-[10px] uppercase">
+                        / Pax
+                      </span>
                     </span>
                   </div>
 
-                  {/* Badges */}
-                  <div className="absolute bottom-4 left-4 flex gap-2 flex-wrap">
+                  {/* Badge - Min Pax only */}
+                  <div className="absolute bottom-4 left-4">
                     <span className="text-[9px] uppercase tracking-widest bg-zinc-900/90 text-white px-3 py-1.5 backdrop-blur-md flex items-center gap-1 shadow-md">
                       <Users size={10} /> Min {pkg.minPax} Pax
-                    </span>
-                    <span className="text-[9px] uppercase tracking-widest bg-white/90 text-zinc-800 px-3 py-1.5 backdrop-blur-md shadow-md font-bold">
-                      {pkg.idealFor}
                     </span>
                   </div>
                 </div>
@@ -461,13 +420,16 @@ const FoodMenu: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Inclusion List - Full Height */}
+                  {/* Inclusion List */}
                   <div className="space-y-3">
                     <span className="text-[9px] uppercase tracking-widest text-zinc-400 block mb-3 font-bold">
                       Package Includes:
                     </span>
                     {pkg.inclusions.map((item, i) => (
-                      <div key={i} className="flex items-start gap-3 group/item">
+                      <div
+                        key={i}
+                        className="flex items-start gap-3 group/item"
+                      >
                         <div className="mt-1 w-1 h-1 bg-zinc-300 rounded-full group-hover/item:bg-zinc-900 transition-colors"></div>
                         <span
                           className={`text-[11px] uppercase tracking-widest transition-colors ${
@@ -487,16 +449,12 @@ const FoodMenu: React.FC = () => {
           })}
         </div>
 
-        {/* External Food Policy Warning - Red Border (Responsive) */}
+        {/* External Food Policy Warning */}
         <div className="mt-16 bg-red-50 border-2 border-red-500 relative overflow-hidden shadow-lg">
-          {/* Top Red Line */}
           <div className="absolute top-0 left-0 w-full h-1 bg-red-500"></div>
-          
-          {/* Decorative Blur - Hidden on mobile */}
           <div className="absolute bottom-0 right-0 w-32 h-32 bg-red-100/30 rounded-full blur-3xl pointer-events-none hidden md:block"></div>
-          
+
           <div className="relative z-10 p-5 md:p-8">
-            {/* Header Section */}
             <div className="flex items-start gap-3 md:gap-4 mb-4">
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-red-500 flex items-center justify-center shrink-0">
                 <svg
@@ -520,30 +478,34 @@ const FoodMenu: React.FC = () => {
                   External Catering Policy
                 </h4>
                 <p className="text-[10px] md:text-[11px] lg:text-xs text-red-600 leading-relaxed mb-3">
-                  Bringing <span className="font-bold text-red-700">external catering services or large-scale food setups</span> (buffets, event meals, bulk orders) will incur a{" "}
-                  <span className="font-bold text-red-700">RM100 cleaning service fee</span>. 
-                  This covers deep cleaning, waste management, and maintaining premium hygiene standards.
+                  Bringing{" "}
+                  <span className="font-bold text-red-700">
+                    external catering services or large-scale food setups
+                  </span>{" "}
+                  (buffets, event meals, bulk orders) will incur a{" "}
+                  <span className="font-bold text-red-700">
+                    RM100 cleaning service fee
+                  </span>
+                  . This covers deep cleaning, waste management, and maintaining
+                  premium hygiene standards.
                 </p>
                 <p className="text-[9px] md:text-[10px] text-emerald-700 leading-relaxed bg-emerald-50 px-3 py-2 border-l-2 border-emerald-500">
                   ✓ Personal meals, snacks, coffee & light refreshments are{" "}
-                  <span className="font-bold">welcome anytime</span> at no extra charge!
+                  <span className="font-bold">welcome anytime</span> at no extra
+                  charge!
                 </p>
               </div>
             </div>
 
-            {/* Divider - Hidden on mobile */}
             <div className="hidden md:block w-full h-px bg-red-200 my-4"></div>
 
-            {/* CTA Section */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-5 md:mt-0">
-              {/* Left Side - Optional Text (hidden on small mobile) */}
               <div className="hidden sm:block">
                 <p className="text-[9px] md:text-[10px] uppercase tracking-wider text-red-500 font-medium">
                   💡 Planning an event?
                 </p>
               </div>
 
-              {/* Right Side - CTA Badge */}
               <div className="w-full sm:w-auto">
                 <div className="flex items-center justify-between sm:justify-center gap-3 px-4 md:px-6 py-3 md:py-4 bg-white border-2 border-red-500 shadow-md">
                   <div className="flex items-center gap-2">
@@ -568,4 +530,3 @@ const FoodMenu: React.FC = () => {
 };
 
 export default FoodMenu;
-  
