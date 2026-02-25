@@ -833,131 +833,190 @@ const TotalVisitorBanner = ({ data }: { data: AnalyticsData }) => (
 );
 
 // ============================================
-// SESSION HISTORY (No clear button)
+// SESSION HISTORY (Fixed height + internal scroll)
 // ============================================
 const SessionHistory = ({ sessions }: { sessions: SessionRecord[] }) => {
-  const [showAll, setShowAll] = useState(false);
-  const display = showAll ? sessions : sessions.slice(0, 8);
+    const [isHidden, setIsHidden] = useState(false);
+    const [hiddenCount, setHiddenCount] = useState(0);
+    const scrollRef = useRef<HTMLDivElement>(null);
 
-  if (sessions.length === 0) return null;
+    const visibleSessions = sessions.slice(0, sessions.length - hiddenCount);
+    const newSinceHide = isHidden ? Math.max(sessions.length - hiddenCount, 0) : 0;
 
-  return (
-    <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-5">
-      <SectionTitle
-        emoji="📋"
-        title={`Session History (${sessions.length})`}
-        tooltipKey="sessionHistory"
-      />
+    const handleClearVisual = () => {
+        setHiddenCount(sessions.length);
+        setIsHidden(true);
+    };
 
-      <div className="space-y-2">
-        {display.map((session) => {
-          const deviceConfig =
-            DEVICE_CONFIG[session.device_type] || DEVICE_CONFIG.unknown;
-          const DeviceIcon = deviceConfig.icon;
-          const flag = COUNTRY_FLAGS[session.country_code] || "🌍";
+    const handleShowBack = () => {
+        setHiddenCount(0);
+        setIsHidden(false);
+    };
 
-          return (
-            <div
-              key={session.session_id}
-              className={`p-3 rounded-xl border transition-all ${
-                session.is_active
-                  ? "border-green-200 bg-green-50/50"
-                  : "border-gray-100 bg-gray-50/50 hover:bg-gray-50"
-              }`}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <div className="flex-shrink-0">
-                    {session.is_active ? (
-                      <div className="relative">
-                        <Circle className="w-3 h-3 fill-green-500 text-green-500" />
-                        <Circle className="w-3 h-3 fill-green-500 text-green-500 absolute inset-0 animate-ping opacity-50" />
-                      </div>
-                    ) : (
-                      <Circle className="w-3 h-3 fill-gray-300 text-gray-300" />
+    // Auto-scroll to top when new session arrives
+    useEffect(() => {
+        if (scrollRef.current && !isHidden) {
+            scrollRef.current.scrollTop = 0;
+        }
+    }, [sessions.length, isHidden]);
+
+    if (sessions.length === 0) return null;
+
+    const activeCount = visibleSessions.filter(s => s.is_active).length;
+    const endedCount = visibleSessions.filter(s => !s.is_active).length;
+
+    return (
+        <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-5">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                    <span className="text-base sm:text-lg">📋</span>
+                    <h3 className="text-sm sm:text-base font-semibold text-gray-900">Session History</h3>
+                    <InfoButton tooltipKey="sessionHistory" />
+                </div>
+
+                <div className="flex items-center gap-2">
+                    {isHidden && (
+                        <button onClick={handleShowBack}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium text-blue-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                            <Eye size={12} /> Show All
+                        </button>
                     )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-xs font-mono text-gray-600">
-                        {shortenVisitorId(session.visitor_id)}
-                      </span>
-                      <span className="text-sm">{flag}</span>
-                      <DeviceIcon className={`w-3 h-3 ${deviceConfig.color}`} />
-                      <span className="text-[10px] text-gray-400">
-                        {session.browser}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-1 text-[10px] text-gray-500">
-                      <LogIn className="w-2.5 h-2.5 text-green-500" />
-                      <span className="truncate max-w-[120px]">
-                        {session.entry_page}
-                      </span>
-                      {session.exit_page &&
-                        session.exit_page !== session.entry_page && (
-                          <>
-                            <ArrowRight className="w-2.5 h-2.5" />
-                            <LogOut className="w-2.5 h-2.5 text-red-400" />
-                            <span className="truncate max-w-[120px]">
-                              {session.exit_page}
-                            </span>
-                          </>
-                        )}
-                    </div>
-                  </div>
+                    {visibleSessions.length > 0 && (
+                        <button onClick={handleClearVisual}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            title="Clear from view only — database stays safe!">
+                            <X size={12} /> Clear View
+                        </button>
+                    )}
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <div className="text-right">
-                    <p className="text-xs font-bold text-gray-900">
-                      {formatDuration(
-                        session.is_active
-                          ? Math.floor(
-                              (Date.now() -
-                                new Date(session.started_at).getTime()) /
-                                1000,
-                            )
-                          : session.duration_seconds,
-                      )}
-                    </p>
-                    <p className="text-[9px] text-gray-400">
-                      {session.page_count}{" "}
-                      {session.page_count === 1 ? "page" : "pages"}
-                    </p>
-                  </div>
-                  <div
-                    className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${session.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
-                  >
-                    {session.is_active
-                      ? "LIVE"
-                      : formatDistanceToNow(parseISO(session.started_at), {
-                          addSuffix: true,
-                        })}
-                  </div>
-                </div>
-              </div>
             </div>
-          );
-        })}
-      </div>
 
-      {sessions.length > 8 && (
-        <button
-          onClick={() => setShowAll(!showAll)}
-          className="w-full mt-3 py-2.5 text-xs font-semibold text-blue-600 hover:bg-blue-50 rounded-xl flex items-center justify-center gap-1.5"
-        >
-          {showAll ? (
-            <>
-              <ChevronUp size={14} /> Show Less
-            </>
-          ) : (
-            <>
-              <ChevronDown size={14} /> Show All {sessions.length}
-            </>
-          )}
-        </button>
-      )}
-    </div>
-  );
+            {/* Quick Stats Bar */}
+            {visibleSessions.length > 0 && (
+                <div className="flex items-center gap-3 mb-3 text-[11px]">
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg">
+                        <span className="text-gray-500">Total:</span>
+                        <span className="font-bold text-gray-900">{visibleSessions.length}</span>
+                    </div>
+                    {activeCount > 0 && (
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-green-50 rounded-lg">
+                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                            <span className="font-bold text-green-700">{activeCount} Live</span>
+                        </div>
+                    )}
+                    {endedCount > 0 && (
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-lg">
+                            <div className="w-1.5 h-1.5 bg-gray-300 rounded-full" />
+                            <span className="font-bold text-gray-500">{endedCount} Ended</span>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Hidden State */}
+            {isHidden && visibleSessions.length === 0 && (
+                <div className="py-8 text-center">
+                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Eye className="w-5 h-5 text-gray-400" />
+                    </div>
+                    <p className="text-sm text-gray-500 mb-1">View cleared</p>
+                    <p className="text-[11px] text-gray-400 mb-3">
+                        Database selamat ✅
+                        {newSinceHide > 0 && (
+                            <span className="text-blue-500 font-medium"> • {newSinceHide} new</span>
+                        )}
+                    </p>
+                    <button onClick={handleShowBack}
+                        className="px-4 py-2 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded-xl transition-colors">
+                        Show All Sessions
+                    </button>
+                </div>
+            )}
+
+            {/* Scrollable Session List — MAX HEIGHT FIXED */}
+            {visibleSessions.length > 0 && (
+                <div
+                    ref={scrollRef}
+                    className="max-h-[400px] overflow-y-auto space-y-2 pr-1 scrollbar-thin"
+                    style={{
+                        scrollbarWidth: "thin",
+                        scrollbarColor: "#D1D5DB transparent",
+                    }}
+                >
+                    {visibleSessions.map((session) => {
+                        const deviceConfig = DEVICE_CONFIG[session.device_type] || DEVICE_CONFIG.unknown;
+                        const DeviceIcon = deviceConfig.icon;
+                        const flag = COUNTRY_FLAGS[session.country_code] || "🌍";
+
+                        return (
+                            <div key={session.session_id}
+                                className={`p-3 rounded-xl border transition-all ${session.is_active
+                                    ? "border-green-200 bg-green-50/50"
+                                    : "border-gray-100 bg-gray-50/50 hover:bg-gray-50"}`}>
+                                <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                                        <div className="flex-shrink-0">
+                                            {session.is_active ? (
+                                                <div className="relative">
+                                                    <Circle className="w-3 h-3 fill-green-500 text-green-500" />
+                                                    <Circle className="w-3 h-3 fill-green-500 text-green-500 absolute inset-0 animate-ping opacity-50" />
+                                                </div>
+                                            ) : (
+                                                <Circle className="w-3 h-3 fill-gray-300 text-gray-300" />
+                                            )}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                                <span className="text-xs font-mono text-gray-600">{shortenVisitorId(session.visitor_id)}</span>
+                                                <span className="text-sm">{flag}</span>
+                                                <DeviceIcon className={`w-3 h-3 ${deviceConfig.color}`} />
+                                                <span className="text-[10px] text-gray-400">{session.browser}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5 mt-1 text-[10px] text-gray-500">
+                                                <LogIn className="w-2.5 h-2.5 text-green-500" />
+                                                <span className="truncate max-w-[120px]">{session.entry_page}</span>
+                                                {session.exit_page && session.exit_page !== session.entry_page && (
+                                                    <>
+                                                        <ArrowRight className="w-2.5 h-2.5" />
+                                                        <LogOut className="w-2.5 h-2.5 text-red-400" />
+                                                        <span className="truncate max-w-[120px]">{session.exit_page}</span>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                        <div className="text-right">
+                                            <p className="text-xs font-bold text-gray-900">
+                                                {formatDuration(session.is_active
+                                                    ? Math.floor((Date.now() - new Date(session.started_at).getTime()) / 1000)
+                                                    : session.duration_seconds)}
+                                            </p>
+                                            <p className="text-[9px] text-gray-400">{session.page_count} {session.page_count === 1 ? "page" : "pages"}</p>
+                                        </div>
+                                        <div className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${session.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                                            {session.is_active ? "LIVE" : formatDistanceToNow(parseISO(session.started_at), { addSuffix: true })}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* Scroll hint */}
+            {visibleSessions.length > 6 && (
+                <div className="mt-2 text-center">
+                    <p className="text-[10px] text-gray-400 flex items-center justify-center gap-1">
+                        <ChevronDown size={10} className="animate-bounce" />
+                        Scroll to see more
+                    </p>
+                </div>
+            )}
+        </div>
+    );
 };
 
 // ============================================
