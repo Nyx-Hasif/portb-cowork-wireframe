@@ -64,22 +64,18 @@ function calculateBotScore(
     const reasons: string[] = [];
 
     // ── Signal 1: Datacenter/Hosting IP ──
-    // Bot biasa run dari VPS (DigitalOcean, AWS, etc)
-    // ip-api.com detect hosting = true
     if (geo.isHosting) {
         score += 30;
         reasons.push('datacenter-ip');
     }
 
     // ── Signal 2: Proxy/VPN IP ──
-    // Kurang suspicious dari datacenter, tapi still flag
     if (geo.isProxy) {
         score += 10;
         reasons.push('proxy-ip');
     }
 
     // ── Signal 3: Rapid Requests ──
-    // yhd4ldlif bot pattern: 3 session dalam 15 saat
     const recentCount = countRecentRequests(visitorId);
     if (recentCount >= 5) {
         score += 50;
@@ -90,7 +86,6 @@ function calculateBotScore(
     }
 
     // ── Signal 4: Missing sec-fetch headers ──
-    // Browser sebenar SELALU hantar sec-fetch-mode untuk fetch()
     const secFetchMode = req.headers.get('sec-fetch-mode');
     if (!secFetchMode) {
         score += 15;
@@ -98,7 +93,6 @@ function calculateBotScore(
     }
 
     // ── Signal 5: Cross-origin request ──
-    // Tracker kita patut same-origin, kalau cross-origin = suspicious
     const secFetchSite = req.headers.get('sec-fetch-site');
     if (secFetchSite && secFetchSite !== 'same-origin') {
         score += 20;
@@ -106,11 +100,20 @@ function calculateBotScore(
     }
 
     // ── Signal 6: Missing accept-language ──
-    // Browser sebenar selalu ada language setting
     if (!req.headers.get('accept-language')) {
         score += 10;
         reasons.push('no-lang');
     }
+
+    // ══════════════════════════════════════
+    // 🛡️ LETAK SINI — Signal 7
+    // ══════════════════════════════════════
+    const { browser, os } = parseUserAgent(ua);
+    if (browser === "Other" && os === "Other") {
+        score += 35;
+        reasons.push('unknown-browser-os');
+    }
+    // ══════════════════════════════════════
 
     return { score: Math.min(100, score), reasons };
 }
