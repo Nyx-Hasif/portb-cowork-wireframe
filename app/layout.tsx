@@ -18,12 +18,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Port B Coworking",
   description: "Your premium coworking space",
-  // 👇 TAMBAH NI
   verification: {
-    google: "Xzxpaido11teNJ5fFkdwxDn5-IyctkSv5qp2Zbxd5Ww",
+    google: "SWAzS0Y-tj2bYKntHe2hZPiNa7TuyyvGZygXB-2n12A", // ← CODE BARU
   },
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{
