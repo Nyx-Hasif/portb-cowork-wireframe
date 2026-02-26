@@ -1,15 +1,16 @@
 // 📁 components/AnalyticsTracker.tsx
-// REPLACE EXISTING FILE
 
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
-// Heartbeat every 10 seconds for real-time tracking
-const HEARTBEAT_INTERVAL = 10 * 1000;
-// Session expires after 30 minutes of inactivity
-const SESSION_EXPIRY = 30 * 60 * 1000;
+// ═══════════════════════════════════════════════
+// 🛡️ SMART HEARTBEAT CONFIG
+// ═══════════════════════════════════════════════
+const HEARTBEAT_INTERVAL = 30 * 1000;   // 1 minit ✅
+const SESSION_EXPIRY = 30 * 60 * 1000;   // 30 saat
+const INACTIVE_THRESHOLD = 3 * 60 * 1000; // 3 minit — skip kalau inactive
 
 export default function AnalyticsTracker() {
   const pathname = usePathname();
@@ -20,6 +21,39 @@ export default function AnalyticsTracker() {
   const heartbeatTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastPageRef = useRef<string | null>(null);
   const isTrackingRef = useRef(false);
+
+  // 🛡️ Activity tracking
+  const lastActivityRef = useRef<number>(Date.now());
+  const isUserActiveRef = useRef<boolean>(true);
+
+  // ============================================
+  // 🛡️ ACTIVITY TRACKER — Detect Real User
+  // ============================================
+  useEffect(() => {
+    const updateActivity = () => {
+      lastActivityRef.current = Date.now();
+      isUserActiveRef.current = true;
+    };
+
+    const events = [
+      "mousemove",
+      "keydown",
+      "scroll",
+      "click",
+      "touchstart",
+      "touchmove",
+    ];
+
+    events.forEach((event) => {
+      document.addEventListener(event, updateActivity, { passive: true });
+    });
+
+    return () => {
+      events.forEach((event) => {
+        document.removeEventListener(event, updateActivity);
+      });
+    };
+  }, []);
 
   // ============================================
   // GET OR CREATE VISITOR ID
@@ -51,12 +85,10 @@ export default function AnalyticsTracker() {
 
     if (stored && expiry && Date.now() < parseInt(expiry, 10)) {
       sessionIdRef.current = stored;
-      // Extend expiry
       sessionStorage.setItem("_sexp", String(Date.now() + SESSION_EXPIRY));
       return stored;
     }
 
-    // Session expired or doesn't exist
     sessionStorage.removeItem("_sid");
     sessionStorage.removeItem("_sexp");
     return null;
@@ -74,11 +106,29 @@ export default function AnalyticsTracker() {
   }, []);
 
   // ============================================
-  // SEND HEARTBEAT
+  // 🛡️ SMART HEARTBEAT — Skip If Inactive
   // ============================================
   const sendHeartbeat = useCallback(async (isLeaving = false) => {
     const sid = sessionIdRef.current;
     if (!sid) return;
+
+    if (!isLeaving) {
+      // Skip 1: Tab hidden
+      if (document.hidden) {
+        console.log("[Heartbeat] Skipped — tab hidden");
+        return;
+      }
+
+      // Skip 2: User inactive lebih 3 minit
+      const timeSinceActivity = Date.now() - lastActivityRef.current;
+      if (timeSinceActivity > INACTIVE_THRESHOLD) {
+        console.log(
+          `[Heartbeat] Skipped — inactive ${Math.round(timeSinceActivity / 1000)}s`,
+        );
+        isUserActiveRef.current = false;
+        return;
+      }
+    }
 
     try {
       const payload = {
@@ -88,7 +138,6 @@ export default function AnalyticsTracker() {
       };
 
       if (isLeaving && navigator.sendBeacon) {
-        // Use sendBeacon for reliability when leaving
         navigator.sendBeacon(
           "/api/analytics/heartbeat",
           JSON.stringify(payload),
@@ -101,8 +150,10 @@ export default function AnalyticsTracker() {
           keepalive: isLeaving,
         });
       }
+
+      console.log("[Heartbeat] Sent ✓");
     } catch {
-      // Silently fail - don't break user experience
+      // Silently fail
     }
   }, []);
 
@@ -110,12 +161,10 @@ export default function AnalyticsTracker() {
   // START HEARTBEAT INTERVAL
   // ============================================
   const startHeartbeat = useCallback(() => {
-    // Clear existing
     if (heartbeatTimerRef.current) {
       clearInterval(heartbeatTimerRef.current);
     }
 
-    // Start new interval
     heartbeatTimerRef.current = setInterval(() => {
       sendHeartbeat(false);
     }, HEARTBEAT_INTERVAL);
@@ -166,6 +215,10 @@ export default function AnalyticsTracker() {
         if (data.success && data.sessionId) {
           saveSessionId(data.sessionId);
           lastPageRef.current = page;
+
+          lastActivityRef.current = Date.now();
+          isUserActiveRef.current = true;
+
           startHeartbeat();
         }
       } catch {
@@ -183,17 +236,14 @@ export default function AnalyticsTracker() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        // Tab hidden - pause heartbeat, send one last update
-        sendHeartbeat(false);
         stopHeartbeat();
       } else {
-        // Tab visible - resume heartbeat
+        lastActivityRef.current = Date.now();
         startHeartbeat();
       }
     };
 
     const handleBeforeUnload = () => {
-      // User leaving - send final heartbeat to end session
       sendHeartbeat(true);
       stopHeartbeat();
     };
@@ -219,7 +269,6 @@ export default function AnalyticsTracker() {
     const search = searchParams?.toString();
     const fullPath = search ? `${pathname}?${search}` : pathname;
 
-    // Only track if path changed
     if (fullPath && fullPath !== lastPageRef.current) {
       trackPageView(fullPath);
     }
