@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
-import ToastProvider from "@/components/ToastProvider"; // ← TAMBAH INI!
+import ToastProvider from "@/components/ToastProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,6 +18,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Port B Coworking",
   description: "Your premium coworking space",
+  // 👇 TAMBAH NI
+  verification: {
+    google: "Xzxpaido11teNJ5fFkdwxDn5-IyctkSv5qp2Zbxd5Ww",
+  },
 };
 
 export default function RootLayout({
@@ -31,7 +35,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>{children}</AuthProvider>
-        <ToastProvider /> {/* ← TAMBAH INI! */}
+        <ToastProvider />
       </body>
     </html>
   );
