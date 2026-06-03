@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import React from "react";
 import EpicCarousel from "./components/EpicCarousel";
 import CategoryYears from "./components/CategoryYears";
+import SpaceShowcase from "./components/SpaceShowcase";
 
 // 👇 SEO METADATA — Gallery Page
 export const metadata: Metadata = {
@@ -56,6 +57,7 @@ const GalleryPage = () => {
   return (
     <div>
       <EpicCarousel />
+      <SpaceShowcase />
       <CategoryYears />
     </div>
   );

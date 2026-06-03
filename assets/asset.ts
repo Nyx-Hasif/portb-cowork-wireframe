@@ -114,6 +114,35 @@ import private_locker from "./private_locker.png";
 import mail_management from "./mail_management.png";
 import prestigious_address from "./prestigious_address.png";
 import security_cctv from "./security_cctv.png";
+import event_area_1 from "./event_area_1.png";
+import event_area_2 from "./event_area_2.png";
+import event_area_3 from "./event_area_3.png";
+import event_area_4 from "./event_area_4.png";
+import event_area_5 from "./event_area_5.png";
+import event_area_6 from "./event_area_6.png";
+import fixed_desk_area_1 from "./fixed_desk_area_1.png";
+import fixed_desk_area_2 from "./fixed_desk_area_2.png";
+import fixed_desk_area_3 from "./fixed_desk_area_3.png";
+import green_area_1 from "./green_area_1.png";
+import green_area_2 from "./green_area_2.png";
+import green_area_3 from "./green_area_3.png";
+import green_area_4 from "./green_area_4.png";
+import green_area_5 from "./green_area_5.png";
+import meeting_area_1 from "./meeting_area_1.png";
+import meeting_area_2 from "./meeting_area_2.png";
+import meeting_area_3 from "./meeting_area_3.png";
+import meeting_area_4 from "./meeting_area_4.png";
+import meeting_area_5 from "./meeting_area_5.png";
+import common_area_1 from "./common_area_1.png";
+import common_area_2 from "./common_area_2.png";
+import common_area_3 from "./common_area_3.png";
+
+
+
+
+
+
+
 
 
 /* ---- Other assets ---- */
@@ -218,7 +247,35 @@ export const assets = {
   private_locker,
   mail_management,
   prestigious_address,
-  security_cctv
+  security_cctv,
+  event_area_1,
+  event_area_2,
+  event_area_3,
+  event_area_4,
+  event_area_5,
+  event_area_6,
+  fixed_desk_area_1,
+  fixed_desk_area_2,
+  fixed_desk_area_3,
+  green_area_1,
+  green_area_2,
+  green_area_3,
+  green_area_4,
+  green_area_5,
+  meeting_area_1,
+  meeting_area_2,
+  meeting_area_3,
+  meeting_area_4,
+  meeting_area_5,
+  common_area_1,
+  common_area_2,
+  common_area_3,
+
+
+
+
+
+
 
 };
 
