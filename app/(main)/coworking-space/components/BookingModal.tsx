@@ -167,6 +167,11 @@ interface FormErrors {
 const OPERATING_OPEN = 9;
 const OPERATING_CLOSE = 18;
 
+// ─── Package Type Constants ────────────────────────────────
+const CATERING_ELIGIBLE = ["Event Space"];
+const SPACE_RENTAL_TITLES = ["Meeting Room", "The Green Area", "Event Space"];
+const PER_PAX_PACKAGES = ["Common Area", "Fixed Desk"]; // ✅ Per pax pricing
+
 const formatTo12Hour = (time24: string): string => {
   if (!time24) return "";
   const [h, m] = time24.split(":").map(Number);
@@ -193,10 +198,6 @@ const generateTimeSlots = (): string[] => {
 
 const ALL_TIME_SLOTS = generateTimeSlots();
 
-// ─── Which packages get catering & extra fields ────────────
-const CATERING_ELIGIBLE = ["Event Space"];
-const SPACE_RENTAL_TITLES = ["Meeting Room", "The Green Area", "Event Space"];
-
 const BookingModal: React.FC<BookingModalProps> = ({
   isOpen,
   onClose,
@@ -210,6 +211,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
 }) => {
   const showCateringStep = CATERING_ELIGIBLE.includes(packageTitle);
   const isSpaceRental = SPACE_RENTAL_TITLES.includes(packageTitle);
+  const isPerPax = PER_PAX_PACKAGES.includes(packageTitle); // ✅ Check per pax
   const totalSteps = showCateringStep ? 4 : 3;
 
   const [step, setStep] = useState(1);
@@ -435,13 +437,19 @@ const BookingModal: React.FC<BookingModalProps> = ({
     }, 0);
   };
 
+  // ─── ✅ FIXED getSpacePrice - ambil kira pax untuk Common Area & Fixed Desk ──
   const getSpacePrice = useCallback((): number => {
     const r = rates.find((r) => r.period === selectedRate);
     const p = parseInt(r?.price || "0");
-    if (selectedRate === "Hourly" && customHours)
-      return p * parseInt(customHours || "1");
-    return p;
-  }, [rates, selectedRate, customHours]);
+    const paxCount = parseInt(pax || "1");
+
+    if (selectedRate === "Hourly" && customHours) {
+      const hourlyTotal = p * parseInt(customHours || "1");
+      return isPerPax ? hourlyTotal * paxCount : hourlyTotal;
+    }
+
+    return isPerPax ? p * paxCount : p;
+  }, [rates, selectedRate, customHours, pax, isPerPax]);
 
   // ─── Validation ──────────────────────────────────────────
   const scrollToFirstError = useCallback(() => {
@@ -481,29 +489,28 @@ const BookingModal: React.FC<BookingModalProps> = ({
       setTouched((p) => ({ ...p, date: true, time: true }));
     }
 
-  if (type === "confirm") {
-    if (!name.trim()) newErrors.name = "Name is required";
-    if (!phone.trim()) newErrors.phone = "Phone number is required";
-    if (!email.trim()) newErrors.email = "Email is required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-      newErrors.email = "Invalid email format";
+    if (type === "confirm") {
+      if (!name.trim()) newErrors.name = "Name is required";
+      if (!phone.trim()) newErrors.phone = "Phone number is required";
+      if (!email.trim()) newErrors.email = "Email is required";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+        newErrors.email = "Invalid email format";
 
-    // Space rental extra fields — required
-    if (isSpaceRental) {
-      if (!companyName.trim())
-        newErrors.companyName = "Company / Organization name is required";
-      if (!eventName.trim()) newErrors.eventName = "Event name is required";
+      if (isSpaceRental) {
+        if (!companyName.trim())
+          newErrors.companyName = "Company / Organization name is required";
+        if (!eventName.trim()) newErrors.eventName = "Event name is required";
+      }
+
+      setTouched((p) => ({
+        ...p,
+        name: true,
+        phone: true,
+        email: true,
+        companyName: true,
+        eventName: true,
+      }));
     }
-
-    setTouched((p) => ({
-      ...p,
-      name: true,
-      phone: true,
-      email: true,
-      companyName: true,
-      eventName: true,
-    }));
-  }
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
@@ -569,10 +576,11 @@ const BookingModal: React.FC<BookingModalProps> = ({
     };
   }, [isOpen]);
 
-  // ─── WhatsApp Message ────────────────────────────────────
+  // ─── ✅ FIXED WhatsApp Message - breakdown per pax ────────
   const generateWhatsAppMessage = () => {
     const rateObj = rates.find((r) => r.period === selectedRate);
-    const price = rateObj?.price || "N/A";
+    const price = rateObj?.price || "0";
+    const paxCount = parseInt(pax || "1");
 
     const fmtDate = (d: string) => {
       if (!d) return "";
@@ -588,10 +596,22 @@ const BookingModal: React.FC<BookingModalProps> = ({
     if (selectedRate === "Hourly" && customHours)
       dur = `${customHours} Hour${parseInt(customHours) > 1 ? "s" : ""}`;
 
-    let prc = `RM ${price}`;
+    // ✅ Price breakdown ikut jenis pakej
+    let prc = "";
     if (selectedRate === "Hourly" && customHours) {
-      const tot = parseInt(price) * parseInt(customHours || "1");
-      prc = `RM ${price}/hr x ${customHours} hrs = RM ${tot}`;
+      const perHour = parseInt(price);
+      const hours = parseInt(customHours || "1");
+      if (isPerPax) {
+        prc = `RM ${price}/hr × ${hours}hrs × ${paxCount} pax = RM ${perHour * hours * paxCount}`;
+      } else {
+        prc = `RM ${price}/hr × ${hours}hrs = RM ${perHour * hours}`;
+      }
+    } else {
+      if (isPerPax) {
+        prc = `RM ${price}/pax × ${paxCount} pax = RM ${parseInt(price) * paxCount}`;
+      } else {
+        prc = `RM ${price}`;
+      }
     }
 
     let msg = `Assalamualaikum & Hi,\n\n`;
@@ -631,14 +651,13 @@ const BookingModal: React.FC<BookingModalProps> = ({
       msg += `*Catering Total: RM ${getCateringTotal()}*\n`;
     }
 
-    // Grand total
+    // ✅ Grand total guna getSpacePrice() yang dah fix
     const grandTotal = getSpacePrice() + getCateringTotal();
     msg += `\n*TOTAL ESTIMATE: RM ${grandTotal}*\n`;
 
     msg += `\n*CONTACT INFORMATION*\n`;
     msg += `------------------------------\n`;
 
-    // Space rental extra fields
     if (isSpaceRental) {
       msg += `- Company / Org: ${companyName}\n`;
       msg += `- Event Name: ${eventName}\n`;
@@ -658,7 +677,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
     msg += `\nLooking forward to your confirmation. Thank you!`;
 
     return encodeURIComponent(msg);
-  };;
+  };
 
   const handleSendWhatsApp = () => {
     if (!validateStep(step)) return;
@@ -796,7 +815,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
             </div>
           )}
 
-          {/* ─── STEP: DURATION ──────────────────────────── */}
+          {/* ─── STEP 1: DURATION ────────────────────────── */}
           {currentStepType === "duration" && (
             <div
               className={`animate-fadeUp ${shakeStep ? "animate-shake" : ""}`}
@@ -817,6 +836,17 @@ const BookingModal: React.FC<BookingModalProps> = ({
                   – {formatTo12HourShort(`${OPERATING_CLOSE}:00`)}
                 </span>
               </div>
+
+              {/* ✅ Per pax notice untuk Common Area & Fixed Desk */}
+              {isPerPax && (
+                <div className="flex items-center gap-2 mb-4 px-3 py-2.5 bg-blue-50 border border-blue-200 text-blue-700">
+                  <Users size={14} className="flex-shrink-0" />
+                  <span className="text-[10px] uppercase tracking-wider font-bold">
+                    Pricing is per pax — total will be calculated based on
+                    number of people
+                  </span>
+                </div>
+              )}
 
               <div data-error={errors.duration ? "true" : undefined}>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -855,7 +885,12 @@ const BookingModal: React.FC<BookingModalProps> = ({
                         </div>
                         {rate.period === "Hourly" && (
                           <span className="text-[8px] text-zinc-400 mt-1 block">
-                            per hour
+                            per hour{isPerPax ? " / pax" : ""}
+                          </span>
+                        )}
+                        {isPerPax && rate.period !== "Hourly" && (
+                          <span className="text-[8px] text-zinc-400 mt-1 block">
+                            per pax
                           </span>
                         )}
                       </button>
@@ -907,6 +942,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
                             rates.find((r) => r.period === "Hourly")?.price ||
                               "0",
                           ) * parseInt(customHours || "1")}
+                          {isPerPax ? "/pax" : ""}
                         </span>
                       )}
                   </div>
@@ -923,7 +959,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
             </div>
           )}
 
-          {/* ─── STEP: SCHEDULE ──────────────────────────── */}
+          {/* ─── STEP 2: SCHEDULE ────────────────────────── */}
           {currentStepType === "schedule" && (
             <div
               className={`animate-fadeUp ${shakeStep ? "animate-shake" : ""}`}
@@ -946,6 +982,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
                   ? ` x ${customHours}hrs`
                   : ""}{" "}
                 — RM {spacePrice}
+                {isPerPax ? ` (${pax} pax)` : ""}
               </div>
 
               <div className="space-y-5">
@@ -962,7 +999,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
                     onChange={(e) => {
                       setSelectedDate(e.target.value);
                       setErrors((p) => ({ ...p, date: undefined }));
-                      setTouched((p) => ({ ...p, date: false })); // ✅ Reset touched
+                      setTouched((p) => ({ ...p, date: false }));
                     }}
                     className={`w-full px-4 py-3.5 border text-zinc-900 text-sm focus:outline-none transition-all ${errors.date && touched.date ? "border-red-400 bg-red-50/50" : "border-zinc-300 focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"}`}
                   />
@@ -1064,7 +1101,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
             </div>
           )}
 
-          {/* ─── STEP: ADD-ONS (CATERING) ────────────────── */}
+          {/* ─── STEP 3: ADD-ONS (CATERING) ──────────────── */}
           {currentStepType === "addons" && (
             <div className="animate-fadeUp">
               <div className="mb-6">
@@ -1106,7 +1143,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
                 ))}
               </div>
 
-              {/* Package Cards — with images */}
+              {/* Package Cards */}
               <div className="space-y-4">
                 {filteredCateringPackages.map((pkg) => {
                   const qty = getCateringQuantity(pkg.id);
@@ -1117,9 +1154,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
                       key={pkg.id}
                       className={`border-2 transition-all duration-300 overflow-hidden ${isAdded ? "border-zinc-900 shadow-md" : "border-zinc-200 hover:border-zinc-300"}`}
                     >
-                      {/* Image + Info Layout */}
                       <div className="flex">
-                        {/* Image */}
                         <div className="relative w-28 sm:w-36 flex-shrink-0">
                           <Image
                             src={pkg.image}
@@ -1138,7 +1173,6 @@ const BookingModal: React.FC<BookingModalProps> = ({
                               </div>
                             </div>
                           )}
-                          {/* Min pax badge */}
                           <div className="absolute bottom-2 left-2">
                             <span className="text-[8px] uppercase tracking-widest bg-black/70 text-white px-2 py-1 backdrop-blur-sm font-bold">
                               Min {pkg.minPax} Pax
@@ -1146,7 +1180,6 @@ const BookingModal: React.FC<BookingModalProps> = ({
                           </div>
                         </div>
 
-                        {/* Content */}
                         <div className="flex-1 p-4 sm:p-5 flex flex-col justify-between">
                           <div>
                             <div className="flex items-start justify-between gap-3 mb-2">
@@ -1173,7 +1206,6 @@ const BookingModal: React.FC<BookingModalProps> = ({
                               </div>
                             </div>
 
-                            {/* Inclusions */}
                             <div className="flex flex-wrap gap-x-3 gap-y-0.5 mb-3">
                               {pkg.inclusions.map((item, i) => (
                                 <span
@@ -1187,7 +1219,6 @@ const BookingModal: React.FC<BookingModalProps> = ({
                             </div>
                           </div>
 
-                          {/* Controls */}
                           <div className="flex items-center justify-between">
                             {isAdded ? (
                               <div className="flex items-center gap-1">
@@ -1242,7 +1273,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
                 })}
               </div>
 
-              {/* Summary Bar */}
+              {/* Catering Summary Bar */}
               {selectedCatering.length > 0 && (
                 <div className="mt-6 p-4 bg-zinc-900 text-white animate-fadeUp">
                   <div className="flex items-center justify-between mb-3">
@@ -1302,7 +1333,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
             </div>
           )}
 
-          {/* ─── STEP: CONFIRM ───────────────────────────── */}
+          {/* ─── STEP 4: CONFIRM ─────────────────────────── */}
           {currentStepType === "confirm" && (
             <div
               className={`animate-fadeUp ${shakeStep ? "animate-shake" : ""}`}
@@ -1316,7 +1347,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
                 </p>
               </div>
 
-              {/* Summary */}
+              {/* Booking Summary */}
               <div
                 className={`mb-6 border-2 ${colors.border} ${colors.bg} relative overflow-hidden`}
               >
@@ -1385,6 +1416,11 @@ const BookingModal: React.FC<BookingModalProps> = ({
                       <div className="text-zinc-500">Space Rate</div>
                       <div className={`font-bold ${colors.text}`}>
                         RM {spacePrice}
+                        {isPerPax && (
+                          <span className="text-[10px] text-zinc-400 font-normal ml-1">
+                            ({pax} pax)
+                          </span>
+                        )}
                       </div>
 
                       {selectedCatering.length > 0 && (
@@ -1433,9 +1469,8 @@ const BookingModal: React.FC<BookingModalProps> = ({
                 </div>
               </div>
 
-              {/* ─── Form Fields ─────────────────────────── */}
+              {/* Form Fields */}
               <div className="space-y-4">
-                {/* ── Space Rental Fields: Company & Event ── */}
                 {isSpaceRental && (
                   <>
                     <div data-error={errors.companyName ? "true" : undefined}>
@@ -1453,7 +1488,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
                               ...p,
                               companyName: undefined,
                             }));
-                            setTouched((p) => ({ ...p, companyName: false })); // ✅ Reset touched
+                            setTouched((p) => ({ ...p, companyName: false }));
                           }
                         }}
                         placeholder="e.g. Syarikat ABC Sdn Bhd"
@@ -1478,7 +1513,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
                           setEventName(e.target.value);
                           if (e.target.value.trim()) {
                             setErrors((p) => ({ ...p, eventName: undefined }));
-                            setTouched((p) => ({ ...p, eventName: false })); // ✅ Reset touched
+                            setTouched((p) => ({ ...p, eventName: false }));
                           }
                         }}
                         placeholder="e.g. Q1 Team Planning Workshop"
@@ -1490,8 +1525,6 @@ const BookingModal: React.FC<BookingModalProps> = ({
                         </span>
                       )}
                     </div>
-
-                    {/* Subtle divider */}
                     <div className="border-t border-zinc-200 pt-2" />
                   </>
                 )}
@@ -1509,7 +1542,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
                       setName(e.target.value);
                       if (e.target.value.trim()) {
                         setErrors((p) => ({ ...p, name: undefined }));
-                        setTouched((p) => ({ ...p, name: false })); // ✅ Reset touched
+                        setTouched((p) => ({ ...p, name: false }));
                       }
                     }}
                     placeholder="e.g. Ahmad Firdaus"
@@ -1534,7 +1567,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
                       setPhone(e.target.value);
                       if (e.target.value.trim()) {
                         setErrors((p) => ({ ...p, phone: undefined }));
-                        setTouched((p) => ({ ...p, phone: false })); // ✅ Reset touched
+                        setTouched((p) => ({ ...p, phone: false }));
                       }
                     }}
                     placeholder="e.g. 012-345 6789"
@@ -1559,7 +1592,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
                       setEmail(e.target.value);
                       if (e.target.value.trim()) {
                         setErrors((p) => ({ ...p, email: undefined }));
-                        setTouched((p) => ({ ...p, email: false })); // ✅ Reset touched
+                        setTouched((p) => ({ ...p, email: false }));
                       }
                     }}
                     placeholder="e.g. ahmad@email.com"
