@@ -164,35 +164,46 @@ const SAMPLE_SPACES: SpaceImage[] = [
   },
   {
     id: 21,
+    image_url: assets.green_area_6.src,
+    category: "green-area",
+    alt_text: "Green Area 6",
+  },
+  {
+    id: 22,
     image_url: assets.meeting_area_1.src,
     category: "meeting-area",
     alt_text: "Meeting Area 1",
   },
   {
-    id: 22,
+    id: 23,
     image_url: assets.meeting_area_2.src,
     category: "meeting-area",
     alt_text: "Meeting Area 2",
   },
   {
-    id: 23,
+    id: 24,
     image_url: assets.meeting_area_3.src,
     category: "meeting-area",
     alt_text: "Meeting Area 3",
   },
   {
-    id: 24,
+    id: 25,
     image_url: assets.meeting_area_4.src,
     category: "meeting-area",
     alt_text: "Meeting Area 4",
   },
   {
-    id: 25,
+    id: 26,
     image_url: assets.meeting_area_5.src,
     category: "meeting-area",
     alt_text: "Meeting Area 5",
   },
-
+  {
+    id: 27,
+    image_url: assets.meeting_area_6.src,
+    category: "meeting-area",
+    alt_text: "Meeting Area 6",
+  },
 ];
 
 const CATEGORIES = [

@@ -128,11 +128,13 @@ import green_area_2 from "./green_area_2.png";
 import green_area_3 from "./green_area_3.png";
 import green_area_4 from "./green_area_4.png";
 import green_area_5 from "./green_area_5.png";
+import green_area_6 from "./green_area_6.png";
 import meeting_area_1 from "./meeting_area_1.png";
 import meeting_area_2 from "./meeting_area_2.png";
 import meeting_area_3 from "./meeting_area_3.png";
 import meeting_area_4 from "./meeting_area_4.png";
 import meeting_area_5 from "./meeting_area_5.png";
+import meeting_area_6 from "./meeting_area_6.png";
 import common_area_1 from "./common_area_1.png";
 import common_area_2 from "./common_area_2.png";
 import common_area_3 from "./common_area_3.png";
@@ -262,11 +264,13 @@ export const assets = {
   green_area_3,
   green_area_4,
   green_area_5,
+  green_area_6,
   meeting_area_1,
   meeting_area_2,
   meeting_area_3,
   meeting_area_4,
   meeting_area_5,
+  meeting_area_6,
   common_area_1,
   common_area_2,
   common_area_3,
