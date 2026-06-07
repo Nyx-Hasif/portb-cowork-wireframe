@@ -138,6 +138,9 @@ import meeting_area_6 from "./meeting_area_6.png";
 import common_area_1 from "./common_area_1.png";
 import common_area_2 from "./common_area_2.png";
 import common_area_3 from "./common_area_3.png";
+import program_english_kids from "./program_english_kids.png";
+import ms_aisyah from "./ms_aisyah.png";
+import profile_ms_aisyah from "./profile_ms_aisyah.png";
 
 
 
@@ -274,6 +277,9 @@ export const assets = {
   common_area_1,
   common_area_2,
   common_area_3,
+  program_english_kids,
+  ms_aisyah,
+  profile_ms_aisyah,
 
 
 

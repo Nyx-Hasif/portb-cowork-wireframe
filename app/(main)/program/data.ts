@@ -102,4 +102,59 @@ export const TRAINER_DATA: Record<string, TrainerData> = {
     //     ],
     //     ctaBg: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&q=80&w=1920"
     // },
+
+    [ProgramType.ENGLISH_CLASS]: {
+        id: ProgramType.ENGLISH_CLASS,
+        title: "Speak Up English",
+        heroHeader: "FROM SHY TO CONFIDENT IN ENGLISH",
+        heroSubheader: "A fun and safe space for kids to speak freely and confidently no judgment, just growth",
+        trainerName: "TBA",
+        trainerImage: assets.ms_aisyah,
+        trainerProfileImage: assets.profile_ms_aisyah,
+        aboutIntro: "A guided reading community for women who want to grow through books.",
+        aboutBio: "Coming soon – more details will be announced.",
+        experience: {
+            years: "Coming Soon",
+            description: "Details to be announced",
+            background: "Details to be announced"
+        },
+        badges: ["Community-Based", "Women Only", "Growth-Focused"],
+        gallery: [{ type: 'image', url: assets.program_english_kids, thumbnail: assets.program_english_kids },],
+        benefits: [
+            { title: "Mental Stimulation", description: "Keep your mind sharp and engaged through regular reading and discussion.", imageUrl: assets.program_english_kids},
+            { title: "Community Connection", description: "Build meaningful friendships with like-minded women.", imageUrl: assets.program_english_kids },
+            { title: "Personal Growth", description: "Discover new perspectives that challenge and inspire you.", imageUrl: assets.program_english_kids }
+        ],
+        faqs: [
+            { question: "When will this program start?", answer: "Coming soon! Follow our socials for updates." },
+            { question: "Is this women only?", answer: "Yes, this program is designed exclusively for women." },
+        ],
+        ctaBg: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&q=80&w=1920",
+        ctaLinks: {
+            registerUrl: "https://forms.gle/brYQ2mmxWwE7a57N8",
+            chatUrl: "https://wa.me/60143298981?text=Hi%2C%20saya%20berminat%20dengan%20Her%20Hour%20program",
+        },
+        ctaHeadline: "Your Body Has Been Waiting For This",
+        ctaDescription: "One class is all it takes to feel the difference. No experience needed, no judgment just you, your mat, and a room full of women cheering each other on.",
+        ctaSocialProof: [
+            "Women-Only Sessions",
+            "Beginner Friendly",
+            "Trial Available",
+            "Guided by 10+ Year Expert",
+        ],
+
+        // ✅ Testimonial Video
+        testimonial: {
+            videoUrl: "/videos/testimony_herhour.mp4",
+            thumbnail: assets.program_english_kids,  // tukar dengan thumbnail testimonial sebenar
+            participantName: "Sofia",                   // tukar nama sebenar
+            participantTitle: "Her Hour Participant",
+            quote: "I never thought yoga was for me until I joined Her Hour. The environment is so warm and welcoming, and I finally feel comfortable moving at my own pace.",
+        },
+        socialLinks: {
+            instagram: "https://www.instagram.com/julylai.yogainstructor/",
+            facebook: "https://www.facebook.com/julylai.yogainstructor",
+            threads: "https://www.threads.com/@julylai.yogainstructor?xmt=AQF0AB4oamMTZVCXJMUMCQVoEhsim57fOUjuDNVgxn63x9g",
+        },
+    },
 };

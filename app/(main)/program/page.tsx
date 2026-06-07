@@ -101,6 +101,27 @@ export default function ProgramPage() {
             </h2>
           </div>
         </div>
+
+        {/* English for kids - COMING SOON 🚫 */}
+        <Link
+          href={`/program/${ProgramType.ENGLISH_CLASS}`}
+          className="group relative h-80 sm:h-96 cursor-pointer overflow-hidden border-2 border-black transition-all md:hover:scale-[1.02] active:scale-[0.98] duration-500"
+        >
+          <Image
+            src={assets.program_english_kids}
+            alt="Her Hour - Kelas Yoga Wanita Kota Bharu"
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover grayscale group-hover:grayscale-0 group-active:grayscale-0 transition-all duration-700"
+          />
+          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/10 group-active:bg-black/10 transition-colors duration-500" />
+          <div className="absolute bottom-8 left-8">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white uppercase tracking-widest">
+              English Class
+            </h2>
+            <div className="h-1 w-0 group-hover:w-full group-active:w-full bg-white transition-all duration-500 mt-2" />
+          </div>
+        </Link>
       </div>
 
       <p className="mt-12 text-[10px] sm:text-xs text-gray-500 uppercase tracking-[0.3em] font-semibold text-center">

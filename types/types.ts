@@ -6,6 +6,7 @@ export enum ProgramType {
     YOGA = 'herhour',
     // THERAPY = 'therapy',
     CURIOUS_READER = 'curious-reader',
+    ENGLISH_CLASS = 'english-class',
 }
 
 export interface GalleryItem {
