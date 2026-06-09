@@ -119,7 +119,7 @@ export const TRAINER_DATA: Record<string, TrainerData> = {
             background: "Details to be announced"
         },
         badges: ["Community-Based", "Women Only", "Growth-Focused"],
-        gallery: [{ type: 'image', url: assets.program_english_kids, thumbnail: assets.program_english_kids },],
+        gallery: [{ type: 'video', url: "/videos/english_class_1.mp4", thumbnail: assets.program_english_kids },],
         benefits: [
             { title: "Mental Stimulation", description: "Keep your mind sharp and engaged through regular reading and discussion.", imageUrl: assets.program_english_kids},
             { title: "Community Connection", description: "Build meaningful friendships with like-minded women.", imageUrl: assets.program_english_kids },
