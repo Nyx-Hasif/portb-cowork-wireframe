@@ -8,7 +8,7 @@ import { ProgramType, TrainerData } from "@/types/types";
 import SteamGallery from "./SteamGallery";
 import FaqSection from "./FaqSection";
 import TestimonialSection from "./TestimonialSection";
-import { ClassDifferentSection } from "../../gallery/components/ClassDifferentSection";
+import { ClassDifferentSection } from "./ClassDifferentSection";
 import Link from "next/link";
 import {
   ArrowRight,

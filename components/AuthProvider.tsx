@@ -66,7 +66,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signIn = async (email: string, password: string) => {
     setLoading(true);
 
-    const { data, error } = await auth.signIn(email, password);
+    const { error } = await auth.signIn(email, password);
 
     setLoading(false);
     return { error };

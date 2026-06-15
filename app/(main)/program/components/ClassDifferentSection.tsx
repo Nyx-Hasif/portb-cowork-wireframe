@@ -161,12 +161,9 @@ export function ClassDifferentSection({ methods }: ClassDifferentSectionProps) {
 
                 // Desktop spread
                 const spreadDesktop = 130;
-                // Mobile/tablet spread — tighter
-                const spreadMobile = 70;
 
                 // Use CSS clamp via inline for spread
                 const translateX = off * spreadDesktop;
-                const translateXMobile = off * spreadMobile;
 
                 const rotateY = off * -16;
                 const scale = 1 - abs * 0.08;
@@ -285,7 +282,6 @@ export function ClassDifferentSection({ methods }: ClassDifferentSectionProps) {
               </button>
             </div>
           </div>
-          
         </div>
       </div>
     </section>
