@@ -120,7 +120,7 @@ export const TRAINER_DATA: Record<string, TrainerData> = {
         // HERO
         // ============================================
         heroHeader: "FROM SHY TO CONFIDENT IN ENGLISH.",
-        heroSubheader: "A fun and safe space for kids to speak freely and confidently — no judgment, just growth.",
+        heroSubheader: "A fun and safe space for kids to speak freely and confidently no judgment, just growth.",
 
         // ============================================
         // ABOUT / TRAINER
@@ -132,12 +132,12 @@ export const TRAINER_DATA: Record<string, TrainerData> = {
         aboutBio: "",
         experience: {
             years: "10 years of teaching experience",
-            description: "Me with love to teach English.",
+            description: "I love teach English.",
             background: "Focus on confidence, expression, and real-life communication not just grammar drills."
         },
         badges: [
             "Lecturer",
-            "Graduated from University of Nottingham",
+            "TESL Teacher",
             "expert in English communication",
             "expert in English teaching",
             "Port B Coworking",
@@ -250,7 +250,7 @@ export const TRAINER_DATA: Record<string, TrainerData> = {
             thumbnail: assets.program_english_kids,
             participantName: "Parent of Student",
             participantTitle: "The Speaking Space Participant",
-            quote: "My child used to be so shy in class. After joining The Speaking Space, I can see the difference — she now speaks up and shares her ideas with confidence.",
+            quote: "My child used to be so shy in class. After joining The Speaking Space, I can see the difference she now speaks up and shares her ideas with confidence.",
         },
 
         // ============================================
