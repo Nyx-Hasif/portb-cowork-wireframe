@@ -31,7 +31,6 @@ export interface CtaLinks {
     chatUrl: string;
 }
 
-// ✅ NEW - Testimonial
 export interface TestimonialVideo {
     videoUrl: string;
     thumbnail: string | StaticImageData;
@@ -47,6 +46,58 @@ export interface SocialLinks {
     email?: string;
     tiktok?: string;
 }
+
+// ✅ NEW - English Class specific types
+export interface EnglishTrack {
+    name: string;         // "Junior Track" / "Varsity Track"
+    ageRange: string;     // "Ages 7–12" / "Ages 13–17"
+    description: string;
+    activities: string[];
+}
+
+export interface EnglishLearningPathway {
+    volume: string;       // "Vol. 1"
+    title: string;        // "Voice"
+    description: string;  // "Building confidence..."
+}
+
+export interface EnglishClassMethod {
+    emoji: string;
+    label: string;        // "Podcast-style speaking"
+    imageUrl: StaticImageData | string; // ✅ tambah ni
+}
+
+export interface EnglishProgramInfo {
+    // "Who is this for?" section
+    targetAudience: string[];
+
+    // "Our Tracks" section
+    tracks: EnglishTrack[];
+
+    // "How is class different?" section
+    classMethods: EnglishClassMethod[];
+
+    // "Learning Pathway" section
+    learningPathway: EnglishLearningPathway[];
+
+    // "Class Format" section
+    classFormat: string[];
+
+    // "Free Trial" section
+    freeTrial: {
+        title: string;
+        description: string;
+    };
+
+    // Programme Details
+    programmeDetails: {
+        location: string;
+        ageGroup: string;
+        classType: string;
+        registration: string;
+    };
+}
+// ✅ END NEW
 
 export interface TrainerData {
     id: ProgramType | string;
@@ -72,6 +123,9 @@ export interface TrainerData {
     ctaHeadline: string;
     ctaDescription: string;
     ctaSocialProof: string[];
-    testimonial?: TestimonialVideo;    
+    testimonial?: TestimonialVideo;
     socialLinks?: SocialLinks;
+
+    // ✅ NEW - Optional, only English Class will have this
+    englishProgramInfo?: EnglishProgramInfo;
 }

@@ -4,10 +4,11 @@
 
 import React from "react";
 import Image from "next/image";
-import { TrainerData } from "@/types/types";
+import { ProgramType, TrainerData } from "@/types/types";
 import SteamGallery from "./SteamGallery";
 import FaqSection from "./FaqSection";
 import TestimonialSection from "./TestimonialSection";
+import { ClassDifferentSection } from "../../gallery/components/ClassDifferentSection";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -16,6 +17,10 @@ import {
   Facebook,
   ChevronLeft,
   CheckCircle2,
+  MapPin,
+  Users,
+  BookOpen,
+  ClipboardList,
 } from "lucide-react";
 
 interface LandingPageContentProps {
@@ -23,6 +28,8 @@ interface LandingPageContentProps {
 }
 
 const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
+  const isEnglishClass = data.id === ProgramType.ENGLISH_CLASS;
+
   return (
     <div className="bg-white text-black selection:bg-black selection:text-white mt-[-20px]">
       {/* ============================================= */}
@@ -34,7 +41,9 @@ const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
             <div className="w-full max-w-xl">
               <div className="mb-6 flex items-center gap-3 text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-neutral-400">
                 <span className="w-8 sm:w-12 h-[1px] bg-neutral-300"></span>
-                Elite Performance Training
+                {isEnglishClass
+                  ? "English Communication & Confidence Studio"
+                  : "Elite Performance Training"}
               </div>
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-7xl font-black uppercase leading-[0.9] tracking-tighter mb-6">
                 {data.heroHeader}
@@ -43,27 +52,57 @@ const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
                 {data.heroSubheader}
               </p>
               <div className="hidden lg:flex flex-col gap-3 mb-10 text-xs font-medium text-neutral-500 uppercase tracking-widest">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2
-                    size={16}
-                    className="text-black flex-shrink-0"
-                  />
-                  <span>Guided with Care by Experienced Practitioners</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle2
-                    size={16}
-                    className="text-black flex-shrink-0"
-                  />
-                  <span>Support That Honours Where You Are Today</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle2
-                    size={16}
-                    className="text-black flex-shrink-0"
-                  />
-                  <span>A Welcoming Circle of people on Similar Journeys</span>
-                </div>
+                {isEnglishClass ? (
+                  <>
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2
+                        size={16}
+                        className="text-black flex-shrink-0"
+                      />
+                      <span>Safe & Supportive Space to Speak Freely</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2
+                        size={16}
+                        className="text-black flex-shrink-0"
+                      />
+                      <span>Junior Track (7–12) & Varsity Track (13–17)</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2
+                        size={16}
+                        className="text-black flex-shrink-0"
+                      />
+                      <span>Free Trial Class Available Now</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2
+                        size={16}
+                        className="text-black flex-shrink-0"
+                      />
+                      <span>Guided with Care by Experienced Practitioners</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2
+                        size={16}
+                        className="text-black flex-shrink-0"
+                      />
+                      <span>Support That Honours Where You Are Today</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2
+                        size={16}
+                        className="text-black flex-shrink-0"
+                      />
+                      <span>
+                        A Welcoming Circle of People on Similar Journeys
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
                 <a
@@ -72,7 +111,8 @@ const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
                   rel="noopener noreferrer"
                   className="px-8 py-4 bg-black text-white font-bold uppercase tracking-widest hover:bg-neutral-800 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-xl text-sm"
                 >
-                  Reg Now <ArrowRight size={18} />
+                  {isEnglishClass ? "Book Free Trial" : "Reg Now"}{" "}
+                  <ArrowRight size={18} />
                 </a>
                 <a
                   href={data.ctaLinks.chatUrl}
@@ -117,7 +157,7 @@ const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
               </div>
               <div className="space-y-4 max-w-sm mx-auto lg:mx-0">
                 <h3 className="text-2xl font-bold uppercase tracking-tighter underline underline-offset-8 decoration-2">
-                  About Me
+                  {isEnglishClass && "About Me"}
                 </h3>
                 <p className="text-base font-medium text-neutral-800">
                   {data.aboutIntro}
@@ -141,7 +181,9 @@ const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
               </div>
               <div className="space-y-4">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-neutral-400 text-center lg:text-left">
-                  Credentials & Awards
+                  {isEnglishClass
+                    ? "Programme Highlights"
+                    : "Credentials & Awards"}
                 </h4>
                 <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
                   {data.badges.map((badge, idx) => (
@@ -154,16 +196,12 @@ const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
                   ))}
                 </div>
               </div>
-              {/* Social Connections */}
-              {/* Social Connections */}
               {data.socialLinks && (
                 <div className="space-y-4 pt-8 border-t border-neutral-200">
                   <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-neutral-400 text-center lg:text-left">
                     Social Connections
                   </h4>
-
                   <div className="flex gap-6 items-center justify-center lg:justify-start">
-                    {/* Instagram */}
                     {data.socialLinks.instagram && (
                       <a
                         href={data.socialLinks.instagram}
@@ -177,8 +215,6 @@ const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
                         />
                       </a>
                     )}
-
-                    {/* Facebook */}
                     {data.socialLinks.facebook && (
                       <a
                         href={data.socialLinks.facebook}
@@ -192,8 +228,6 @@ const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
                         />
                       </a>
                     )}
-
-                    {/* ✅ Threads Official (Boxicons SVG) */}
                     {data.socialLinks?.threads && (
                       <a
                         href={data.socialLinks.threads}
@@ -220,7 +254,109 @@ const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
       </section>
 
       {/* ============================================= */}
-      {/* 3. GALLERY SECTION */}
+      {/* 3. WHO IS THIS FOR — English Only */}
+      {/* ============================================= */}
+      {isEnglishClass && data.englishProgramInfo && (
+        <section className="py-20 lg:py-28 px-6 sm:px-10 md:px-12 lg:px-16 xl:px-24 bg-black text-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-4">
+                  Is This For My Child?
+                </p>
+                <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tighter leading-none mb-6">
+                  Who Is This
+                  <br />
+                  Programme
+                  <br />
+                  For?
+                </h2>
+                <p className="text-neutral-400 text-sm leading-relaxed max-w-sm">
+                  This programme is suitable for students who need a safe,
+                  supportive, and creative space to grow their English
+                  communication skills.
+                </p>
+              </div>
+              <div className="space-y-4">
+                {data.englishProgramInfo.targetAudience.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-start gap-4 p-4 border border-neutral-800 hover:border-white transition-colors duration-300 group"
+                  >
+                    <span className="text-neutral-600 font-black text-sm group-hover:text-white transition-colors">
+                      0{idx + 1}
+                    </span>
+                    <p className="text-sm text-neutral-300 group-hover:text-white transition-colors leading-relaxed">
+                      {item}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ============================================= */}
+      {/* 4. OUR TRACKS — English Only */}
+      {/* ============================================= */}
+      {isEnglishClass && data.englishProgramInfo && (
+        <section className="py-20 lg:py-28 px-6 sm:px-10 md:px-12 lg:px-16 xl:px-24 bg-white border-b border-black/10">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-4">
+                Age-Based Learning
+              </p>
+              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tighter">
+                Our Tracks
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {data.englishProgramInfo.tracks.map((track, idx) => (
+                <div
+                  key={idx}
+                  className="border-2 border-black p-8 lg:p-10 hover:bg-black hover:text-white transition-all duration-500 group"
+                >
+                  <div className="flex items-start justify-between mb-6">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.25em] text-neutral-400 group-hover:text-neutral-500 mb-2">
+                        {track.ageRange}
+                      </p>
+                      <h3 className="text-3xl lg:text-4xl font-black uppercase tracking-tighter">
+                        {track.name}
+                      </h3>
+                    </div>
+                    <span className="text-6xl font-black text-neutral-100 group-hover:text-neutral-800 transition-colors">
+                      0{idx + 1}
+                    </span>
+                  </div>
+                  <p className="text-sm text-neutral-600 group-hover:text-neutral-300 leading-relaxed mb-8">
+                    {track.description}
+                  </p>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-neutral-400 group-hover:text-neutral-500 mb-4">
+                      Activities Include
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {track.activities.map((activity, aIdx) => (
+                        <span
+                          key={aIdx}
+                          className="px-3 py-1.5 border border-black group-hover:border-white text-[10px] font-black uppercase tracking-widest transition-colors"
+                        >
+                          {activity}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ============================================= */}
+      {/* 5. GALLERY SECTION */}
       {/* ============================================= */}
       <section className="py-20 lg:py-28 bg-black text-white">
         <div className="px-6 sm:px-10 md:px-12 lg:px-16 xl:px-24 mb-12">
@@ -234,12 +370,19 @@ const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
       </section>
 
       {/* ============================================= */}
-      {/* 4. BENEFITS SECTION */}
+      {/* 6. HOW IS CLASS DIFFERENT — English Only */}
+      {/* ============================================= */}
+      {isEnglishClass && data.englishProgramInfo && (
+        <ClassDifferentSection methods={data.englishProgramInfo.classMethods} />
+      )}
+
+      {/* ============================================= */}
+      {/* 7. BENEFITS SECTION */}
       {/* ============================================= */}
       <section className="py-20 lg:py-28 px-6 sm:px-10 md:px-12 lg:px-16 xl:px-24 border-y border-black bg-white">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tighter mb-16 text-center">
-            Core Benefits
+            {isEnglishClass ? "What Will Students Learn?" : "Core Benefits"}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-12">
             {data.benefits.map((benefit, idx) => (
@@ -271,14 +414,171 @@ const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
       </section>
 
       {/* ============================================= */}
-      {/* 5. TESTIMONIAL VIDEO — ✅ NEW */}
+      {/* 8. LEARNING PATHWAY — English Only */}
+      {/* ============================================= */}
+      {isEnglishClass && data.englishProgramInfo && (
+        <section className="py-20 lg:py-28 px-6 sm:px-10 md:px-12 lg:px-16 xl:px-24 bg-black text-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 mb-4">
+                Step by Step Growth
+              </p>
+              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tighter">
+                Learning Pathway
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-0">
+              {data.englishProgramInfo.learningPathway.map((step, idx) => (
+                <div
+                  key={idx}
+                  className="relative p-8 lg:p-10 border border-neutral-800 hover:border-white transition-colors duration-300 group"
+                >
+                  {/* Arrow connector — desktop only */}
+                  {idx <
+                    data.englishProgramInfo!.learningPathway.length - 1 && (
+                    <div className="hidden lg:block absolute -right-4 top-1/2 -translate-y-1/2 z-10">
+                      <ArrowRight size={24} className="text-neutral-600" />
+                    </div>
+                  )}
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600 group-hover:text-neutral-400 mb-4 transition-colors">
+                    {step.volume}
+                  </p>
+                  <h3 className="text-5xl lg:text-6xl font-black uppercase tracking-tighter mb-6 text-white">
+                    {step.title}
+                  </h3>
+                  <p className="text-sm text-neutral-400 group-hover:text-neutral-200 leading-relaxed transition-colors">
+                    {step.description}
+                  </p>
+                  <div className="mt-8 pt-8 border-t border-neutral-800 group-hover:border-neutral-600 transition-colors">
+                    <span className="text-7xl font-black text-neutral-900 group-hover:text-neutral-800 transition-colors">
+                      0{idx + 1}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-center text-sm text-neutral-500 mt-10 tracking-widest uppercase">
+              Each student grows step by step — from{" "}
+              <span className="text-white font-bold">Voice</span>, to{" "}
+              <span className="text-white font-bold">Ideas</span>, to{" "}
+              <span className="text-white font-bold">Impact</span>.
+            </p>
+          </div>
+        </section>
+      )}
+
+      {/* ============================================= */}
+      {/* 9. CLASS FORMAT + FREE TRIAL — English Only */}
+      {/* ============================================= */}
+      {isEnglishClass && data.englishProgramInfo && (
+        <section className="py-20 lg:py-28 px-6 sm:px-10 md:px-12 lg:px-16 xl:px-24 bg-white border-b border-black/10">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+              {/* Class Format */}
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-4">
+                  How We Run It
+                </p>
+                <h2 className="text-4xl sm:text-5xl font-black uppercase tracking-tighter mb-10">
+                  Class Format
+                </h2>
+                <div className="space-y-4">
+                  {data.englishProgramInfo.classFormat.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-4 group">
+                      <div className="w-8 h-8 border-2 border-black flex items-center justify-center flex-shrink-0 group-hover:bg-black transition-colors">
+                        <CheckCircle2
+                          size={14}
+                          className="text-black group-hover:text-white transition-colors"
+                        />
+                      </div>
+                      <p className="text-sm text-neutral-700 font-medium">
+                        {item}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Programme Details */}
+                <div className="mt-12 pt-10 border-t border-neutral-200 space-y-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-6">
+                    Programme Details
+                  </p>
+                  <div className="flex items-start gap-3">
+                    <MapPin
+                      size={16}
+                      className="text-black flex-shrink-0 mt-0.5"
+                    />
+                    <p className="text-sm text-neutral-600">
+                      {data.englishProgramInfo.programmeDetails.location}
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Users
+                      size={16}
+                      className="text-black flex-shrink-0 mt-0.5"
+                    />
+                    <p className="text-sm text-neutral-600">
+                      Age Group:{" "}
+                      {data.englishProgramInfo.programmeDetails.ageGroup}
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <BookOpen
+                      size={16}
+                      className="text-black flex-shrink-0 mt-0.5"
+                    />
+                    <p className="text-sm text-neutral-600">
+                      {data.englishProgramInfo.programmeDetails.classType}
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <ClipboardList
+                      size={16}
+                      className="text-black flex-shrink-0 mt-0.5"
+                    />
+                    <p className="text-sm text-neutral-600">
+                      {data.englishProgramInfo.programmeDetails.registration}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Free Trial */}
+              <div className="flex flex-col justify-center">
+                <div className="bg-black text-white p-8 lg:p-12">
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 mb-4">
+                    Try Before You Commit
+                  </p>
+                  <h3 className="text-3xl lg:text-4xl font-black uppercase tracking-tighter mb-6">
+                    {data.englishProgramInfo.freeTrial.title}
+                  </h3>
+                  <p className="text-sm text-neutral-400 leading-relaxed mb-10">
+                    {data.englishProgramInfo.freeTrial.description}
+                  </p>
+                  <a
+                    href={data.ctaLinks.registerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-3 px-8 py-4 bg-white text-black font-black uppercase tracking-widest text-sm hover:bg-neutral-200 transition-all active:scale-95"
+                  >
+                    Book Free Trial <ArrowRight size={18} />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ============================================= */}
+      {/* 10. TESTIMONIAL */}
       {/* ============================================= */}
       {data.testimonial && (
         <TestimonialSection testimonial={data.testimonial} />
       )}
 
       {/* ============================================= */}
-      {/* 6. FAQS SECTION */}
+      {/* 11. FAQS SECTION */}
       {/* ============================================= */}
       <section className="py-20 lg:py-28 px-6 sm:px-10 md:px-12 lg:px-16 xl:px-24">
         <div className="max-w-7xl mx-auto">
@@ -289,8 +589,9 @@ const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
                 <br className="hidden lg:block" /> Inquiries
               </h2>
               <p className="text-sm text-neutral-400 font-medium max-w-sm mx-auto lg:mx-0 mb-8">
-                Clear, concise, and professional answers regarding our elite
-                training methodology and intake process.
+                {isEnglishClass
+                  ? "Common questions from parents about The Speaking Space programme."
+                  : "Clear, concise, and professional answers regarding our elite training methodology and intake process."}
               </p>
               <div className="hidden lg:block mt-auto">
                 <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-300">
@@ -309,7 +610,7 @@ const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
       </section>
 
       {/* ============================================= */}
-      {/* 7. FINAL CTA */}
+      {/* 12. FINAL CTA */}
       {/* ============================================= */}
       <section className="relative min-h-[70vh] lg:min-h-[85vh] flex items-center justify-center overflow-hidden border-t border-black bg-white">
         <div className="absolute inset-0 z-0">
@@ -323,7 +624,9 @@ const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
         </div>
         <div className="relative z-10 text-center px-6 py-20 flex flex-col items-center justify-center space-y-8 w-full max-w-4xl mx-auto">
           <p className="text-[10px] sm:text-xs font-black uppercase tracking-[0.4em] text-neutral-400">
-            You&apos;ve read this far for a reason
+            {isEnglishClass
+              ? "Your child has been waiting for this"
+              : "You've read this far for a reason"}
           </p>
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black uppercase tracking-tighter leading-tight">
             {data.ctaHeadline}
@@ -346,7 +649,7 @@ const LandingPageContent: React.FC<LandingPageContentProps> = ({ data }) => {
             className="mt-4 px-12 sm:px-16 lg:px-20 py-5 lg:py-6 bg-black text-white text-sm sm:text-base lg:text-lg font-black uppercase tracking-[0.2em] hover:bg-neutral-800 transition-all duration-300 active:scale-95 shadow-2xl flex items-center justify-center gap-3"
           >
             <MessageSquare size={20} />
-            Talk to Us Now
+            {isEnglishClass ? "Book Free Trial Now" : "Talk to Us Now"}
           </a>
         </div>
       </section>

@@ -21,6 +21,19 @@ const config: Config = {
                 "canopy-horizontal": "canopy-x var(--duration) infinite linear",
                 "canopy-vertical": "canopy-y var(--duration) linear infinite",
             },
+            maxWidth: {
+                "350": "87.5rem",
+            },
+            height: {
+                "105": "26.25rem",
+                "125": "31.25rem",
+                "130": "32.5rem",
+                "150": "37.5rem",
+            },
+            width: {
+                "70": "17.5rem",
+                "85": "21.25rem",
+            },
         },
     },
     plugins: [],
