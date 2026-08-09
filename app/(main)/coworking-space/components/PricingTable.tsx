@@ -106,8 +106,8 @@ const rentalPackages: RateItem[] = [
     ],
     bniRates: [
       { period: "Hourly", price: "80" },
-      { period: "4 Hours", price: "240" },
-      { period: "8 Hours", price: "400" },
+      { period: "4 Hours", price: "300" }, 
+      { period: "8 Hours", price: "500" }, 
     ],
   },
   {
@@ -148,8 +148,8 @@ const rentalPackages: RateItem[] = [
     ],
     bniRates: [
       { period: "Hourly", price: "180" },
-      { period: "4 Hours", price: "400" },
-      { period: "8 Hours", price: "640" },
+      { period: "4 Hours", price: "500" },
+      { period: "8 Hours", price: "800" },
     ],
   },
 ];
