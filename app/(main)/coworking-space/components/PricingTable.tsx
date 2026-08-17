@@ -13,6 +13,8 @@ import {
   Sparkles,
   ChevronDown,
   Briefcase,
+  Star,
+  Calendar,
 } from "lucide-react";
 import { assets } from "@/assets/asset";
 import BookingModal from "./BookingModal";
@@ -20,6 +22,8 @@ import BookingModal from "./BookingModal";
 interface Rate {
   period: string;
   price: string;
+  originalPrice?: string;
+  isPromo?: boolean;
 }
 
 interface RateItem {
@@ -35,7 +39,151 @@ interface RateItem {
   bniRates?: Rate[];
   isStudentFriendly?: boolean;
   isBniFriendly?: boolean;
+  hasMerdekaPromo?: boolean;
 }
+
+const MERDEKA_PROMO_PERIOD = "16 Ogos – 16 September";
+
+// ─── Merdeka Promo Banner — Clean Blue & Gold Theme ──────────────────────────
+const MerdekaPromoBanner: React.FC = () => (
+  <div className="relative overflow-hidden rounded-md mb-6 border border-blue-900/15 shadow-[0_8px_30px_-8px_rgba(30,58,138,0.2)]">
+    {/* Base gradient - clean blue tones */}
+    <div className="absolute inset-0 bg-gradient-to-br from-blue-800 via-blue-700 to-blue-800" />
+
+    {/* Subtle gold texture lines */}
+    <div className="absolute inset-0 opacity-[0.06]">
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(45deg, transparent, transparent 10px, #fbbf24 10px, #fbbf24 11px)",
+        }}
+      />
+    </div>
+
+    {/* Gold decorative star - subtle, top right */}
+    <div className="absolute -top-4 -right-4 opacity-[0.08]">
+      <Star size={100} className="text-amber-300 fill-amber-300" />
+    </div>
+
+    {/* Bottom gold accent line */}
+    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-300 to-transparent" />
+    {/* Top gold hairline */}
+    <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-300/50 to-transparent" />
+
+    <div className="relative z-10 px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex items-center gap-4">
+        <div className="relative flex-shrink-0">
+          <div className="w-11 h-11 rounded-full bg-amber-300/10 border border-amber-300/30 flex items-center justify-center">
+            <Star size={16} className="text-amber-300 fill-amber-300" />
+          </div>
+        </div>
+
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[9px] uppercase tracking-[0.5em] text-amber-300 font-bold">
+              Merdeka Special
+            </span>
+          </div>
+          <p className="text-white font-serif text-xl leading-tight tracking-tight">
+            Sempena Bulan Kemerdekaan
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-col items-start sm:items-end gap-1.5 flex-shrink-0 pl-[60px] sm:pl-0">
+        <div className="bg-amber-300 text-blue-900 px-4 py-1.5 rounded-sm font-black text-[9px] uppercase tracking-[0.2em] shadow-lg">
+          Harga Istimewa
+        </div>
+        <div className="flex items-center gap-1.5 text-white/70">
+          <Calendar size={10} />
+          <span className="text-[8px] uppercase tracking-wider font-medium">
+            {MERDEKA_PROMO_PERIOD}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// ─── Promo Rate Card — Clean Blue & Gold Theme ───────────────────────────────
+const PromoRateCard: React.FC<{ rate: Rate; index: number }> = ({
+  rate,
+  index,
+}) => {
+  if (!rate.isPromo || !rate.originalPrice) {
+    return (
+      <div className="p-5 border border-zinc-200 bg-white hover:border-zinc-400 hover:shadow-lg transition-all relative overflow-hidden">
+        <div className="flex justify-between items-start mb-2">
+          <span className="text-[9px] uppercase tracking-widest text-zinc-500">
+            {rate.period}
+          </span>
+        </div>
+        <div className="flex items-baseline gap-2">
+          <span className="text-[10px] font-bold text-zinc-400">RM</span>
+          <span className="text-3xl font-serif text-zinc-900">
+            {rate.price}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="relative border border-blue-900/15 bg-white overflow-hidden shadow-[0_4px_20px_-4px_rgba(30,58,138,0.1)] transition-all duration-500 hover:shadow-[0_8px_30px_-6px_rgba(30,58,138,0.18)] hover:-translate-y-1 group"
+      style={{ animationDelay: `${index * 100}ms` }}
+    >
+      {/* Top accent bar - blue to gold gradient */}
+      <div className="h-[3px] w-full bg-gradient-to-r from-blue-800 via-amber-300 to-blue-800" />
+
+      {/* Corner badge */}
+      <div className="absolute top-3 right-3">
+        <div className="flex items-center gap-1 bg-blue-800 px-2 py-1 rounded-full">
+          <Star size={8} className="text-amber-300 fill-amber-300" />
+          <span className="text-[7px] text-white font-bold uppercase tracking-wider">
+            Promo
+          </span>
+        </div>
+      </div>
+
+      <div className="p-5">
+        <span className="text-[9px] uppercase tracking-widest text-blue-800 font-bold block mb-3">
+          {rate.period}
+        </span>
+
+        {/* Harga asal - strikethrough */}
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <span className="text-[9px] text-zinc-400 font-medium">
+            Harga Asal
+          </span>
+          <div className="flex items-baseline gap-0.5 relative">
+            <span className="text-[10px] text-zinc-400">RM</span>
+            <span className="text-base text-zinc-400 font-serif relative">
+              {rate.originalPrice}
+              <span className="absolute inset-0 flex items-center">
+                <span className="w-full h-px bg-zinc-400 block" />
+              </span>
+            </span>
+          </div>
+        </div>
+
+        {/* Harga promo */}
+        <div className="flex items-baseline gap-2">
+          <span className="text-[10px] font-bold text-blue-800">RM</span>
+          <span className="text-3xl font-serif text-blue-800">
+            {rate.price}
+          </span>
+        </div>
+
+        {/* Gold accent underline on hover */}
+        <div className="mt-3 h-px w-full bg-zinc-100 relative overflow-hidden">
+          <div className="absolute inset-0 bg-amber-300 w-0 group-hover:w-full transition-all duration-700" />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const personalPackages: RateItem[] = [
   {
@@ -72,13 +220,14 @@ const personalPackages: RateItem[] = [
     tier: "Tier 02",
     capacity: "Solo Professional",
     isBniFriendly: true,
+    hasMerdekaPromo: true,
     description:
       "Your own permanent desk in a quiet zone. Includes a lockable pedestal and ergonomic chair for consistent productivity.",
     image: assets.fixed_desk,
     standardRates: [
-      { period: "Daily", price: "35" },
-      { period: "Weekly", price: "150" },
-      { period: "Monthly", price: "400" },
+      { period: "Daily", price: "20", originalPrice: "35", isPromo: true },
+      { period: "Weekly", price: "100", originalPrice: "150", isPromo: true },
+      { period: "Monthly", price: "300", originalPrice: "400", isPromo: true },
     ],
     bniRates: [
       { period: "Daily", price: "20" },
@@ -96,18 +245,19 @@ const rentalPackages: RateItem[] = [
     tier: "Space A",
     capacity: "10 Pax",
     isBniFriendly: true,
+    hasMerdekaPromo: true,
     description:
       "Fully equipped with 4K displays and soundproofing. Ideal for board meetings, client presentations, and team huddles.",
     image: assets.meeting_room_v2,
     standardRates: [
-      { period: "Hourly", price: "100" },
-      { period: "4 Hours", price: "300" },
-      { period: "8 Hours", price: "500" },
+      { period: "Hourly", price: "80", originalPrice: "100", isPromo: true },
+      { period: "4 Hours", price: "300", originalPrice: "300", isPromo: false },
+      { period: "8 Hours", price: "500", originalPrice: "500", isPromo: false },
     ],
     bniRates: [
       { period: "Hourly", price: "80" },
-      { period: "4 Hours", price: "300" }, 
-      { period: "8 Hours", price: "500" }, 
+      { period: "4 Hours", price: "300" },
+      { period: "8 Hours", price: "500" },
     ],
   },
   {
@@ -202,7 +352,6 @@ const Membership: React.FC = () => {
     "standard",
   );
 
-  // ─── 1. Update bookingModal state — tambah packageImage ───
   const [bookingModal, setBookingModal] = useState<{
     isOpen: boolean;
     packageTitle: string;
@@ -221,14 +370,11 @@ const Membership: React.FC = () => {
     rates: [],
   });
 
-  // ─── Handle redirect from SpacesGallery ─────────────────
   useEffect(() => {
     const spaceParam = searchParams.get("space");
-
     if (!spaceParam || !SLUG_TO_PRICING[spaceParam]) return;
 
     const { tab, packageId } = SLUG_TO_PRICING[spaceParam];
-
     setActiveMainTab(tab);
 
     let attempts = 0;
@@ -240,28 +386,16 @@ const Membership: React.FC = () => {
 
       if (el) {
         clearInterval(interval);
-
         const rect = el.getBoundingClientRect();
         const top =
           window.scrollY + rect.top - window.innerHeight / 2 + rect.height / 2;
-
-        window.scrollTo({
-          top: Math.max(0, top),
-          behavior: "smooth",
-        });
-
+        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
         setHighlightedPackage(packageId);
-
-        setTimeout(() => {
-          setHighlightedPackage(null);
-        }, 30000);
-
+        setTimeout(() => setHighlightedPackage(null), 30000);
         window.history.replaceState({}, "", "/coworking-space");
       }
 
-      if (attempts >= maxAttempts) {
-        clearInterval(interval);
-      }
+      if (attempts >= maxAttempts) clearInterval(interval);
     }, 100);
 
     return () => clearInterval(interval);
@@ -304,10 +438,20 @@ const Membership: React.FC = () => {
     return "standard";
   };
 
-  // ─── 2. Update openBookingModal — pass image ─────────────
+  const isShowingPromo = (pkg: RateItem) => {
+    if (!pkg.hasMerdekaPromo) return false;
+    const track = getActiveTrack(pkg);
+    return track === "standard";
+  };
+
   const openBookingModal = (pkg: RateItem) => {
     const track = getActiveTrack(pkg);
     const rates = getRatesForPackage(pkg) || pkg.standardRates;
+
+    const cleanRates = rates.map((r) => ({
+      period: r.period,
+      price: r.price,
+    }));
 
     setBookingModal({
       isOpen: true,
@@ -316,7 +460,7 @@ const Membership: React.FC = () => {
       packageCapacity: pkg.capacity,
       packageImage: pkg.image,
       activeTrack: track as "standard" | "student" | "bni",
-      rates: rates,
+      rates: cleanRates,
     });
   };
 
@@ -390,7 +534,7 @@ const Membership: React.FC = () => {
                     ? "left-0 w-1/2"
                     : "left-1/2 w-1/2"
                 }`}
-              ></div>
+              />
 
               <div className="relative flex">
                 <button
@@ -441,7 +585,7 @@ const Membership: React.FC = () => {
                   </div>
                 </button>
 
-                <div className="relative w-px bg-zinc-200 my-3"></div>
+                <div className="relative w-px bg-zinc-200 my-3" />
 
                 <button
                   onClick={() => setActiveMainTab("space")}
@@ -498,8 +642,8 @@ const Membership: React.FC = () => {
                 } -translate-x-1/2`}
               >
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-900 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-zinc-900"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-900 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-zinc-900" />
                 </span>
               </div>
             </div>
@@ -512,6 +656,7 @@ const Membership: React.FC = () => {
             const activeTrack = getActiveTrack(pkg);
             const displayRates = getRatesForPackage(pkg);
             const isHighlighted = highlightedPackage === pkg.id;
+            const showingPromo = isShowingPromo(pkg);
 
             const rateSwitcherClass = isHighlighted
               ? "bg-amber-100/50 border-amber-400/40 shadow-[0_4px_30px_-4px_rgba(251,191,36,0.25)] ring-1 ring-amber-300/40 rounded-lg border-breathe"
@@ -521,7 +666,6 @@ const Membership: React.FC = () => {
               type: "standard" | "student" | "bni",
             ) => {
               if (!isHighlighted) return "text-zinc-500 hover:bg-zinc-200";
-
               switch (type) {
                 case "standard":
                   return "animate-pulse bg-gradient-to-r from-amber-100/60 to-yellow-100/40 text-amber-800 border border-amber-300/40 shadow-[0_0_16px_rgba(217,175,90,0.15)] rounded-sm";
@@ -557,7 +701,38 @@ const Membership: React.FC = () => {
                     className="object-cover transition-all duration-[2s] group-hover:scale-105"
                     priority={idx === 0}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
+
+                  {/* Merdeka Promo overlay - Blue & Gold */}
+                  {showingPromo && (
+                    <div className="absolute bottom-6 left-6 right-6 z-20">
+                      <div className="bg-blue-800/90 backdrop-blur-md border border-amber-300/30 px-4 py-3 shadow-xl flex items-center justify-between rounded-sm">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-amber-300/15 border border-amber-300/40 flex items-center justify-center flex-shrink-0">
+                            <Star
+                              size={12}
+                              className="text-amber-300 fill-amber-300"
+                            />
+                          </div>
+                          <div>
+                            <p className="text-[8px] uppercase tracking-[0.4em] text-amber-300 font-bold">
+                              Merdeka Special
+                            </p>
+                            <p className="text-white text-[10px] uppercase tracking-wider font-medium">
+                              Harga Promosi Aktif
+                            </p>
+                          </div>
+                        </div>
+                        <div className="hidden sm:flex items-center gap-1.5 text-white/60 flex-shrink-0">
+                          <Calendar size={10} />
+                          <span className="text-[8px] uppercase tracking-wider">
+                            {MERDEKA_PROMO_PERIOD}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="absolute top-6 left-6 flex flex-col gap-2 z-10">
                     <span className="text-[9px] uppercase tracking-[0.4em] bg-white text-black px-4 py-2 font-bold self-start shadow-md">
                       {pkg.tier}
@@ -602,6 +777,17 @@ const Membership: React.FC = () => {
                             </span>
                           </div>
                         )}
+                        {showingPromo && (
+                          <div className="flex items-center gap-2 text-blue-800">
+                            <Star
+                              size={10}
+                              className="fill-amber-400 text-amber-400"
+                            />
+                            <span className="text-[8px] uppercase tracking-widest font-bold">
+                              Merdeka Promotion 
+                            </span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Rate Switcher */}
@@ -622,7 +808,7 @@ const Membership: React.FC = () => {
                           Select Rate <ChevronDown size={10} />
                         </span>
 
-                        {/* Common Area - 3 options */}
+                        {/* Common Area — 3 options */}
                         {pkg.id === "p1" && (
                           <div
                             className={`flex w-full lg:w-auto p-1.5 border rounded-md transition-all duration-700 ${rateSwitcherClass}`}
@@ -660,7 +846,7 @@ const Membership: React.FC = () => {
                           </div>
                         )}
 
-                        {/* Fixed Desk - 2 options */}
+                        {/* Fixed Desk — 2 options */}
                         {pkg.id === "p2" && (
                           <div
                             className={`flex w-full lg:w-auto p-1.5 border rounded-md transition-all duration-700 ${rateSwitcherClass}`}
@@ -688,7 +874,7 @@ const Membership: React.FC = () => {
                           </div>
                         )}
 
-                        {/* Meeting Room - 2 options */}
+                        {/* Meeting Room — 2 options */}
                         {pkg.id === "r1" && (
                           <div
                             className={`flex w-full lg:w-auto p-1.5 border rounded-md transition-all duration-700 ${rateSwitcherClass}`}
@@ -716,7 +902,7 @@ const Membership: React.FC = () => {
                           </div>
                         )}
 
-                        {/* Green Area - 2 options */}
+                        {/* Green Area — 2 options */}
                         {pkg.id === "r2" && (
                           <div
                             className={`flex w-full lg:w-auto p-1.5 border rounded-md transition-all duration-700 ${rateSwitcherClass}`}
@@ -744,7 +930,7 @@ const Membership: React.FC = () => {
                           </div>
                         )}
 
-                        {/* Event Space - 2 options */}
+                        {/* Event Space — 2 options */}
                         {pkg.id === "r3" && (
                           <div
                             className={`flex w-full lg:w-auto p-1.5 border rounded-md transition-all duration-700 ${rateSwitcherClass}`}
@@ -782,76 +968,87 @@ const Membership: React.FC = () => {
                     </p>
                   </div>
 
+                  {/* ─── Merdeka Promo Banner (Blue & Gold) ──────── */}
+                  {showingPromo && <MerdekaPromoBanner />}
+
                   {/* Rate Cards */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-                    {displayRates?.map((rate, rIdx) => (
-                      <div
-                        key={rIdx}
-                        className={`p-5 border transition-all relative overflow-hidden ${
-                          activeTrack === "student"
-                            ? "border-blue-200 bg-blue-50 shadow-[0_0_20px_rgba(59,130,246,0.1)]"
-                            : activeTrack === "bni"
-                              ? "border-red-200 bg-red-50 shadow-[0_0_20px_rgba(239,68,68,0.1)]"
-                              : "border-zinc-200 bg-white hover:border-zinc-400 hover:shadow-lg"
-                        }`}
-                      >
-                        {activeTrack === "student" && (
-                          <div className="absolute top-0 right-0 w-8 h-8 flex items-center justify-center">
-                            <div className="absolute top-0 right-0 border-t-[32px] border-l-[32px] border-t-blue-500 border-l-transparent"></div>
-                            <GraduationCap
-                              size={10}
-                              className="relative z-10 -mt-3 -mr-3 text-white"
-                            />
+                    {displayRates?.map((rate, rIdx) => {
+                      if (showingPromo) {
+                        return (
+                          <PromoRateCard key={rIdx} rate={rate} index={rIdx} />
+                        );
+                      }
+
+                      return (
+                        <div
+                          key={rIdx}
+                          className={`p-5 border transition-all relative overflow-hidden ${
+                            activeTrack === "student"
+                              ? "border-blue-200 bg-blue-50 shadow-[0_0_20px_rgba(59,130,246,0.1)]"
+                              : activeTrack === "bni"
+                                ? "border-red-200 bg-red-50 shadow-[0_0_20px_rgba(239,68,68,0.1)]"
+                                : "border-zinc-200 bg-white hover:border-zinc-400 hover:shadow-lg"
+                          }`}
+                        >
+                          {activeTrack === "student" && (
+                            <div className="absolute top-0 right-0 w-8 h-8 flex items-center justify-center">
+                              <div className="absolute top-0 right-0 border-t-[32px] border-l-[32px] border-t-blue-500 border-l-transparent" />
+                              <GraduationCap
+                                size={10}
+                                className="relative z-10 -mt-3 -mr-3 text-white"
+                              />
+                            </div>
+                          )}
+                          {activeTrack === "bni" && (
+                            <div className="absolute top-0 right-0 w-8 h-8 flex items-center justify-center">
+                              <div className="absolute top-0 right-0 border-t-[32px] border-l-[32px] border-t-red-500 border-l-transparent" />
+                              <Briefcase
+                                size={10}
+                                className="relative z-10 -mt-3 -mr-3 text-white"
+                              />
+                            </div>
+                          )}
+                          <div className="flex justify-between items-start mb-2">
+                            <span
+                              className={`text-[9px] uppercase tracking-widest ${
+                                activeTrack === "student"
+                                  ? "text-blue-600 font-bold"
+                                  : activeTrack === "bni"
+                                    ? "text-red-600 font-bold"
+                                    : "text-zinc-500"
+                              }`}
+                            >
+                              {rate.period}
+                            </span>
                           </div>
-                        )}
-                        {activeTrack === "bni" && (
-                          <div className="absolute top-0 right-0 w-8 h-8 flex items-center justify-center">
-                            <div className="absolute top-0 right-0 border-t-[32px] border-l-[32px] border-t-red-500 border-l-transparent"></div>
-                            <Briefcase
-                              size={10}
-                              className="relative z-10 -mt-3 -mr-3 text-white"
-                            />
+                          <div className="flex items-baseline gap-2">
+                            <span
+                              className={`text-[10px] font-bold ${
+                                activeTrack === "student"
+                                  ? "text-blue-600"
+                                  : activeTrack === "bni"
+                                    ? "text-red-600"
+                                    : "text-zinc-400"
+                              }`}
+                            >
+                              RM
+                            </span>
+                            <span
+                              className={`text-3xl font-serif ${
+                                activeTrack === "student"
+                                  ? "text-blue-600"
+                                  : activeTrack === "bni"
+                                    ? "text-red-600"
+                                    : "text-zinc-900"
+                              }`}
+                            >
+                              {rate.price}
+                            </span>
                           </div>
-                        )}
-                        <div className="flex justify-between items-start mb-2">
-                          <span
-                            className={`text-[9px] uppercase tracking-widest ${
-                              activeTrack === "student"
-                                ? "text-blue-600 font-bold"
-                                : activeTrack === "bni"
-                                  ? "text-red-600 font-bold"
-                                  : "text-zinc-500"
-                            }`}
-                          >
-                            {rate.period}
-                          </span>
                         </div>
-                        <div className="flex items-baseline gap-2">
-                          <span
-                            className={`text-[10px] font-bold ${
-                              activeTrack === "student"
-                                ? "text-blue-600"
-                                : activeTrack === "bni"
-                                  ? "text-red-600"
-                                  : "text-zinc-400"
-                            }`}
-                          >
-                            RM
-                          </span>
-                          <span
-                            className={`text-3xl font-serif ${
-                              activeTrack === "student"
-                                ? "text-blue-600"
-                                : activeTrack === "bni"
-                                  ? "text-red-600"
-                                  : "text-zinc-900"
-                            }`}
-                          >
-                            {rate.price}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   {activeTrack === "student" && (
@@ -871,12 +1068,45 @@ const Membership: React.FC = () => {
                     </div>
                   )}
 
+                  {/* Merdeka Promo Note — Blue & Gold, dengan tempoh sah */}
+                  {showingPromo && (
+                    <div className="flex items-start gap-3 mb-6 px-4 py-3 bg-blue-50 border border-blue-200">
+                      <Calendar
+                        size={14}
+                        className="text-blue-700 mt-0.5 shrink-0"
+                      />
+                      <div className="flex flex-col gap-0.5">
+                        <p className="text-[10px] uppercase tracking-[0.15em] text-blue-800 font-bold leading-relaxed">
+                          Sah Tempoh: {MERDEKA_PROMO_PERIOD}
+                        </p>
+                        <p className="text-[9px] uppercase tracking-[0.1em] text-blue-600/80 leading-relaxed">
+                          Harga Promosi Merdeka · Tertakluk Kepada Ketersediaan
+                          Slot
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex flex-col sm:flex-row gap-4">
                     <button
                       onClick={() => openBookingModal(pkg)}
-                      className="w-full px-8 py-5 bg-zinc-900 text-white text-[10px] uppercase tracking-[0.5em] font-bold hover:bg-black transition-all flex items-center justify-center gap-4 shadow-lg cursor-pointer group"
+                      className={`w-full px-8 py-5 text-[10px] uppercase tracking-[0.5em] font-bold transition-all flex items-center justify-center gap-4 shadow-lg cursor-pointer group ${
+                        showingPromo
+                          ? "bg-gradient-to-r from-blue-800 to-blue-700 hover:from-blue-900 hover:to-blue-800 text-white border border-amber-300/20"
+                          : "bg-zinc-900 hover:bg-black text-white"
+                      }`}
                     >
-                      Reserve Space
+                      {showingPromo ? (
+                        <>
+                          <Star
+                            size={14}
+                            className="fill-amber-300 text-amber-300"
+                          />
+                          Tuntut Harga Merdeka
+                        </>
+                      ) : (
+                        "Reserve Space"
+                      )}
                       <ArrowRight
                         size={14}
                         className="group-hover:translate-x-1 transition-transform"
@@ -891,7 +1121,7 @@ const Membership: React.FC = () => {
 
         {/* Standard Facilities */}
         <div className="mt-16 p-8 md:p-10 bg-zinc-900 border border-zinc-800 relative overflow-hidden group shadow-xl">
-          <div className="absolute top-0 right-0 w-1/3 h-full bg-white/[0.03] skew-x-12 translate-x-1/2"></div>
+          <div className="absolute top-0 right-0 w-1/3 h-full bg-white/[0.03] skew-x-12 translate-x-1/2" />
           <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-8">
             <div className="max-w-md text-center lg:text-left">
               <h4 className="text-2xl font-serif text-white mb-2">
@@ -904,7 +1134,7 @@ const Membership: React.FC = () => {
             <div className="flex flex-wrap justify-center lg:justify-end gap-x-8 gap-y-4">
               {inclusions.map((item, i) => (
                 <div key={i} className="flex items-center gap-4 group/inc">
-                  <div className="w-1.5 h-1.5 bg-white/30 rounded-full group-hover/inc:bg-white group-hover/inc:scale-150 transition-all"></div>
+                  <div className="w-1.5 h-1.5 bg-white/30 rounded-full group-hover/inc:bg-white group-hover/inc:scale-150 transition-all" />
                   <span className="text-[10px] uppercase tracking-[0.4em] text-zinc-400 group-hover/inc:text-white transition-colors">
                     {item}
                   </span>
@@ -929,6 +1159,6 @@ const Membership: React.FC = () => {
       />
     </section>
   );
-};;;
+};
 
 export default Membership;
